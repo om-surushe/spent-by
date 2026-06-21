@@ -1,0 +1,2117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: flex-start;
+        }
+        
+        h1 {
+            margin-bottom: 5px;
+            color: #222;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .tabs {
+            display: none;
+            gap: 10px;
+            margin: 20px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .nav-wrap {
+            position: relative;
+        }
+
+        .menu-btn {
+            width: 42px;
+            height: 42px;
+            padding: 0;
+            font-size: 22px;
+            line-height: 1;
+        }
+
+        .nav-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 48px;
+            width: 210px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.16);
+            z-index: 20;
+            overflow: hidden;
+        }
+
+        .nav-menu.open {
+            display: block;
+        }
+
+        .nav-menu button {
+            width: 100%;
+            background: white;
+            color: #222;
+            border-radius: 0;
+            text-align: left;
+            padding: 12px 14px;
+        }
+
+        .nav-menu button:hover {
+            background: #f2f6fb;
+        }
+        
+        .tab-btn {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: #666;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn.active {
+            color: #0066cc;
+            border-bottom-color: #0066cc;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .toast {
+            display: none;
+            margin-bottom: 15px;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 50;
+            padding: 20px;
+            overflow: auto;
+        }
+
+        .modal-backdrop.open {
+            display: block;
+        }
+
+        .modal-panel {
+            max-width: 720px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.25);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .secondary {
+            background: #eef2f7;
+            color: #223;
+        }
+
+        .secondary:hover {
+            background: #dfe7f0;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #0066cc;
+            box-shadow: 0 0 0 3px rgba(0,102,204,0.1);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #0052a3;
+        }
+        
+        button.danger {
+            background: #d9534f;
+            margin-left: 10px;
+        }
+        
+        button.danger:hover {
+            background: #c9302c;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-box {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #0066cc;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 12px;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #222;
+        }
+        
+        .category-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .cat-stat {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-top: 3px solid #0066cc;
+        }
+        
+        .cat-stat.needs { border-top-color: #d9534f; }
+        .cat-stat.wants { border-top-color: #5cb85c; }
+        .cat-stat.family { border-top-color: #5bc0de; }
+        .cat-stat.misc { border-top-color: #f0ad4e; }
+        
+        .cat-name {
+            font-weight: 600;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .cat-amount {
+            font-size: 18px;
+            font-weight: bold;
+            color: #222;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        th {
+            background: #f9f9f9;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #ddd;
+            font-size: 13px;
+            color: #666;
+        }
+
+        th.sortable {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        th.sortable:hover {
+            color: #0066cc;
+            background: #eef6ff;
+        }
+        
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+        
+        tr:hover {
+            background: #f9f9f9;
+        }
+        
+        .alert {
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+        
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        .delete-btn {
+            background: #d9534f;
+            padding: 5px 10px;
+            font-size: 12px;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        
+        .delete-btn:hover {
+            background: #c9302c;
+        }
+
+        .edit-btn {
+            background: #f0ad4e;
+            padding: 5px 10px;
+            font-size: 12px;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-right: 6px;
+        }
+
+        .edit-btn:hover {
+            background: #ec971f;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 150px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        
+        .error-list {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .error-list h4 {
+            color: #721c24;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .error-list ul {
+            margin-left: 20px;
+            color: #721c24;
+            font-size: 13px;
+        }
+
+        .toolbar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin: 16px 0 20px;
+        }
+
+        .mini-stat {
+            background: #f9fbff;
+            border: 1px solid #dce8f8;
+            border-radius: 8px;
+            padding: 14px;
+        }
+
+        .mini-stat-label {
+            color: #5f6b7a;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .mini-stat-value {
+            color: #1d2a3a;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .mini-stat-text {
+            color: #5f6b7a;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        .section-title {
+            margin-bottom: 10px;
+            color: #222;
+            font-size: 18px;
+        }
+
+        .muted {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .budget-meter {
+            background: #edf1f5;
+            border-radius: 999px;
+            height: 10px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .budget-meter-fill {
+            background: #0066cc;
+            height: 100%;
+            width: 0;
+        }
+
+        .budget-meter-fill.over {
+            background: #d9534f;
+        }
+
+        .review-shell {
+            max-width: 560px;
+            margin: 0 auto;
+        }
+
+        .review-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 22px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            min-height: 280px;
+        }
+
+        .review-amount {
+            font-size: 36px;
+            font-weight: 800;
+            color: #222;
+            margin: 8px 0;
+        }
+
+        .review-reason {
+            font-size: 22px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .review-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 12px 0 18px;
+        }
+
+        .pill {
+            background: #f2f4f7;
+            border: 1px solid #d9dee7;
+            border-radius: 999px;
+            color: #3d4756;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 5px 9px;
+        }
+
+        .category-actions {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .category-actions button.active {
+            outline: 3px solid rgba(0, 102, 204, 0.25);
+            background: #004f9e;
+        }
+
+        .review-nav {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .review-nav button {
+            flex: 1;
+        }
+
+        @media (max-width: 640px) {
+            .category-actions {
+                grid-template-columns: 1fr;
+            }
+
+            .review-amount {
+                font-size: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>Finance Tracker</h1>
+                <p class="subtitle">Daily personal spending. Your share only.</p>
+            </div>
+            <div class="nav-wrap">
+                <button class="menu-btn" onclick="toggleMenu()" aria-label="Open menu">☰</button>
+                <div id="navMenu" class="nav-menu">
+                    <button onclick="navigateTo('add')">Quick Add</button>
+                    <button onclick="navigateTo('analysis')">Analysis</button>
+                    <button onclick="navigateTo('review')">Review Cards</button>
+                    <button onclick="navigateTo('transactions')">All Expenses</button>
+                    <button onclick="openImportModal()">Import JSON</button>
+                </div>
+            </div>
+        </header>
+        <div id="appToast" class="toast alert success"></div>
+        
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('add')">Add Expense</button>
+            <button class="tab-btn" onclick="switchTab('analysis')">Analysis</button>
+            <button class="tab-btn" onclick="switchTab('review')">Review Cards</button>
+            <button class="tab-btn" onclick="switchTab('transactions')">All Expenses</button>
+        </div>
+        
+        <!-- ADD EXPENSE -->
+        <div id="add" class="tab-content active">
+            <div class="card">
+                <h2>Quick Add</h2>
+                <form id="addForm">
+                    <div id="formModeBanner" class="alert success" style="display: none;">
+                        Editing expense
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="amount">Amount ₹ *</label>
+                            <input type="number" id="amount" placeholder="500" min="0.01" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="date">Date *</label>
+                            <input type="date" id="date" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="reason">What did you spend on? *</label>
+                        <input type="text" id="reason" placeholder="e.g., Lunch, Groceries, Coffee" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="category">Category *</label>
+                            <select id="category" required>
+                                <option value="">Select category</option>
+                                <option value="Needs">Needs (essentials, bills)</option>
+                                <option value="Wants">Wants (personal discretionary)</option>
+                                <option value="Family">Family (gifting, support)</option>
+                                <option value="Miscellaneous">Miscellaneous (other)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="subcategory">Subcategory</label>
+                            <select id="subcategory">
+                                <option value="">Auto / not set</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="payment_method">Payment Method</label>
+                            <select id="payment_method">
+                                <option value="Card">Card</option>
+                                <option value="UPI">UPI</option>
+                                <option value="Cash">Cash</option>
+                                <option value="Bank">Bank Transfer</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="notes">Notes (optional)</label>
+                        <input type="text" id="notes" placeholder="e.g., 'your share from split with Harsh'">
+                    </div>
+                    
+                    <button type="submit" id="submitBtn">Add Expense</button>
+                    <button type="button" id="cancelEditBtn" class="danger" style="display: none;">Cancel Edit</button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- ANALYSIS -->
+        <div id="analysis" class="tab-content">
+            <div class="card">
+                <h2>Analysis</h2>
+                <div class="toolbar">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="analysisYear">Year</label>
+                        <select id="analysisYear"></select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="analysisMonth">Month</label>
+                        <select id="analysisMonth"></select>
+                    </div>
+                </div>
+                <div id="analysisContent"></div>
+            </div>
+        </div>
+
+        <!-- REVIEW CARDS -->
+        <div id="review" class="tab-content">
+            <div class="card">
+                <h2>Review Cards</h2>
+                <div class="toolbar">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="reviewCategoryFilter">Show</label>
+                        <select id="reviewCategoryFilter">
+                            <option value="All">All categories</option>
+                            <option value="Needs">Needs</option>
+                            <option value="Wants">Wants</option>
+                            <option value="Family">Family</option>
+                            <option value="Miscellaneous">Miscellaneous</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="reviewSubcategoryFilter">Subcategory</label>
+                        <select id="reviewSubcategoryFilter"></select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="reviewStatusFilter">Status</label>
+                        <select id="reviewStatusFilter">
+                            <option value="All">All transactions</option>
+                            <option value="NeedsReview">Needs review</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="reviewMonthFilter">Month</label>
+                        <select id="reviewMonthFilter"></select>
+                    </div>
+                </div>
+                <div id="reviewContent"></div>
+            </div>
+        </div>
+        
+        <!-- ALL EXPENSES -->
+        <div id="transactions" class="tab-content">
+            <div class="card">
+                <h2>All Expenses</h2>
+                <button onclick="goToQuickAdd()" style="margin-bottom: 15px;">Add Expense</button>
+                <button onclick="exportJSON()" style="margin-bottom: 15px;">📥 Export as JSON</button>
+                <button onclick="clearAll()" class="danger" style="margin-bottom: 15px;">🗑️ Clear All</button>
+                <div id="exportFeedback"></div>
+                <div class="toolbar">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="transactionSearch">Search</label>
+                        <input type="text" id="transactionSearch" placeholder="Search reason or notes">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="transactionCategoryFilter">Category</label>
+                        <select id="transactionCategoryFilter">
+                            <option value="All">All categories</option>
+                            <option value="Needs">Needs</option>
+                            <option value="Wants">Wants</option>
+                            <option value="Family">Family</option>
+                            <option value="Miscellaneous">Miscellaneous</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="transactionSubcategoryFilter">Subcategory</label>
+                        <select id="transactionSubcategoryFilter"></select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="transactionMonthFilter">Month</label>
+                        <select id="transactionMonthFilter"></select>
+                    </div>
+                </div>
+                <div id="transactionsContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="importModal" class="modal-backdrop">
+        <div class="modal-panel">
+            <div class="modal-header">
+                <h2>Import JSON</h2>
+                <button class="secondary" onclick="closeImportModal()">Close</button>
+            </div>
+            <p class="muted" style="margin-bottom: 15px;">Import a JSON file or paste a JSON array.</p>
+            <div class="form-group">
+                <label for="jsonFileInput">JSON file</label>
+                <input type="file" id="jsonFileInput" accept=".json,application/json">
+            </div>
+            <textarea id="jsonInput" placeholder='[{"amount": 500, "reason": "Lunch", "date": "2026-06-10", "category": "Wants", "subcategory": "Eating Out", "payment_method": "Card", "notes": ""}]'></textarea>
+            <button onclick="uploadJSON()" style="margin-top: 15px;">Import</button>
+            <div id="uploadFeedback" style="margin-top: 15px;"></div>
+        </div>
+    </div>
+
+    <div id="editModal" class="modal-backdrop">
+        <div class="modal-panel">
+            <div class="modal-header">
+                <h2>Edit Transaction</h2>
+                <button class="secondary" onclick="closeEditModal()">Close</button>
+            </div>
+            <form id="editForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editAmount">Amount ₹ *</label>
+                        <input type="number" id="editAmount" min="0.01" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editDate">Date *</label>
+                        <input type="date" id="editDate" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editReason">Reason *</label>
+                    <input type="text" id="editReason" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editCategory">Category *</label>
+                        <select id="editCategory" required>
+                            <option value="Needs">Needs</option>
+                            <option value="Wants">Wants</option>
+                            <option value="Family">Family</option>
+                            <option value="Miscellaneous">Miscellaneous</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editSubcategory">Subcategory</label>
+                        <select id="editSubcategory"></select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editPaymentMethod">Payment Method</label>
+                        <select id="editPaymentMethod">
+                            <option value="Card">Card</option>
+                            <option value="UPI">UPI</option>
+                            <option value="Cash">Cash</option>
+                            <option value="Bank">Bank Transfer</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editNotes">Notes</label>
+                    <input type="text" id="editNotes">
+                </div>
+                <button type="submit">Save Changes</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        const CATEGORIES = ['Needs', 'Wants', 'Family', 'Miscellaneous'];
+        const SUBCATEGORIES = {
+            Needs: ['Rent', 'Food Maid', 'Cleaning Maid', 'Groceries', 'Transport', 'Electricity', 'WiFi', 'Home Travel', 'Home Sent', 'Home EMI', 'Recharge', 'Medical', 'Education', 'Household', 'Other Needs'],
+            Wants: ['Eating Out', 'Sports', 'Subscriptions', 'Entertainment', 'Shopping', 'Personal Care', 'Snacks', 'Other Wants'],
+            Family: ['Family Support', 'Family Food', 'Family Recharge', 'Family Medical', 'Gifts', 'Events', 'Other Family'],
+            Miscellaneous: ['Fixed Home Expense', 'Recoverable', 'One-time', 'Travel', 'Unclear']
+        };
+        const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        const FINANCIAL_PROFILE = {
+            fiscalYearLabel: 'FY 2026-27',
+            income: {
+                annualSalary: 1588300,
+                salaryTax: 111275,
+                professionalTax: 2496,
+                annualRentalIncome: 228000,
+                monthlyReimbursement: 1000,
+                netAnnualIncome: 1714529,
+                netMonthlyIncome: 134544
+            },
+            monthlyNeedsBudget: 38000,
+            monthlyWantsBudget: 10000,
+            fixedHomeAnnualBudget: 200000,
+            annualWantsBudget: 120000,
+            annualSurplusTarget: 938529,
+            additionalMonthlyBudget: 3000,
+            monthlyNeeds: [
+                { subcategory: 'Rent', amount: 10200 },
+                { subcategory: 'Food Maid', amount: 2333 },
+                { subcategory: 'Cleaning Maid', amount: 500 },
+                { subcategory: 'Groceries', amount: 3000 },
+                { subcategory: 'Transport', amount: 2500 },
+                { subcategory: 'Electricity', amount: 600 },
+                { subcategory: 'WiFi', amount: 200 },
+                { subcategory: 'Home Travel', amount: 1250 },
+                { subcategory: 'Home Sent', amount: 3000 },
+                { subcategory: 'Home EMI', amount: 11000 },
+                { subcategory: 'Recharge', amount: 1683 },
+                { subcategory: 'Transport', amount: 1500, label: 'Nagpur Travel' }
+            ],
+            fixedMonthlyNeeds: 34583,
+            annualGifting: 20000,
+            annualPlans: [
+                { month: '2026-05', name: 'Bathroom fitting', amount: 60000, category: 'Miscellaneous' },
+                { month: '2026-05', name: 'Terrace work', amount: 20000, category: 'Miscellaneous' },
+                { month: '2026-06', name: 'Parents health insurance', amount: 18000, category: 'Family' },
+                { month: '2026-07', name: 'Birthday', amount: 10000, category: 'Family' },
+                { month: '2026-08', name: 'Family outing', amount: 20000, category: 'Family' },
+                { month: '2026-08', name: 'Ganpati setup', amount: 20000, category: 'Family' },
+                { month: '2026-10', name: 'Diwali', amount: 10000, category: 'Family' },
+                { month: '2026-12', name: 'December outing', amount: 10000, category: 'Family' },
+                { month: '2027-02', name: 'Self health insurance', amount: 12000, category: 'Needs' }
+            ]
+        };
+        let transactions = [];
+        let editingIndex = null;
+        let reviewIndex = 0;
+        let reviewTouchStartX = null;
+        let transactionSort = { key: 'date', direction: 'desc' };
+        const USE_API_STORAGE = location.protocol !== 'file:';
+        
+        // Initialize
+        async function init() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').value = today;
+            populateSubcategorySelect('subcategory', '');
+            bindControls();
+            await loadTransactions();
+            populateAnalysisFilters();
+            populateReviewFilters();
+            populateTransactionSubcategoryFilter();
+            populateTransactionMonthFilter();
+            renderAnalysis();
+            renderTransactions();
+            renderReview();
+        }
+        
+        // Local Storage
+        async function saveTransactions() {
+            if (USE_API_STORAGE) {
+                try {
+                    const response = await fetch('/api/transactions', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(transactions)
+                    });
+                    if (!response.ok) throw new Error('Database save failed');
+                } catch (err) {
+                    showToast('Could not save to database');
+                }
+            } else {
+                localStorage.setItem('transactions', JSON.stringify(transactions));
+            }
+            populateTransactionSubcategoryFilter();
+            populateTransactionMonthFilter();
+            renderAnalysis();
+            renderTransactions();
+            renderReview();
+        }
+        
+        async function loadTransactions() {
+            if (USE_API_STORAGE) {
+                try {
+                    const response = await fetch('/api/transactions');
+                    if (!response.ok) throw new Error('Database load failed');
+                    transactions = await response.json();
+                    return;
+                } catch (err) {
+                    showToast('Could not load database data');
+                }
+            }
+
+            const saved = localStorage.getItem('transactions');
+            transactions = saved ? JSON.parse(saved) : [];
+        }
+
+        function bindControls() {
+            document.getElementById('analysisYear').addEventListener('change', function() {
+                populateMonthFilter();
+                renderAnalysis();
+            });
+            document.getElementById('analysisMonth').addEventListener('change', renderAnalysis);
+            document.getElementById('transactionSearch').addEventListener('input', renderTransactions);
+            document.getElementById('transactionCategoryFilter').addEventListener('change', function() {
+                populateTransactionSubcategoryFilter();
+                renderTransactions();
+            });
+            document.getElementById('transactionSubcategoryFilter').addEventListener('change', renderTransactions);
+            document.getElementById('transactionMonthFilter').addEventListener('change', renderTransactions);
+            document.getElementById('category').addEventListener('change', function() {
+                populateSubcategorySelect('subcategory', this.value);
+            });
+            document.getElementById('editCategory').addEventListener('change', function() {
+                populateSubcategorySelect('editSubcategory', this.value);
+            });
+            document.getElementById('editForm').addEventListener('submit', saveEditModal);
+            document.getElementById('reviewCategoryFilter').addEventListener('change', function() {
+                reviewIndex = 0;
+                populateReviewSubcategoryFilter();
+                renderReview();
+            });
+            document.getElementById('reviewSubcategoryFilter').addEventListener('change', function() {
+                reviewIndex = 0;
+                renderReview();
+            });
+            document.getElementById('reviewStatusFilter').addEventListener('change', function() {
+                reviewIndex = 0;
+                renderReview();
+            });
+            document.getElementById('reviewMonthFilter').addEventListener('change', function() {
+                reviewIndex = 0;
+                renderReview();
+            });
+        }
+        
+        // Tab switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            const activeButton = document.querySelector(`.tab-btn[onclick="switchTab('${tabName}')"]`);
+            if (activeButton) activeButton.classList.add('active');
+            
+            if (tabName === 'analysis') renderAnalysis();
+            if (tabName === 'review') renderReview();
+            if (tabName === 'transactions') renderTransactions();
+        }
+
+        function navigateTo(tabName) {
+            switchTab(tabName);
+            closeMenu();
+        }
+
+        function goToQuickAdd() {
+            switchTab('add');
+            resetForm();
+            document.getElementById('amount').focus();
+        }
+
+        function toggleMenu() {
+            document.getElementById('navMenu').classList.toggle('open');
+        }
+
+        function closeMenu() {
+            document.getElementById('navMenu').classList.remove('open');
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('appToast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(function() {
+                toast.classList.remove('show');
+            }, 1800);
+        }
+
+        function openImportModal() {
+            closeMenu();
+            document.getElementById('importModal').classList.add('open');
+        }
+
+        function closeImportModal() {
+            document.getElementById('importModal').classList.remove('open');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('open');
+            editingIndex = null;
+        }
+
+        function populateSubcategorySelect(selectId, category, selectedValue = '') {
+            const select = document.getElementById(selectId);
+            const options = SUBCATEGORIES[category] || [];
+            select.innerHTML = ['<option value="">Auto / not set</option>']
+                .concat(options.map(item => `<option value="${item}">${item}</option>`))
+                .join('');
+            select.value = options.includes(selectedValue) ? selectedValue : '';
+        }
+
+        function getTransactionText(transaction) {
+            return `${transaction.reason || ''} ${transaction.notes || ''}`.toLowerCase();
+        }
+
+        function inferSubcategory(transaction) {
+            if (transaction.subcategory) return transaction.subcategory;
+
+            const text = getTransactionText(transaction);
+            const category = transaction.category;
+
+            if (category === 'Needs') {
+                if (text.includes('rent')) return 'Rent';
+                if (text.includes('rekha') || text.includes('food maid') || text.includes('cooking maid')) return 'Food Maid';
+                if (text.includes('cleaning maid')) return 'Cleaning Maid';
+                if (text.includes('grocery') || text.includes('groceries') || text.includes('oats') || text.includes('eggs') || text.includes('chicken') || text.includes('soya') || text.includes('dahi') || text.includes('guava')) return 'Groceries';
+                if (text.includes('auto') || text.includes('cab') || text.includes('bus') || text.includes('metro') || text.includes('petrol') || text.includes('parking')) return 'Transport';
+                if (text.includes('electricity') || text.includes('ebill') || text.includes('e-bill')) return 'Electricity';
+                if (text.includes('wifi')) return 'WiFi';
+                if (text.includes('home travel') || text.includes('railway') || text.includes('train')) return 'Home Travel';
+                if (text.includes('home sent')) return 'Home Sent';
+                if (text.includes('emi')) return 'Home EMI';
+                if (text.includes('recharge')) return 'Recharge';
+                if (text.includes('medicine') || text.includes('health') || text.includes('dentist') || text.includes('dermat')) return 'Medical';
+                if (text.includes('ielts') || text.includes('gre') || text.includes('college') || text.includes('marksheet')) return 'Education';
+                return 'Other Needs';
+            }
+
+            if (category === 'Wants') {
+                if (text.includes('badminton') || text.includes('swimming')) return 'Sports';
+                if (text.includes('spotify') || text.includes('youtube') || text.includes('netflix')) return 'Subscriptions';
+                if (text.includes('movie')) return 'Entertainment';
+                if (text.includes('shopping') || text.includes('tshirt') || text.includes('vest') || text.includes('book')) return 'Shopping';
+                if (text.includes('face') || text.includes('cleanser') || text.includes('serum') || text.includes('moisturizer')) return 'Personal Care';
+                if (text.includes('snack') || text.includes('chips') || text.includes('juice') || text.includes('ice cream') || text.includes('kulfi')) return 'Snacks';
+                return 'Eating Out';
+            }
+
+            if (category === 'Family') {
+                if (text.includes('recharge')) return 'Family Recharge';
+                if (text.includes('dentist') || text.includes('health') || text.includes('insurance')) return 'Family Medical';
+                if (text.includes('gift') || text.includes('birthday')) return 'Gifts';
+                if (text.includes('dinner') || text.includes('cake') || text.includes('food') || text.includes('groceries')) return 'Family Food';
+                return 'Family Support';
+            }
+
+            if (category === 'Miscellaneous') {
+                if (text.includes('bathroom') || text.includes('terrace')) return 'Fixed Home Expense';
+                if (text.includes('udhar') || text.includes('will get back') || text.includes('gayatri')) return 'Recoverable';
+                if (text.includes('travel') || text.includes('shirdi') || text.includes('darshan')) return 'Travel';
+                return 'One-time';
+            }
+
+            return '';
+        }
+
+        function getEffectiveSubcategory(transaction) {
+            return transaction.subcategory || inferSubcategory(transaction);
+        }
+
+        function resetForm() {
+            document.getElementById('addForm').reset();
+            document.getElementById('date').value = new Date().toISOString().split('T')[0];
+            populateSubcategorySelect('subcategory', '');
+            document.getElementById('submitBtn').textContent = 'Add Expense';
+            document.getElementById('cancelEditBtn').style.display = 'none';
+            document.getElementById('formModeBanner').style.display = 'none';
+            editingIndex = null;
+        }
+
+        function setFormValues(transaction) {
+            document.getElementById('amount').value = transaction.amount;
+            document.getElementById('reason').value = transaction.reason;
+            document.getElementById('date').value = transaction.date;
+            document.getElementById('category').value = transaction.category;
+            populateSubcategorySelect('subcategory', transaction.category, transaction.subcategory || getEffectiveSubcategory(transaction));
+            document.getElementById('payment_method').value = transaction.payment_method || 'Other';
+            document.getElementById('notes').value = transaction.notes || '';
+        }
+        
+        // Add expense
+        document.getElementById('addForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const amount = parseFloat(document.getElementById('amount').value);
+            const reason = document.getElementById('reason').value;
+            const date = document.getElementById('date').value;
+            const category = document.getElementById('category').value;
+            const subcategory = document.getElementById('subcategory').value;
+            const payment_method = document.getElementById('payment_method').value;
+            const notes = document.getElementById('notes').value;
+            
+            const transaction = { amount, reason, date, category, subcategory, payment_method, notes };
+            const wasEditing = editingIndex !== null;
+            if (wasEditing) {
+                transactions[editingIndex] = transaction;
+            } else {
+                transactions.push(transaction);
+            }
+            saveTransactions();
+            
+            resetForm();
+            
+            showToast(wasEditing ? 'Expense updated' : 'Expense added');
+        });
+
+        document.getElementById('cancelEditBtn').addEventListener('click', function() {
+            resetForm();
+        });
+        
+        // Upload JSON
+        function uploadJSON() {
+            const json = document.getElementById('jsonInput').value;
+            importTransactionsFromText(json);
+        }
+
+        function importTransactionsFromText(json) {
+            const feedback = document.getElementById('uploadFeedback');
+            feedback.innerHTML = '';
+            
+            try {
+                const data = JSON.parse(json);
+                if (!Array.isArray(data)) throw new Error('Must be a JSON array');
+                
+                const errors = [];
+                const validTransactions = [];
+                
+                data.forEach((item, idx) => {
+                    const itemErrors = validateTransaction(item);
+                    if (itemErrors.length > 0) {
+                        errors.push(`Row ${idx + 1}: ${itemErrors.join(', ')}`);
+                    } else {
+                        validTransactions.push({
+                            amount: Number(item.amount),
+                            reason: item.reason,
+                            date: item.date,
+                            category: item.category,
+                            subcategory: item.subcategory || inferSubcategory(item),
+                            needs_review: Boolean(item.needs_review),
+                            review_reason: item.review_reason || '',
+                            payment_method: item.payment_method || 'Other',
+                            notes: item.notes || ''
+                        });
+                    }
+                });
+                
+                if (errors.length > 0) {
+                    feedback.innerHTML = `
+                        <div class="error-list">
+                            <h4>⚠️ Validation Errors (${errors.length}):</h4>
+                            <ul>${errors.map(e => `<li>${e}</li>`).join('')}</ul>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                if (validTransactions.length > 0) {
+                    transactions = transactions.concat(validTransactions);
+                    saveTransactions();
+                    feedback.innerHTML = `<div class="alert success">✓ Uploaded ${validTransactions.length} expenses</div>`;
+                    document.getElementById('jsonInput').value = '';
+                    document.getElementById('jsonFileInput').value = '';
+                }
+            } catch (err) {
+                feedback.innerHTML = `<div class="alert error">❌ JSON Error: ${err.message}</div>`;
+            }
+        }
+
+        document.getElementById('jsonFileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(loadEvent) {
+                importTransactionsFromText(loadEvent.target.result);
+            };
+            reader.onerror = function() {
+                document.getElementById('uploadFeedback').innerHTML = '<div class="alert error">❌ Could not read the selected file.</div>';
+            };
+            reader.readAsText(file);
+        });
+        
+        function validateTransaction(t) {
+            const errors = [];
+            if (!t.amount || t.amount <= 0) errors.push('amount must be positive');
+            if (!t.reason) errors.push('reason required');
+            if (!t.date) errors.push('date required');
+            if (!CATEGORIES.includes(t.category)) errors.push('invalid category');
+            return errors;
+        }
+
+        function formatCurrency(amount) {
+            return `₹${amount.toFixed(2)}`;
+        }
+
+        function getMonthKey(dateString) {
+            return dateString.slice(0, 7);
+        }
+
+        function getYearKey(dateString) {
+            return dateString.slice(0, 4);
+        }
+
+        function formatMonthLabel(monthKey) {
+            const [year, month] = monthKey.split('-').map(Number);
+            return new Date(year, month - 1, 1).toLocaleDateString('en-IN', {
+                month: 'long',
+                year: 'numeric'
+            });
+        }
+
+        function getSortedTransactions(items) {
+            return [...items].sort((a, b) => `${b.date}|${b.reason}`.localeCompare(`${a.date}|${a.reason}`));
+        }
+
+        function getSortValue(transaction, key) {
+            if (key === 'amount') return transaction.amount;
+            if (key === 'subcategory') return getEffectiveSubcategory(transaction) || '';
+            if (key === 'method') return transaction.payment_method || '';
+            return transaction[key] || '';
+        }
+
+        function sortVisibleTransactions(items) {
+            return [...items].sort((a, b) => {
+                const aValue = getSortValue(a, transactionSort.key);
+                const bValue = getSortValue(b, transactionSort.key);
+                let result;
+
+                if (typeof aValue === 'number' && typeof bValue === 'number') {
+                    result = aValue - bValue;
+                } else {
+                    result = String(aValue).localeCompare(String(bValue), 'en-IN', {
+                        numeric: true,
+                        sensitivity: 'base'
+                    });
+                }
+
+                return transactionSort.direction === 'asc' ? result : -result;
+            });
+        }
+
+        function sortTransactionsBy(key) {
+            if (transactionSort.key === key) {
+                transactionSort.direction = transactionSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                transactionSort = { key, direction: key === 'date' ? 'desc' : 'asc' };
+            }
+            renderTransactions();
+        }
+
+        function getSortLabel(key, label) {
+            if (transactionSort.key !== key) return `${label} ↕`;
+            return `${label} ${transactionSort.direction === 'asc' ? '↑' : '↓'}`;
+        }
+
+        function populateAnalysisFilters() {
+            const yearSelect = document.getElementById('analysisYear');
+            const previousYear = yearSelect.value || 'All';
+            const yearSet = new Set(transactions.map(t => getYearKey(t.date)));
+            FINANCIAL_PROFILE.annualPlans.forEach(item => yearSet.add(item.month.slice(0, 4)));
+            const years = Array.from(yearSet).filter(Boolean).sort((a, b) => b.localeCompare(a));
+
+            yearSelect.innerHTML = ['<option value="All">All years</option>']
+                .concat(years.map(year => `<option value="${year}">${year}</option>`))
+                .join('');
+
+            yearSelect.value = years.includes(previousYear) || previousYear === 'All'
+                ? previousYear
+                : (years[0] || 'All');
+            populateMonthFilter();
+        }
+
+        function populateMonthFilter() {
+            const yearValue = document.getElementById('analysisYear').value || 'All';
+            const monthSelect = document.getElementById('analysisMonth');
+            const previousMonth = monthSelect.value || 'All';
+            const monthSet = new Set(
+                transactions
+                    .filter(t => yearValue === 'All' || getYearKey(t.date) === yearValue)
+                    .map(t => getMonthKey(t.date))
+            );
+
+            const months = Array.from(monthSet).sort((a, b) => b.localeCompare(a));
+            monthSelect.innerHTML = ['<option value="All">All months</option>']
+                .concat(
+                    months.map(month => `<option value="${month}">${formatMonthLabel(month)}</option>`)
+                )
+                .join('');
+
+            monthSelect.value = months.includes(previousMonth) || previousMonth === 'All'
+                ? previousMonth
+                : 'All';
+        }
+
+        function getFilteredAnalysisTransactions() {
+            const yearValue = document.getElementById('analysisYear').value || 'All';
+            const monthValue = document.getElementById('analysisMonth').value || 'All';
+
+            return transactions.filter(transaction => {
+                const sameYear = yearValue === 'All' || getYearKey(transaction.date) === yearValue;
+                const sameMonth = monthValue === 'All' || getMonthKey(transaction.date) === monthValue;
+                return sameYear && sameMonth;
+            });
+        }
+
+        function getTopCategory(categoryTotals) {
+            return Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])[0];
+        }
+
+        function getPlannedTotalsForYear(yearValue) {
+            const categories = { Needs: 0, Wants: 0, Family: 0, Miscellaneous: 0 };
+            const targetYears = yearValue === 'All'
+                ? new Set(FINANCIAL_PROFILE.annualPlans.map(item => item.month.slice(0, 4)))
+                : new Set([yearValue]);
+
+            targetYears.forEach(() => {
+                categories.Needs += FINANCIAL_PROFILE.monthlyNeedsBudget * 12;
+                categories.Wants += FINANCIAL_PROFILE.annualWantsBudget;
+                categories.Family += FINANCIAL_PROFILE.annualGifting;
+                categories.Miscellaneous += FINANCIAL_PROFILE.fixedHomeAnnualBudget;
+            });
+
+            FINANCIAL_PROFILE.annualPlans.forEach(item => {
+                if (yearValue === 'All' || item.month.startsWith(yearValue)) {
+                    categories[item.category] += item.amount;
+                }
+            });
+
+            return categories;
+        }
+
+        function buildSubcategoryMap(items) {
+            const map = {};
+
+            items.forEach(transaction => {
+                const subcategory = getEffectiveSubcategory(transaction) || 'Uncategorized';
+                if (!map[subcategory]) {
+                    map[subcategory] = {
+                        category: transaction.category,
+                        total: 0,
+                        count: 0
+                    };
+                }
+                map[subcategory].total += transaction.amount;
+                map[subcategory].count += 1;
+            });
+
+            return map;
+        }
+
+        function getMonthlyNeedsBudgetRows() {
+            const grouped = {};
+
+            FINANCIAL_PROFILE.monthlyNeeds.forEach(item => {
+                const label = item.label || item.subcategory;
+                if (!grouped[label]) grouped[label] = 0;
+                grouped[label] += item.amount;
+            });
+
+            return Object.entries(grouped).map(([label, amount]) => ({ label, amount }));
+        }
+
+        function getBudgetActuals(items) {
+            const actuals = {
+                Needs: 0,
+                Wants: 0,
+                FixedHome: 0,
+                OutsideBudget: 0,
+                Recoverable: 0
+            };
+
+            items.forEach(transaction => {
+                const subcategory = getEffectiveSubcategory(transaction);
+                if (subcategory === 'Recoverable') {
+                    actuals.Recoverable += transaction.amount;
+                } else if (subcategory === 'Fixed Home Expense') {
+                    actuals.FixedHome += transaction.amount;
+                } else if (transaction.category === 'Needs') {
+                    actuals.Needs += transaction.amount;
+                } else if (transaction.category === 'Wants') {
+                    actuals.Wants += transaction.amount;
+                } else {
+                    actuals.OutsideBudget += transaction.amount;
+                }
+            });
+
+            return actuals;
+        }
+
+        function getBudgetRows(actuals, period) {
+            const annual = period === 'annual';
+            return [
+                {
+                    label: 'Needs',
+                    actual: actuals.Needs,
+                    budget: FINANCIAL_PROFILE.monthlyNeedsBudget * (annual ? 12 : 1)
+                },
+                {
+                    label: 'Wants',
+                    actual: actuals.Wants,
+                    budget: FINANCIAL_PROFILE.monthlyWantsBudget * (annual ? 12 : 1)
+                },
+                {
+                    label: 'Fixed Home',
+                    actual: actuals.FixedHome,
+                    budget: annual ? FINANCIAL_PROFILE.fixedHomeAnnualBudget : FINANCIAL_PROFILE.fixedHomeAnnualBudget / 12
+                }
+            ];
+        }
+
+        function renderBudgetRows(rows) {
+            return rows.map(row => {
+                const remaining = row.budget - row.actual;
+                const usedPercent = row.budget ? Math.min((row.actual / row.budget) * 100, 140) : 0;
+                const over = remaining < 0;
+                return `
+                    <tr>
+                        <td>${row.label}</td>
+                        <td>${formatCurrency(row.actual)}</td>
+                        <td>${formatCurrency(row.budget)}</td>
+                        <td>${over ? 'Over by ' : 'Left '}${formatCurrency(Math.abs(remaining))}</td>
+                        <td>
+                            <div class="budget-meter">
+                                <div class="budget-meter-fill ${over ? 'over' : ''}" style="width: ${Math.min(usedPercent, 100)}%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function populateReviewFilters() {
+            const monthSelect = document.getElementById('reviewMonthFilter');
+            const previousMonth = monthSelect.value || 'All';
+            const months = Array.from(new Set(transactions.map(t => getMonthKey(t.date))))
+                .filter(Boolean)
+                .sort((a, b) => b.localeCompare(a));
+
+            monthSelect.innerHTML = ['<option value="All">All months</option>']
+                .concat(months.map(month => `<option value="${month}">${formatMonthLabel(month)}</option>`))
+                .join('');
+
+            monthSelect.value = months.includes(previousMonth) || previousMonth === 'All'
+                ? previousMonth
+                : 'All';
+
+            populateReviewSubcategoryFilter();
+        }
+
+        function getSubcategoriesForFilter(categoryValue) {
+            if (categoryValue && categoryValue !== 'All') return SUBCATEGORIES[categoryValue] || [];
+            return Object.values(SUBCATEGORIES).flat();
+        }
+
+        function populateReviewSubcategoryFilter() {
+            const select = document.getElementById('reviewSubcategoryFilter');
+            const previous = select.value || 'All';
+            const categoryValue = document.getElementById('reviewCategoryFilter').value;
+            const options = getSubcategoriesForFilter(categoryValue);
+
+            select.innerHTML = ['<option value="All">All subcategories</option>']
+                .concat(options.map(item => `<option value="${item}">${item}</option>`))
+                .join('');
+            select.value = options.includes(previous) || previous === 'All' ? previous : 'All';
+        }
+
+        function populateTransactionSubcategoryFilter() {
+            const select = document.getElementById('transactionSubcategoryFilter');
+            const previous = select.value || 'All';
+            const categoryValue = document.getElementById('transactionCategoryFilter').value;
+            const options = getSubcategoriesForFilter(categoryValue);
+
+            select.innerHTML = ['<option value="All">All subcategories</option>']
+                .concat(options.map(item => `<option value="${item}">${item}</option>`))
+                .join('');
+            select.value = options.includes(previous) || previous === 'All' ? previous : 'All';
+        }
+
+        function populateTransactionMonthFilter() {
+            const select = document.getElementById('transactionMonthFilter');
+            const previous = select.value || 'All';
+            const months = Array.from(new Set(transactions.map(t => getMonthKey(t.date))))
+                .filter(Boolean)
+                .sort((a, b) => b.localeCompare(a));
+
+            select.innerHTML = ['<option value="All">All months</option>']
+                .concat(months.map(month => `<option value="${month}">${formatMonthLabel(month)}</option>`))
+                .join('');
+            select.value = months.includes(previous) || previous === 'All' ? previous : 'All';
+        }
+
+        function getReviewTransactions() {
+            const category = document.getElementById('reviewCategoryFilter').value;
+            const subcategory = document.getElementById('reviewSubcategoryFilter').value;
+            const reviewStatus = document.getElementById('reviewStatusFilter').value;
+            const month = document.getElementById('reviewMonthFilter').value;
+
+            return getSortedTransactions(transactions).filter(transaction => {
+                const matchesCategory = category === 'All' || transaction.category === category;
+                const matchesSubcategory = subcategory === 'All' || getEffectiveSubcategory(transaction) === subcategory;
+                const matchesReviewStatus = reviewStatus === 'All' || transaction.needs_review;
+                const matchesMonth = month === 'All' || getMonthKey(transaction.date) === month;
+                return matchesCategory && matchesSubcategory && matchesReviewStatus && matchesMonth;
+            });
+        }
+
+        function getCategoryHint(transaction) {
+            const text = `${transaction.reason} ${transaction.notes || ''}`.toLowerCase();
+            if (text.includes('family') || text.includes('mummy') || text.includes('mother')) return 'Family';
+            if (text.includes('rekha') || text.includes('maid') || text.includes('emi') || text.includes('rent')) return 'Needs';
+            if (text.includes('badminton') || text.includes('movie') || text.includes('spotify') || text.includes('netflix')) return 'Wants';
+            return 'Review manually';
+        }
+
+        function renderReview() {
+            populateReviewFilters();
+
+            const reviewTransactions = getReviewTransactions();
+            const content = document.getElementById('reviewContent');
+
+            if (reviewTransactions.length === 0) {
+                content.innerHTML = '<div class="empty-state"><p>No transactions match the review filters.</p></div>';
+                return;
+            }
+
+            if (reviewIndex >= reviewTransactions.length) reviewIndex = reviewTransactions.length - 1;
+            if (reviewIndex < 0) reviewIndex = 0;
+
+            const transaction = reviewTransactions[reviewIndex];
+            const sourceIndex = transactions.indexOf(transaction);
+            const hint = getCategoryHint(transaction);
+            const effectiveSubcategory = getEffectiveSubcategory(transaction);
+            const noteHtml = transaction.notes
+                ? `<div class="mini-stat-text"><strong>Notes:</strong> ${transaction.notes}</div>`
+                : '';
+            const reviewHtml = transaction.needs_review
+                ? `<div class="mini-stat" style="margin-top: 16px; border-color: #f0ad4e; background: #fff9ed;">
+                    <div class="mini-stat-label">Needs Review</div>
+                    <div class="mini-stat-text">${transaction.review_reason || 'Confirm category/subcategory'}</div>
+                </div>`
+                : '';
+            const subcategoryOptions = SUBCATEGORIES[transaction.category] || [];
+
+            content.innerHTML = `
+                <div class="review-shell">
+                    <p class="muted" style="margin-bottom: 10px;">${reviewIndex + 1} of ${reviewTransactions.length}</p>
+                    <div class="review-card" id="activeReviewCard">
+                        <div class="review-meta">
+                            <span class="pill">${transaction.date}</span>
+                            <span class="pill">${transaction.payment_method || 'Other'}</span>
+                            <span class="pill">Current: ${transaction.category}</span>
+                            <span class="pill">${effectiveSubcategory || 'No subcategory'}</span>
+                        </div>
+                        <div class="review-amount">${formatCurrency(transaction.amount)}</div>
+                        <div class="review-reason">${transaction.reason}</div>
+                        ${noteHtml}
+                        ${reviewHtml}
+                        <div class="mini-stat" style="margin-top: 16px;">
+                            <div class="mini-stat-label">Suggested check</div>
+                            <div class="mini-stat-text">${hint}</div>
+                        </div>
+                        <div class="category-actions">
+                            ${CATEGORIES.map(category => `
+                                <button class="${transaction.category === category ? 'active' : ''}" onclick="setReviewCategory(${sourceIndex}, '${category}')">${category}</button>
+                            `).join('')}
+                        </div>
+                        <div class="form-group" style="margin-top: 16px; margin-bottom: 0;">
+                            <label for="activeReviewSubcategory">Subcategory</label>
+                            <select id="activeReviewSubcategory" onchange="setReviewSubcategory(${sourceIndex}, this.value)">
+                                <option value="">Auto / not set</option>
+                                ${subcategoryOptions.map(item => `<option value="${item}" ${effectiveSubcategory === item ? 'selected' : ''}>${item}</option>`).join('')}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="review-nav">
+                        <button onclick="moveReview(-1)">Previous</button>
+                        <button onclick="editTransaction(${sourceIndex})">Edit Details</button>
+                        <button onclick="moveReview(1)">Next</button>
+                    </div>
+                </div>
+            `;
+
+            const card = document.getElementById('activeReviewCard');
+            card.addEventListener('touchstart', function(e) {
+                reviewTouchStartX = e.changedTouches[0].screenX;
+            });
+            card.addEventListener('touchend', function(e) {
+                if (reviewTouchStartX === null) return;
+                const delta = e.changedTouches[0].screenX - reviewTouchStartX;
+                if (Math.abs(delta) > 50) moveReview(delta < 0 ? 1 : -1);
+                reviewTouchStartX = null;
+            });
+        }
+
+        function moveReview(direction) {
+            const reviewTransactions = getReviewTransactions();
+            reviewIndex = Math.min(Math.max(reviewIndex + direction, 0), reviewTransactions.length - 1);
+            renderReview();
+        }
+
+        function setReviewCategory(index, category) {
+            transactions[index].category = category;
+            transactions[index].subcategory = inferSubcategory(transactions[index]);
+            transactions[index].needs_review = false;
+            transactions[index].review_reason = '';
+            saveTransactions();
+            moveReview(1);
+        }
+
+        function setReviewSubcategory(index, subcategory) {
+            transactions[index].subcategory = subcategory;
+            transactions[index].needs_review = false;
+            transactions[index].review_reason = '';
+            saveTransactions();
+        }
+
+        function buildSummaryMap(items, keyFn) {
+            const map = {};
+
+            items.forEach(transaction => {
+                const key = keyFn(transaction.date);
+                if (!map[key]) {
+                    map[key] = {
+                        total: 0,
+                        count: 0,
+                        categories: {}
+                    };
+                    CATEGORIES.forEach(cat => map[key].categories[cat] = 0);
+                }
+
+                map[key].total += transaction.amount;
+                map[key].count += 1;
+                map[key].categories[transaction.category] += transaction.amount;
+            });
+
+            return map;
+        }
+        
+        // Analysis
+        function renderAnalysis() {
+            populateAnalysisFilters();
+
+            if (transactions.length === 0) {
+                document.getElementById('analysisContent').innerHTML = '<div class="empty-state"><div class="empty-state-icon">📊</div><p>No expenses yet. Add some to see analysis.</p></div>';
+                return;
+            }
+            const filteredTransactions = getFilteredAnalysisTransactions();
+            const selectedYear = document.getElementById('analysisYear').value || 'All';
+            const selectedMonth = document.getElementById('analysisMonth').value || 'All';
+
+            if (filteredTransactions.length === 0) {
+                document.getElementById('analysisContent').innerHTML = '<div class="empty-state"><div class="empty-state-icon">📊</div><p>No transactions match the selected filters.</p></div>';
+                return;
+            }
+
+            const categoryTotals = {};
+            CATEGORIES.forEach(cat => categoryTotals[cat] = 0);
+            let grandTotal = 0;
+            
+            filteredTransactions.forEach(t => {
+                categoryTotals[t.category] += t.amount;
+                grandTotal += t.amount;
+            });
+
+            const monthlySummary = buildSummaryMap(filteredTransactions, getMonthKey);
+            const yearlySummary = buildSummaryMap(filteredTransactions, getYearKey);
+            const sortedMonths = Object.keys(monthlySummary).sort((a, b) => b.localeCompare(a));
+            const sortedYears = Object.keys(yearlySummary).sort((a, b) => b.localeCompare(a));
+            const topCategory = getTopCategory(categoryTotals);
+            const subcategoryTotals = buildSubcategoryMap(filteredTransactions);
+            const topSubcategories = Object.entries(subcategoryTotals)
+                .sort((a, b) => b[1].total - a[1].total)
+                .slice(0, 12);
+            const monthlyBudgetRows = getMonthlyNeedsBudgetRows();
+            const budgetYearTransactions = selectedYear === 'All'
+                ? transactions
+                : transactions.filter(transaction => getYearKey(transaction.date) === selectedYear);
+            const availableMonths = Array.from(new Set(budgetYearTransactions.map(transaction => getMonthKey(transaction.date))))
+                .sort((a, b) => b.localeCompare(a));
+            const budgetMonth = selectedMonth === 'All' ? availableMonths[0] : selectedMonth;
+            const budgetMonthTransactions = budgetMonth
+                ? transactions.filter(transaction => getMonthKey(transaction.date) === budgetMonth)
+                : [];
+            const monthlyActuals = getBudgetActuals(budgetMonthTransactions);
+            const annualActuals = getBudgetActuals(budgetYearTransactions);
+            const monthlyBudgetPerformanceRows = getBudgetRows(monthlyActuals, 'monthly');
+            const annualBudgetPerformanceRows = getBudgetRows(annualActuals, 'annual');
+            const budgetedAnnualActual = annualActuals.Needs + annualActuals.Wants + annualActuals.FixedHome;
+            const annualBudgetTotal = FINANCIAL_PROFILE.monthlyNeedsBudget * 12 + FINANCIAL_PROFILE.annualWantsBudget + FINANCIAL_PROFILE.fixedHomeAnnualBudget;
+            const annualBudgetRemaining = annualBudgetTotal - budgetedAnnualActual;
+            const reviewCount = transactions.filter(transaction => transaction.needs_review).length;
+            const scopeLabel = selectedMonth !== 'All'
+                ? formatMonthLabel(selectedMonth)
+                : (selectedYear === 'All' ? 'All imported data' : `${selectedYear} overview`);
+            
+            const categoryStats = Object.entries(categoryTotals)
+                .map(([cat, total]) => `
+                    <div class="cat-stat ${cat.toLowerCase()}">
+                        <div class="cat-name">${cat}</div>
+                        <div class="cat-amount">${formatCurrency(total)}</div>
+                        <div class="muted">${grandTotal ? ((total / grandTotal) * 100).toFixed(1) : 0}% of selected spend</div>
+                    </div>
+                `)
+                .join('');
+
+            const yearlyRows = sortedYears.map(year => {
+                const summary = yearlySummary[year];
+                return `
+                    <tr>
+                        <td>${year}</td>
+                        <td>${formatCurrency(summary.total)}</td>
+                        <td>${summary.count}</td>
+                        <td>${formatCurrency(summary.total / summary.count)}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            const monthlyRows = sortedMonths.map(month => {
+                const summary = monthlySummary[month];
+                const topMonthCategory = getTopCategory(summary.categories);
+                return `
+                    <tr>
+                        <td>${formatMonthLabel(month)}</td>
+                        <td>${formatCurrency(summary.total)}</td>
+                        <td>${summary.count}</td>
+                        <td>${formatCurrency(summary.categories.Needs)}</td>
+                        <td>${formatCurrency(summary.categories.Wants)}</td>
+                        <td>${formatCurrency(summary.categories.Family)}</td>
+                        <td>${formatCurrency(summary.categories.Miscellaneous)}</td>
+                        <td>${topMonthCategory[0]}</td>
+                    </tr>
+                `;
+            }).join('');
+            
+            document.getElementById('analysisContent').innerHTML = `
+                <p class="muted" style="margin-bottom: 14px;">Scope: <strong>${scopeLabel}</strong></p>
+                <div class="card" style="margin-top: 0;">
+                    <h3 class="section-title">Income And Targets</h3>
+                    <div class="toolbar">
+                        <div class="mini-stat">
+                            <div class="mini-stat-label">Net Annual Income</div>
+                            <div class="mini-stat-value">${formatCurrency(FINANCIAL_PROFILE.income.netAnnualIncome)}</div>
+                            <div class="mini-stat-text">Salary after tax + rent + reimbursement</div>
+                        </div>
+                        <div class="mini-stat">
+                            <div class="mini-stat-label">Net Monthly Income</div>
+                            <div class="mini-stat-value">${formatCurrency(FINANCIAL_PROFILE.income.netMonthlyIncome)}</div>
+                            <div class="mini-stat-text">Your decided monthly baseline</div>
+                        </div>
+                        <div class="mini-stat">
+                            <div class="mini-stat-label">Annual Surplus Target</div>
+                            <div class="mini-stat-value">${formatCurrency(FINANCIAL_PROFILE.annualSurplusTarget)}</div>
+                            <div class="mini-stat-text">After needs, wants, and fixed home budget</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-box" style="border-left-color: #333;">
+                        <div class="stat-label">Total Spending</div>
+                        <div class="stat-value">${formatCurrency(grandTotal)}</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Budgeted Annual Spend</div>
+                        <div class="stat-value">${formatCurrency(budgetedAnnualActual)}</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Outside Budget</div>
+                        <div class="stat-value">${formatCurrency(annualActuals.OutsideBudget)}</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Needs Review</div>
+                        <div class="stat-value">${reviewCount}</div>
+                    </div>
+                </div>
+                <div class="category-stats">${categoryStats}</div>
+                <div class="card" style="margin-top: 20px;">
+                    <h3 class="section-title">Budget Performance</h3>
+                    <div class="toolbar">
+                        <div class="mini-stat">
+                            <div class="mini-stat-label">Annual Budget Left</div>
+                            <div class="mini-stat-value">${formatCurrency(annualBudgetRemaining)}</div>
+                            <div class="mini-stat-text">Needs + Wants + Fixed Home only</div>
+                        </div>
+                        <div class="mini-stat">
+                            <div class="mini-stat-label">Outside Budget</div>
+                            <div class="mini-stat-value">${formatCurrency(annualActuals.OutsideBudget)}</div>
+                            <div class="mini-stat-text">Family, unclear, or one-time items not in the core budget</div>
+                        </div>
+                        <div class="mini-stat">
+                            <div class="mini-stat-label">Recoverable</div>
+                            <div class="mini-stat-value">${formatCurrency(annualActuals.Recoverable)}</div>
+                            <div class="mini-stat-text">Loans or money expected back</div>
+                        </div>
+                    </div>
+                    <h4 style="margin: 18px 0 8px;">Monthly: ${budgetMonth ? formatMonthLabel(budgetMonth) : 'No month selected'}</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Budget</th>
+                                <th>Actual</th>
+                                <th>Ceiling</th>
+                                <th>Status</th>
+                                <th>Used</th>
+                            </tr>
+                        </thead>
+                        <tbody>${renderBudgetRows(monthlyBudgetPerformanceRows)}</tbody>
+                    </table>
+                    <h4 style="margin: 18px 0 8px;">Annual Progress</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Budget</th>
+                                <th>Actual</th>
+                                <th>Annual Budget</th>
+                                <th>Status</th>
+                                <th>Used</th>
+                            </tr>
+                        </thead>
+                        <tbody>${renderBudgetRows(annualBudgetPerformanceRows)}</tbody>
+                    </table>
+                </div>
+                <div class="card" style="margin-top: 20px;">
+                    <h3 class="section-title">Monthly Needs Budget</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Budget Line</th>
+                                <th>Monthly Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${monthlyBudgetRows.map(row => `
+                                <tr>
+                                    <td>${row.label}</td>
+                                    <td>${formatCurrency(row.amount)}</td>
+                                </tr>
+                            `).join('')}
+                            <tr>
+                                <td><strong>Total Needs Ceiling</strong></td>
+                                <td><strong>${formatCurrency(FINANCIAL_PROFILE.monthlyNeedsBudget)}</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Wants Ceiling</strong></td>
+                                <td><strong>${formatCurrency(FINANCIAL_PROFILE.monthlyWantsBudget)}</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card" style="margin-top: 20px;">
+                    <h3 class="section-title">Top Subcategories</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Subcategory</th>
+                                <th>Category</th>
+                                <th>Total</th>
+                                <th>Expenses</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${topSubcategories.map(([name, summary]) => `
+                                <tr>
+                                    <td>${name}</td>
+                                    <td>${summary.category}</td>
+                                    <td>${formatCurrency(summary.total)}</td>
+                                    <td>${summary.count}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card" style="margin-top: 20px;">
+                    <h3 style="margin-bottom: 12px;">Annual Overview</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Year</th>
+                                <th>Total</th>
+                                <th>Expenses</th>
+                                <th>Average / Expense</th>
+                            </tr>
+                        </thead>
+                        <tbody>${yearlyRows}</tbody>
+                    </table>
+                </div>
+                <div class="card" style="margin-top: 20px;">
+                    <h3 style="margin-bottom: 12px;">Monthly Breakdown</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Month</th>
+                                <th>Total</th>
+                                <th>Expenses</th>
+                                <th>Needs</th>
+                                <th>Wants</th>
+                                <th>Family</th>
+                                <th>Misc</th>
+                                <th>Top Category</th>
+                            </tr>
+                        </thead>
+                        <tbody>${monthlyRows}</tbody>
+                    </table>
+                </div>
+            `;
+        }
+        
+        // Render all expenses
+        function renderTransactions() {
+            if (transactions.length === 0) {
+                document.getElementById('transactionsContent').innerHTML = '<div class="empty-state"><p>No expenses yet.</p></div>';
+                return;
+            }
+
+            const query = document.getElementById('transactionSearch').value.trim().toLowerCase();
+            const categoryFilter = document.getElementById('transactionCategoryFilter').value;
+            const subcategoryFilter = document.getElementById('transactionSubcategoryFilter').value;
+            const monthFilter = document.getElementById('transactionMonthFilter').value;
+            const filteredTransactions = sortVisibleTransactions(transactions.filter(t => {
+                const matchesCategory = categoryFilter === 'All' || t.category === categoryFilter;
+                const matchesSubcategory = subcategoryFilter === 'All' || getEffectiveSubcategory(t) === subcategoryFilter;
+                const matchesMonth = monthFilter === 'All' || getMonthKey(t.date) === monthFilter;
+                const haystack = `${t.reason} ${t.notes || ''}`.toLowerCase();
+                const matchesSearch = !query || haystack.includes(query);
+                return matchesCategory && matchesSubcategory && matchesMonth && matchesSearch;
+            }));
+
+            if (filteredTransactions.length === 0) {
+                document.getElementById('transactionsContent').innerHTML = '<div class="empty-state"><p>No expenses match the current filters.</p></div>';
+                return;
+            }
+
+            const isFiltered = Boolean(query) || categoryFilter !== 'All' || subcategoryFilter !== 'All' || monthFilter !== 'All';
+            const filteredTotal = filteredTransactions.reduce((sum, transaction) => sum + transaction.amount, 0);
+            const filteredSummary = isFiltered
+                ? `
+                    <div class="mini-stat" style="margin-bottom: 12px;">
+                        <div class="mini-stat-label">Filtered Total</div>
+                        <div class="mini-stat-value">${formatCurrency(filteredTotal)}</div>
+                        <div class="mini-stat-text">${filteredTransactions.length} matching expenses</div>
+                    </div>
+                `
+                : '';
+            
+            const html = `
+                ${filteredSummary}
+                <p class="muted">${filteredTransactions.length} of ${transactions.length} expenses shown</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="sortable" onclick="sortTransactionsBy('date')">${getSortLabel('date', 'Date')}</th>
+                            <th class="sortable" onclick="sortTransactionsBy('reason')">${getSortLabel('reason', 'Reason')}</th>
+                            <th class="sortable" onclick="sortTransactionsBy('amount')">${getSortLabel('amount', 'Amount')}</th>
+                            <th class="sortable" onclick="sortTransactionsBy('category')">${getSortLabel('category', 'Category')}</th>
+                            <th class="sortable" onclick="sortTransactionsBy('subcategory')">${getSortLabel('subcategory', 'Subcategory')}</th>
+                            <th class="sortable" onclick="sortTransactionsBy('method')">${getSortLabel('method', 'Method')}</th>
+                            <th class="sortable" onclick="sortTransactionsBy('notes')">${getSortLabel('notes', 'Notes')}</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${filteredTransactions.map(t => {
+                            const idx = transactions.indexOf(t);
+                            return `
+                            <tr>
+                                <td>${t.date}</td>
+                                <td>${t.reason}</td>
+                                <td>₹${t.amount.toFixed(2)}</td>
+                                <td>${t.category}</td>
+                                <td>${getEffectiveSubcategory(t) || '—'}</td>
+                                <td>${t.payment_method}</td>
+                                <td>${t.notes || '—'}</td>
+                                <td>
+                                    <button class="edit-btn" onclick="editTransaction(${idx})">Edit</button>
+                                    <button class="delete-btn" onclick="deleteTransaction(${idx})">Delete</button>
+                                </td>
+                            </tr>
+                        `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            document.getElementById('transactionsContent').innerHTML = html;
+        }
+        
+        // Delete expense
+        function deleteTransaction(idx) {
+            if (confirm('Delete this expense?')) {
+                transactions.splice(idx, 1);
+                saveTransactions();
+            }
+        }
+
+        function editTransaction(idx) {
+            editingIndex = idx;
+            const transaction = transactions[idx];
+            document.getElementById('editAmount').value = transaction.amount;
+            document.getElementById('editReason').value = transaction.reason;
+            document.getElementById('editDate').value = transaction.date;
+            document.getElementById('editCategory').value = transaction.category;
+            populateSubcategorySelect('editSubcategory', transaction.category, transaction.subcategory || getEffectiveSubcategory(transaction));
+            document.getElementById('editPaymentMethod').value = transaction.payment_method || 'Other';
+            document.getElementById('editNotes').value = transaction.notes || '';
+            document.getElementById('editModal').classList.add('open');
+        }
+
+        function saveEditModal(e) {
+            e.preventDefault();
+            if (editingIndex === null) return;
+
+            transactions[editingIndex] = {
+                ...transactions[editingIndex],
+                amount: parseFloat(document.getElementById('editAmount').value),
+                reason: document.getElementById('editReason').value,
+                date: document.getElementById('editDate').value,
+                category: document.getElementById('editCategory').value,
+                subcategory: document.getElementById('editSubcategory').value,
+                payment_method: document.getElementById('editPaymentMethod').value,
+                notes: document.getElementById('editNotes').value,
+                needs_review: false,
+                review_reason: ''
+            };
+
+            saveTransactions();
+            closeEditModal();
+            showToast('Transaction updated');
+        }
+        
+        // Export
+        function exportJSON() {
+            const dataStr = JSON.stringify(transactions, null, 2);
+            const filename = `finance-tracker-${new Date().toISOString().split('T')[0]}.json`;
+            const feedback = document.getElementById('exportFeedback');
+
+            try {
+                const blob = new Blob([dataStr], { type: 'application/json;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+
+                setTimeout(function() {
+                    URL.revokeObjectURL(url);
+                }, 1000);
+
+                feedback.innerHTML = `<div class="alert success">Export started: ${filename}</div>`;
+            } catch (err) {
+                feedback.innerHTML = `
+                    <div class="alert error">
+                        Download was blocked. Select the JSON below and save it manually.
+                    </div>
+                    <textarea readonly>${dataStr}</textarea>
+                `;
+            }
+        }
+        
+        // Clear all
+        async function clearAll() {
+            if (confirm('⚠️ Delete ALL expenses? This cannot be undone.')) {
+                transactions = [];
+                if (!USE_API_STORAGE) localStorage.removeItem('transactions');
+                await saveTransactions();
+                showToast('All data cleared');
+            }
+        }
+        
+        // Start
+        init();
+    </script>
+</body>
+</html>
