@@ -9,6 +9,21 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Upload app files
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: ".dockerignore,.env.example,.gitignore,Dockerfile,README.md,april-2026-expenses.json,data-format.md,docker-compose.yml,financial-profile-2026-2027.json,index.html,june-2026-expenses.json,may-2026-expenses.json,package.json,review-queue.json,sample-data.json,scripts,server.js"
+          target: "/home/ubuntu/finance-tracker"
+          rm: false
+          overwrite: true
+          strip_components: 0
+
       - name: Deploy on VM
         uses: appleboy/ssh-action@v1.0.3
         with:

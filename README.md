@@ -80,7 +80,7 @@ GitHub repo secrets needed:
 - `SSH_USER`: `ubuntu`
 - `SSH_PRIVATE_KEY`: private key that can SSH into the VM
 
-On every push to `main`, GitHub Actions runs:
+On every push to `main`, GitHub Actions uploads the app files over SSH, then runs:
 
 ```bash
 /home/ubuntu/finance-tracker/scripts/deploy.sh
