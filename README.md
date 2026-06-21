@@ -65,6 +65,8 @@ If these are not set, auth is disabled for local development.
 
 This repo includes Docker Compose and a GitHub Actions deploy workflow.
 
+The production app is currently served at `https://finance.usechapter.club`.
+
 On the VM:
 
 ```bash
