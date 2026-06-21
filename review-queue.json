@@ -1,0 +1,92 @@
+[
+  {
+    "file": "april-2026-expenses.json",
+    "row": 5,
+    "date": "2026-04-01",
+    "amount": 119.29,
+    "reason": "Kedar birthday cake contribution",
+    "category": "Miscellaneous",
+    "subcategory": "One-time",
+    "review_reason": "Social/friend gift; confirm if you want Miscellaneous or Wants"
+  },
+  {
+    "file": "april-2026-expenses.json",
+    "row": 46,
+    "date": "2026-04-13",
+    "amount": 410,
+    "reason": "Deriva CMS",
+    "category": "Needs",
+    "subcategory": "Medical",
+    "review_reason": "Confirm if this is medical treatment or personal care"
+  },
+  {
+    "file": "april-2026-expenses.json",
+    "row": 49,
+    "date": "2026-04-14",
+    "amount": 620,
+    "reason": "Gift for friend's wedding",
+    "category": "Miscellaneous",
+    "subcategory": "One-time",
+    "review_reason": "Social/friend gift; confirm if you want Miscellaneous or Wants"
+  },
+  {
+    "file": "april-2026-expenses.json",
+    "row": 118,
+    "date": "2026-04-30",
+    "amount": 1000,
+    "reason": "Travel",
+    "category": "Miscellaneous",
+    "subcategory": "Travel",
+    "review_reason": "Travel purpose unclear; confirm if Needs, Family, or Miscellaneous"
+  },
+  {
+    "file": "april-2026-expenses.json",
+    "row": 119,
+    "date": "2026-04-30",
+    "amount": 300,
+    "reason": "Darshan to Shirdi temple",
+    "category": "Miscellaneous",
+    "subcategory": "Travel",
+    "review_reason": "Travel purpose unclear; confirm if Needs, Family, or Miscellaneous"
+  },
+  {
+    "file": "may-2026-expenses.json",
+    "row": 106,
+    "date": "2026-05-26",
+    "amount": 185000,
+    "reason": "Gayatri",
+    "category": "Miscellaneous",
+    "subcategory": "Recoverable",
+    "review_reason": "Recoverable/loan item; confirm whether to exclude from spending analysis"
+  },
+  {
+    "file": "may-2026-expenses.json",
+    "row": 122,
+    "date": "2026-05-30",
+    "amount": 340,
+    "reason": "Sweets for office colleagues",
+    "category": "Miscellaneous",
+    "subcategory": "One-time",
+    "review_reason": "Social/friend gift; confirm if you want Miscellaneous or Wants"
+  },
+  {
+    "file": "june-2026-expenses.json",
+    "row": 53,
+    "date": "2026-06-14",
+    "amount": 30,
+    "reason": "Flat search",
+    "category": "Needs",
+    "subcategory": "Unclear",
+    "review_reason": "No confident rule matched"
+  },
+  {
+    "file": "june-2026-expenses.json",
+    "row": 68,
+    "date": "2026-06-17",
+    "amount": 5600,
+    "reason": "Udhar",
+    "category": "Miscellaneous",
+    "subcategory": "Recoverable",
+    "review_reason": "Recoverable/loan item; confirm whether to exclude from spending analysis"
+  }
+]

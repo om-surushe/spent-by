@@ -1,0 +1,114 @@
+[
+  {
+    "amount": 500,
+    "reason": "Coffee & breakfast",
+    "date": "2026-06-01",
+    "category": "Wants",
+    "payment_method": "UPI",
+    "notes": ""
+  },
+  {
+    "amount": 3000,
+    "reason": "TV EMI",
+    "date": "2026-06-01",
+    "category": "Needs",
+    "payment_method": "Bank",
+    "notes": "Monthly recurring"
+  },
+  {
+    "amount": 11000,
+    "reason": "Housing EMI",
+    "date": "2026-06-01",
+    "category": "Needs",
+    "payment_method": "Bank",
+    "notes": "Monthly recurring"
+  },
+  {
+    "amount": 3000,
+    "reason": "Rekha Kaku support",
+    "date": "2026-06-01",
+    "category": "Needs",
+    "payment_method": "Bank",
+    "notes": "Monthly recurring"
+  },
+  {
+    "amount": 1200,
+    "reason": "Groceries",
+    "date": "2026-06-02",
+    "category": "Needs",
+    "payment_method": "Card",
+    "notes": "Weekly shopping"
+  },
+  {
+    "amount": 300,
+    "reason": "Lunch at restaurant",
+    "date": "2026-06-03",
+    "category": "Wants",
+    "payment_method": "Card",
+    "notes": "Your share: split 3 ways"
+  },
+  {
+    "amount": 5000,
+    "reason": "Gift",
+    "date": "2026-06-05",
+    "category": "Family",
+    "payment_method": "Card",
+    "notes": "Recurring gift"
+  },
+  {
+    "amount": 525,
+    "reason": "Dinner with friends",
+    "date": "2026-06-05",
+    "category": "Wants",
+    "payment_method": "Card",
+    "notes": "Your share: split 4 ways"
+  },
+  {
+    "amount": 18000,
+    "reason": "Parents health insurance",
+    "date": "2026-06-15",
+    "category": "Needs",
+    "payment_method": "Bank",
+    "notes": "Annual premium"
+  },
+  {
+    "amount": 60000,
+    "reason": "Bathroom fitting",
+    "date": "2026-05-10",
+    "category": "Miscellaneous",
+    "payment_method": "Bank",
+    "notes": "Home renovation"
+  },
+  {
+    "amount": 20000,
+    "reason": "Terrace work",
+    "date": "2026-05-15",
+    "category": "Miscellaneous",
+    "payment_method": "Bank",
+    "notes": "Contractor payment"
+  },
+  {
+    "amount": 800,
+    "reason": "Lunch",
+    "date": "2026-06-06",
+    "category": "Wants",
+    "payment_method": "UPI",
+    "notes": ""
+  },
+  {
+    "amount": 1500,
+    "reason": "Shopping",
+    "date": "2026-06-07",
+    "category": "Wants",
+    "payment_method": "Card",
+    "notes": "Clothes & accessories"
+  },
+  {
+    "amount": 300,
+    "reason": "Dinner",
+    "date": "2026-06-08",
+    "category": "Wants",
+    "payment_method": "Card",
+    "notes": "Your share: split 2 ways"
+  }
+]

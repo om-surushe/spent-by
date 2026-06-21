@@ -1,0 +1,311 @@
+{
+  "fiscal_year": {
+    "label": "FY 2026-27",
+    "start": "2026-04-01",
+    "end": "2027-03-31"
+  },
+  "income": {
+    "total_annual_salary": 1588300,
+    "tax_on_salary": 111275,
+    "professional_tax": 2496,
+    "annual_rental_income": 228000,
+    "monthly_reimbursement": 1000,
+    "net_annual_income": 1714529,
+    "net_monthly_income": 134544,
+    "primary": {
+      "type": "salary",
+      "frequency": "monthly",
+      "payment_timing": "last working day of each month"
+    },
+    "supplemental": [
+      {
+        "type": "rental_income",
+        "notes": "Partially offsets housing EMI"
+      }
+    ],
+    "one_time": [
+      {
+        "type": "annual_bonus",
+        "month": "2026-04",
+        "notes": "One-time annual amount in April"
+      }
+    ]
+  },
+  "decided_budget_values": {
+    "monthly_needs": {
+      "rent": 10200,
+      "food_maid": 2333,
+      "cleaning_maid": 500,
+      "groceries": 3000,
+      "transport": 2500,
+      "electricity": 600,
+      "wifi": 200,
+      "home_travel": 1250,
+      "home_sent": 3000,
+      "home_emi": 11000,
+      "total": 34583,
+      "ceiling": 38000
+    },
+    "annual_wants_budget": 120000,
+    "monthly_wants_budget": 10000,
+    "annual_fixed_home_expenses": 200000,
+    "annual_recharge": 20196,
+    "monthly_nagpur_travel": 1500,
+    "additional_monthly_total": 3000,
+    "total_need_want_fixed": 776000,
+    "remaining_annual_surplus": 938529
+  },
+  "fixed_monthly_obligations": [
+    {
+      "name": "TV EMI",
+      "amount": 3000,
+      "category": "Needs",
+      "frequency": "monthly"
+    },
+    {
+      "name": "Housing EMI",
+      "amount": 11000,
+      "category": "Needs",
+      "frequency": "monthly",
+      "notes": "Rental income partially offsets this EMI; gap paid separately"
+    },
+    {
+      "name": "Rekha Kaku support",
+      "amount": null,
+      "category": "Needs",
+      "frequency": "monthly",
+      "notes": "Recurring monthly support"
+    }
+  ],
+  "budget_system": {
+    "accounts": [
+      {
+        "name": "Needs Account",
+        "purpose": "Fixed and essential expenses",
+        "budget_rule": "Ceiling, not target",
+        "examples": [
+          "EMIs",
+          "utilities",
+          "groceries",
+          "insurance",
+          "Rekha Kaku support"
+        ]
+      },
+      {
+        "name": "Wants Account",
+        "purpose": "Personal discretionary spending on yourself only",
+        "budget_rule": "Ceiling, not target",
+        "funding": "Topped up monthly from salary",
+        "examples": [
+          "coffee",
+          "food",
+          "dining out",
+          "entertainment",
+          "movies",
+          "shopping",
+          "hobbies",
+          "personal care"
+        ]
+      },
+      {
+        "name": "Savings Account",
+        "purpose": "Save-first planned spending only",
+        "budget_rule": "Allocate on salary day; no reactive withdrawals",
+        "vehicles": [
+          "Liquid mutual funds",
+          "Gold ETF"
+        ],
+        "notes": "Education loan in moratorium; credit card balances already factored into net assets"
+      }
+    ]
+  },
+  "planned_one_time_expenses": [
+    {
+      "month": "2026-05",
+      "name": "Bathroom fitting",
+      "amount": 60000,
+      "category": "Miscellaneous"
+    },
+    {
+      "month": "2026-05",
+      "name": "Terrace work",
+      "amount": 20000,
+      "category": "Miscellaneous"
+    },
+    {
+      "month": "2026-06",
+      "name": "Parents health insurance",
+      "amount": 18000,
+      "category": "Family"
+    },
+    {
+      "month": "2027-02",
+      "name": "Self health insurance",
+      "amount": 12000,
+      "category": "Needs"
+    }
+  ],
+  "events_and_outings": [
+    {
+      "month": "2026-07",
+      "name": "Birthday",
+      "amount": 10000,
+      "category": "Family"
+    },
+    {
+      "month": "2026-08",
+      "name": "Family outing",
+      "amount": 20000,
+      "category": "Family"
+    },
+    {
+      "month": "2026-08",
+      "name": "Ganpati setup",
+      "amount": 20000,
+      "category": "Family"
+    },
+    {
+      "month": "2026-10",
+      "name": "Diwali",
+      "amount": 10000,
+      "category": "Family"
+    },
+    {
+      "month": "2026-12",
+      "name": "December outing",
+      "amount": 10000,
+      "category": "Family"
+    }
+  ],
+  "recurring_gifting": {
+    "amount_per_gift": 5000,
+    "annual_total": 20000,
+    "category": "Family",
+    "dates": [
+      "2027-01-24",
+      "2026-07-13",
+      "2026-09-01",
+      "2026-11-17"
+    ]
+  },
+  "planned_purchases": [],
+  "removed_purchase_ideas": [
+    "Soundbar",
+    "Oven"
+  ],
+  "frequent_split_companions": [
+    "Harsh",
+    "Arvi",
+    "Vaishnavi"
+  ],
+  "tracking_categories": [
+    {
+      "name": "Needs",
+      "definition": "Fixed and essential expenses",
+      "examples": [
+        "EMIs",
+        "utilities",
+        "groceries",
+        "insurance",
+        "family support"
+      ]
+    },
+    {
+      "name": "Wants",
+      "definition": "Personal discretionary spending on yourself only",
+      "examples": [
+        "coffee",
+        "food",
+        "entertainment",
+        "shopping",
+        "personal care"
+      ],
+      "rules": [
+        "Do not include family support here",
+        "Do not include gifting here"
+      ]
+    },
+    {
+      "name": "Family",
+      "definition": "Family support, gifting, and shared events",
+      "examples": [
+        "gifts",
+        "family outings",
+        "event setup",
+        "parents insurance"
+      ]
+    },
+    {
+      "name": "Miscellaneous",
+      "definition": "One-time, unclear, or unclassified items",
+      "examples": [
+        "bathroom fitting",
+        "terrace work",
+        "items to recategorize later"
+      ]
+    }
+  ],
+  "current_tracking_system": {
+    "tool": "Google Keep",
+    "friction_points": [
+      "Difficult to categorize transactions",
+      "Split reconciliation is cumbersome",
+      "Goal monitoring requires manual analysis",
+      "Lacks structured data for trends"
+    ]
+  },
+  "goals": {
+    "primary": "Fund a Master's degree program",
+    "secondary": "Regular monthly expense management within budget"
+  },
+  "principles": [
+    "Savings allocation happens on salary day",
+    "Withdrawals from savings are planned and intentional, never reactive",
+    "Never use savings for impulse spending",
+    "Budgets are ceilings, not targets",
+    "Underspending is good; overages trigger review",
+    "Never assume an expense is shared",
+    "Ask for explicit split context before flagging",
+    "Wants means personal spending only",
+    "Separate one-time expenses from baseline recurring spending"
+  ],
+  "preferred_workflows": {
+    "transaction_logging": {
+      "style": "Natural language",
+      "example": "amount + description + date"
+    },
+    "analysis_and_reporting": {
+      "preferred_surfaces": [
+        "Interactive HTML dashboards"
+      ],
+      "visual_preferences": [
+        "Chart.js",
+        "color-coded tables",
+        "progress bars"
+      ],
+      "avoid": [
+        "Unnecessary animations"
+      ]
+    },
+    "output_formats": {
+      "shared_expenses": "Splitwise-style: payer | per-person shares | reason | totals",
+      "personal_expenses": "Simple amount - reason lists"
+    }
+  },
+  "tools_and_resources": [
+    "Google Keep",
+    "Three separate bank accounts",
+    "finance_board.html",
+    "wants_bucket.html",
+    "Splitwise",
+    "Liquid mutual funds",
+    "Gold ETF"
+  ],
+  "life_context": {
+    "expense_sharing_frequency": "Regular",
+    "family_support_structure": "Recurring Rekha Kaku payment",
+    "education_status": "Planning Master's degree",
+    "home_situation": "Property owner with EMI and rental income offset",
+    "work_situation": "Regular monthly salary income"
+  }
+}
