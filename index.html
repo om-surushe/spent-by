@@ -429,6 +429,13 @@
             margin: 16px 0 20px;
         }
 
+        .card-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
         .mini-stat {
             background: #f9fbff;
             border: 1px solid #dce8f8;
@@ -588,7 +595,6 @@
             <button class="tab-btn active" onclick="switchTab('add')">Add Expense</button>
             <button class="tab-btn" onclick="switchTab('analysis')">Analysis</button>
             <button class="tab-btn" onclick="switchTab('review')">Review Cards</button>
-            <button class="tab-btn" onclick="switchTab('transactions')">All Expenses</button>
         </div>
         
         <!-- ADD EXPENSE -->
@@ -656,6 +662,40 @@
                     <button type="button" id="cancelEditBtn" class="danger" style="display: none;">Cancel Edit</button>
                 </form>
             </div>
+
+            <div class="card" id="expensesSection">
+                <h2>All Expenses</h2>
+                <div class="card-actions">
+                    <button onclick="exportJSON()">📥 Export as JSON</button>
+                    <button onclick="clearAll()" class="danger" style="margin-left: 0;">🗑️ Clear All</button>
+                </div>
+                <div id="exportFeedback"></div>
+                <div class="toolbar">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="transactionSearch">Search</label>
+                        <input type="text" id="transactionSearch" placeholder="Search reason or notes">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="transactionCategoryFilter">Category</label>
+                        <select id="transactionCategoryFilter">
+                            <option value="All">All categories</option>
+                            <option value="Needs">Needs</option>
+                            <option value="Wants">Wants</option>
+                            <option value="Family">Family</option>
+                            <option value="Miscellaneous">Miscellaneous</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="transactionSubcategoryFilter">Subcategory</label>
+                        <select id="transactionSubcategoryFilter"></select>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="transactionMonthFilter">Month</label>
+                        <select id="transactionMonthFilter"></select>
+                    </div>
+                </div>
+                <div id="transactionsContent"></div>
+            </div>
         </div>
         
         <!-- ANALYSIS -->
@@ -711,41 +751,6 @@
             </div>
         </div>
         
-        <!-- ALL EXPENSES -->
-        <div id="transactions" class="tab-content">
-            <div class="card">
-                <h2>All Expenses</h2>
-                <button onclick="goToQuickAdd()" style="margin-bottom: 15px;">Add Expense</button>
-                <button onclick="exportJSON()" style="margin-bottom: 15px;">📥 Export as JSON</button>
-                <button onclick="clearAll()" class="danger" style="margin-bottom: 15px;">🗑️ Clear All</button>
-                <div id="exportFeedback"></div>
-                <div class="toolbar">
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label for="transactionSearch">Search</label>
-                        <input type="text" id="transactionSearch" placeholder="Search reason or notes">
-                    </div>
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label for="transactionCategoryFilter">Category</label>
-                        <select id="transactionCategoryFilter">
-                            <option value="All">All categories</option>
-                            <option value="Needs">Needs</option>
-                            <option value="Wants">Wants</option>
-                            <option value="Family">Family</option>
-                            <option value="Miscellaneous">Miscellaneous</option>
-                        </select>
-                    </div>
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label for="transactionSubcategoryFilter">Subcategory</label>
-                        <select id="transactionSubcategoryFilter"></select>
-                    </div>
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label for="transactionMonthFilter">Month</label>
-                        <select id="transactionMonthFilter"></select>
-                    </div>
-                </div>
-                <div id="transactionsContent"></div>
-            </div>
-        </div>
     </div>
 
     <div id="importModal" class="modal-backdrop">
@@ -979,6 +984,8 @@
         
         // Tab switching
         function switchTab(tabName) {
+            if (tabName === 'transactions') tabName = 'add';
+
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(tabName).classList.add('active');
@@ -987,10 +994,15 @@
             
             if (tabName === 'analysis') renderAnalysis();
             if (tabName === 'review') renderReview();
-            if (tabName === 'transactions') renderTransactions();
+            if (tabName === 'add') renderTransactions();
         }
 
         function navigateTo(tabName) {
+            if (tabName === 'transactions') {
+                goToExpenses();
+                closeMenu();
+                return;
+            }
             switchTab(tabName);
             closeMenu();
         }
@@ -999,6 +1011,17 @@
             switchTab('add');
             resetForm();
             document.getElementById('amount').focus();
+        }
+
+        function goToExpenses() {
+            switchTab('add');
+            closeMenu();
+            requestAnimationFrame(function() {
+                document.getElementById('expensesSection').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            });
         }
 
         function toggleMenu() {
