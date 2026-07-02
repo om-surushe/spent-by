@@ -436,6 +436,27 @@
             margin-bottom: 15px;
         }
 
+        .inline-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .inline-actions h3 {
+            margin: 0;
+            font-size: 16px;
+            color: #222;
+        }
+
+        .prompt-box {
+            min-height: 280px;
+            background: #fbfcfe;
+            border: 1px solid #d9e4f2;
+        }
+
         .mini-stat {
             background: #f9fbff;
             border: 1px solid #dce8f8;
@@ -760,6 +781,14 @@
                 <button class="secondary" onclick="closeImportModal()">Close</button>
             </div>
             <p class="muted" style="margin-bottom: 15px;">Import a JSON file or paste a JSON array.</p>
+            <div class="card" style="padding: 16px; margin-bottom: 16px;">
+                <div class="inline-actions">
+                    <h3>AI Import Prompt</h3>
+                    <button type="button" class="secondary" onclick="copyImportPrompt()">Copy Prompt</button>
+                </div>
+                <p class="muted" style="margin-bottom: 12px;">Copy this into any AI tool. It stays in sync with the app's current categories and subcategories.</p>
+                <textarea id="aiImportPrompt" class="prompt-box" readonly></textarea>
+            </div>
             <div class="form-group">
                 <label for="jsonFileInput">JSON file</label>
                 <input type="file" id="jsonFileInput" accept=".json,application/json">
@@ -829,12 +858,20 @@
     
     <script>
         const CATEGORIES = ['Needs', 'Wants', 'Family', 'Miscellaneous'];
+        const CATEGORY_DESCRIPTIONS = {
+            Needs: 'essentials, bills, recurring obligations',
+            Wants: 'personal discretionary spending',
+            Family: 'gifting, support, family-related spend',
+            Miscellaneous: 'one-time or other non-routine spend'
+        };
         const SUBCATEGORIES = {
             Needs: ['Rent', 'Food Maid', 'Cleaning Maid', 'Groceries', 'Transport', 'Electricity', 'WiFi', 'Home Travel', 'Home Sent', 'Home EMI', 'Recharge', 'Medical', 'Education', 'Household', 'Other Needs'],
             Wants: ['Eating Out', 'Sports', 'Subscriptions', 'Entertainment', 'Shopping', 'Personal Care', 'Snacks', 'Other Wants'],
             Family: ['Family Support', 'Family Food', 'Family Recharge', 'Family Medical', 'Gifts', 'Events', 'Other Family'],
             Miscellaneous: ['Fixed Home Expense', 'Recoverable', 'One-time', 'Travel', 'Unclear']
         };
+        const PAYMENT_METHODS = ['Card', 'UPI', 'Cash', 'Bank', 'Other'];
+        const IMPORT_DATE_FORMAT = 'YYYY-MM-DD';
         const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
         const FINANCIAL_PROFILE = {
             fiscalYearLabel: 'FY 2026-27',
@@ -893,6 +930,7 @@
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('date').value = today;
             populateSubcategorySelect('subcategory', '');
+            renderImportPrompt();
             bindControls();
             await loadTransactions();
             populateAnalysisFilters();
@@ -1043,6 +1081,7 @@
 
         function openImportModal() {
             closeMenu();
+            renderImportPrompt();
             document.getElementById('importModal').classList.add('open');
         }
 
@@ -1062,6 +1101,76 @@
                 .concat(options.map(item => `<option value="${item}">${item}</option>`))
                 .join('');
             select.value = options.includes(selectedValue) ? selectedValue : '';
+        }
+
+        function buildImportPrompt() {
+            const categoryLines = CATEGORIES.map(function(category) {
+                const subcategories = (SUBCATEGORIES[category] || []).map(function(item) {
+                    return `"${item}"`;
+                }).join(', ');
+                return `- ${category}: ${CATEGORY_DESCRIPTIONS[category]}. Allowed subcategories: ${subcategories}.`;
+            }).join('\n');
+
+            return [
+                'Convert the source expense data into a valid JSON array for my finance tracker app.',
+                'Return only raw JSON. Do not include markdown, code fences, headings, explanations, or trailing text.',
+                '',
+                'Use this exact schema for every item:',
+                '{',
+                '  "amount": number,',
+                '  "reason": "string",',
+                `  "date": "${IMPORT_DATE_FORMAT}",`,
+                '  "category": "string",',
+                '  "subcategory": "string",',
+                '  "payment_method": "string",',
+                '  "notes": "string",',
+                '  "needs_review": boolean,',
+                '  "review_reason": "string"',
+                '}',
+                '',
+                'Rules:',
+                '- amount must be a positive number with no currency symbol.',
+                `- date must be in exact ${IMPORT_DATE_FORMAT} format.`,
+                '- reason must be short and clear.',
+                `- category must be exactly one of: ${CATEGORIES.map(category => `"${category}"`).join(', ')}.`,
+                '- subcategory must match the selected category from the allowed list below.',
+                `- payment_method must be exactly one of: ${PAYMENT_METHODS.map(method => `"${method}"`).join(', ')}.`,
+                '- notes should be an empty string if there is nothing useful to add.',
+                '- Log only my personal share of split expenses, not the full group amount.',
+                '- Set needs_review to true only when category or subcategory is unclear. Otherwise use false.',
+                '- Set review_reason to an empty string whenever needs_review is false.',
+                '',
+                'Allowed categories and subcategories:',
+                categoryLines,
+                '',
+                'Example output:',
+                '[',
+                '  {',
+                '    "amount": 500,',
+                '    "reason": "Lunch",',
+                '    "date": "2026-06-10",',
+                '    "category": "Wants",',
+                '    "subcategory": "Eating Out",',
+                '    "payment_method": "Card",',
+                '    "notes": "",',
+                '    "needs_review": false,',
+                '    "review_reason": ""',
+                '  }',
+                ']'
+            ].join('\n');
+        }
+
+        function renderImportPrompt() {
+            document.getElementById('aiImportPrompt').value = buildImportPrompt();
+        }
+
+        async function copyImportPrompt() {
+            try {
+                await navigator.clipboard.writeText(document.getElementById('aiImportPrompt').value);
+                showToast('Import prompt copied');
+            } catch (err) {
+                showToast('Could not copy prompt');
+            }
         }
 
         function getTransactionText(transaction) {
@@ -1250,7 +1359,12 @@
             if (!t.amount || t.amount <= 0) errors.push('amount must be positive');
             if (!t.reason) errors.push('reason required');
             if (!t.date) errors.push('date required');
+            if (t.date && !/^\d{4}-\d{2}-\d{2}$/.test(t.date)) errors.push(`date must use ${IMPORT_DATE_FORMAT}`);
             if (!CATEGORIES.includes(t.category)) errors.push('invalid category');
+            if (CATEGORIES.includes(t.category) && t.subcategory && !(SUBCATEGORIES[t.category] || []).includes(t.subcategory)) {
+                errors.push('invalid subcategory for category');
+            }
+            if (t.payment_method && !PAYMENT_METHODS.includes(t.payment_method)) errors.push('invalid payment method');
             return errors;
         }
 
