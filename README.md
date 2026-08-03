@@ -1,203 +1,83 @@
-# Finance Tracker
+# TransactionsApp
 
-A simple, offline personal expense tracker. Log transactions manually or upload JSON, get instant category breakdown and analysis.
+Private personal-finance tracker that works in two modes:
+
+- open `index.html` directly for browser-local storage;
+- run the Node 22 server for SQLite persistence, login protection, and JSON APIs.
+
+The repository contains only sanitized sample data. Real exports, financial profiles, review queues, SQLite files, and credentials must stay outside Git.
 
 ## Features
 
-- **Manual entry** – Add expenses one at a time
-- **Bulk upload** – Paste JSON array for batch processing
-- **Category tracking** – Needs, Wants, Family, Miscellaneous
-- **Live analysis** – See spending by category in real-time
-- **Export** – Download all data as JSON for backup
-- **Offline-first** – All processing in browser; no backend needed
-- **No dependencies** – Pure HTML/CSS/JS; runs anywhere
-- **Simple** – No split tracking complexity, just log your personal share
+- manual transaction entry and bulk JSON import;
+- category and subcategory summaries;
+- review flags for unclear transactions;
+- JSON export for private backups;
+- localStorage when opened directly;
+- SQLite persistence when served by Node.
 
-## Quick Start
+## Local use
 
-1. Open `index.html` in any modern browser
-2. Add expenses manually OR paste JSON from `sample-data.json`
-3. View analysis & export your data
-
-## Run as Hosted App with Database
-
-This project can also run as a small Node app with a SQLite database.
+Requires Node.js 22.5 or newer for `node:sqlite`.
 
 ```bash
 npm start
 ```
 
-Then open:
+Open `http://localhost:3000`. Local development allows authentication to be omitted. To test login locally:
+
+```bash
+cp .env.example .env
+set -a; . ./.env; set +a
+npm start
+```
+
+You can also open `index.html` directly without the server. That mode stores data only in the current browser profile.
+
+## Production requirements
+
+Production fails closed unless all three values are configured:
 
 ```text
-http://localhost:3000
+AUTH_USERNAME
+AUTH_PASSWORD
+SESSION_SECRET
 ```
 
-When opened through `http://localhost:3000`, transactions are saved to:
+Use a long random session secret and store all values outside Git. The Docker image sets `NODE_ENV=production`, so incomplete authentication prevents startup rather than exposing financial data.
+
+SQLite data defaults to `data/finance-tracker.sqlite`. Use persistent storage for `data/`, and back it up separately.
+
+## Data import
+
+Import a JSON array following [`data-format.md`](data-format.md). [`sample-data.json`](sample-data.json) is the only tracked fixture.
+
+Real data files are ignored, including:
 
 ```text
-data/finance-tracker.sqlite
+*-expenses.json
+financial-profile-*.json
+review-queue.json
 ```
 
-When opened directly as `index.html`, the app still uses browser localStorage.
+Export private data regularly and store it in a location with appropriate filesystem permissions and backups.
 
-### Login
-
-Set these environment variables to require login:
+## Validation
 
 ```bash
-AUTH_USERNAME=your-username
-AUTH_PASSWORD=change-this-password
-SESSION_SECRET=generate-a-long-random-secret
+npm run check
 ```
 
-If these are not set, auth is disabled for local development.
+This checks server syntax, authentication behavior, and the sample JSON fixture without installing dependencies.
 
-### Deploy Notes
+## Deployment
 
-- Host on a Node server such as Render, Railway, Fly.io, or a VPS.
-- Use persistent disk storage for the `data/` folder.
-- Set `PORT` if your host requires it.
-- Optional: set `DATABASE_PATH` to control where the SQLite file is stored.
-- Do not commit `.env.production`; keep it only on the server.
+The GitHub Actions deployment workflow copies application code and sanitized fixtures to the configured private VM. It does not upload personal financial exports. The deployment script removes stale tracked-export filenames before rebuilding the container while preserving the SQLite volume.
 
-## VM Deployment
+Required GitHub Actions secrets:
 
-This repo includes Docker Compose and a GitHub Actions deploy workflow.
+- `SSH_HOST`
+- `SSH_USER`
+- `SSH_PRIVATE_KEY`
 
-The production app is currently served at `https://finance.usechapter.club`.
-
-On the VM:
-
-```bash
-cd /home/ubuntu/finance-tracker
-cp .env.example .env.production
-nano .env.production
-sudo docker compose up -d --build
-```
-
-GitHub repo secrets needed:
-
-- `SSH_HOST`: `80.225.237.216`
-- `SSH_USER`: `ubuntu`
-- `SSH_PRIVATE_KEY`: private key that can SSH into the VM
-
-On every push to `main`, GitHub Actions uploads the app files over SSH, then runs:
-
-```bash
-/home/ubuntu/finance-tracker/scripts/deploy.sh
-```
-
-## Data Format
-
-Simple transaction structure:
-
-```json
-{
-  "amount": 500,
-  "reason": "Lunch",
-  "date": "2026-06-10",
-  "category": "Wants",
-  "subcategory": "Eating Out",
-  "payment_method": "Card",
-  "notes": "",
-  "needs_review": false,
-  "review_reason": ""
-}
-```
-
-### Fields
-
-- `amount` (required) – Positive number in ₹
-- `reason` (required) – What you spent on
-- `date` (required) – YYYY-MM-DD format
-- `category` (required) – One of: Needs, Wants, Family, Miscellaneous
-- `subcategory` (optional) – Specific budget bucket inside the category
-- `payment_method` (optional) – Card, UPI, Cash, Bank, Other
-- `notes` (optional) – Context (e.g., "your share from split")
-- `needs_review` (optional) – Use true for unclear transactions
-- `review_reason` (optional) – Why the transaction needs review
-
-See `data-format.md` for full details & examples.
-
-## How to Use
-
-### Add Manually
-1. Fill Amount, Reason, Date, Category
-2. Click "Add Expense"
-3. Data saves automatically to browser
-
-### Bulk Upload
-1. Paste JSON array into upload box
-2. Review any validation errors
-3. Click "Upload"
-
-### View Analysis
-- See total spending by category
-- Filter by category
-- View all transactions with dates
-
-### Export
-- Click "Export as JSON" to download
-- Use for backup or external analysis
-
-## Project Files
-
-```
-finance-tracker/
-├── README.md           (this file)
-├── index.html          (the complete app)
-├── data-format.md      (transaction format reference)
-└── sample-data.json    (test data)
-```
-
-## Storage
-
-- **Local Storage** – Data persists in your browser
-- **No cloud** – Everything stays on your device
-- **Export regularly** – Use export function to back up
-
-## Browser Support
-
-Works in all modern browsers:
-- Chrome/Chromium 90+
-- Firefox 88+
-- Safari 14+
-- Edge 90+
-
-## GitHub Setup
-
-1. Create repo: `github.com/new`
-2. Name it `finance-tracker`
-3. Clone locally: `git clone <your-repo-url>`
-4. Copy these 4 files into the folder
-5. Push:
-   ```bash
-   git add .
-   git commit -m "Initial commit: finance tracker"
-   git push
-   ```
-
-## Using from GitHub
-
-- Share the repo link with anyone
-- Open `index.html` directly in browser (works with GitHub pages too)
-- All data stays local; export to back up to Git
-
-## Notes
-
-- **For shared expenses:** Log only your personal share, add context in notes
-  - Example: ₹900 split 3 ways = log ₹300 with note "Your share: split 3"
-- **Recurring expenses:** Log each month or add notes to track
-- **One-time expenses:** Use Miscellaneous category
-
-## License
-
-Public domain – use however you want.
-
----
-
-**Next steps:**
-1. Open `index.html` in browser
-2. Try the sample data
-3. Start tracking your expenses
+Keep the repository private. No license has been selected.

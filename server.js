@@ -3,15 +3,18 @@ import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import { extname, join, resolve } from 'node:path';
 import { createServer } from 'node:http';
 import { DatabaseSync } from 'node:sqlite';
+import { getAuthConfig } from './auth-config.js';
 
 const PORT = Number(process.env.PORT || 3000);
 const ROOT = process.cwd();
 const DATA_DIR = process.env.DATA_DIR || join(ROOT, 'data');
 const DB_PATH = process.env.DATABASE_PATH || join(DATA_DIR, 'finance-tracker.sqlite');
-const AUTH_USERNAME = process.env.AUTH_USERNAME || '';
-const AUTH_PASSWORD = process.env.AUTH_PASSWORD || '';
-const SESSION_SECRET = process.env.SESSION_SECRET || '';
-const AUTH_ENABLED = Boolean(AUTH_USERNAME && AUTH_PASSWORD && SESSION_SECRET);
+const {
+  username: AUTH_USERNAME,
+  password: AUTH_PASSWORD,
+  sessionSecret: SESSION_SECRET,
+  enabled: AUTH_ENABLED
+} = getAuthConfig(process.env);
 const SESSION_COOKIE = 'finance_session';
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 14;
 
