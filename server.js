@@ -1,4 +1,4 @@
-import { createReadStream, existsSync, mkdirSync } from 'node:fs';
+import { copyFileSync, createReadStream, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import { extname, join, resolve } from 'node:path';
 import { createServer } from 'node:http';
@@ -8,14 +8,18 @@ const PORT = Number(process.env.PORT || 3000);
 const ROOT = process.cwd();
 const DATA_DIR = process.env.DATA_DIR || join(ROOT, 'data');
 const DB_PATH = process.env.DATABASE_PATH || join(DATA_DIR, 'finance-tracker.sqlite');
+const BACKUP_DIR = process.env.BACKUP_DIR || join(DATA_DIR, 'backups');
+const BACKUP_RETENTION_DAYS = Math.max(1, Number(process.env.BACKUP_RETENTION_DAYS || 7));
 const AUTH_USERNAME = process.env.AUTH_USERNAME || '';
 const AUTH_PASSWORD = process.env.AUTH_PASSWORD || '';
 const SESSION_SECRET = process.env.SESSION_SECRET || '';
 const AUTH_ENABLED = Boolean(AUTH_USERNAME && AUTH_PASSWORD && SESSION_SECRET);
 const SESSION_COOKIE = 'finance_session';
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 14;
+const STOP_TOKEN = process.env.STOP_TOKEN || '';
 
 if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true });
+if (!existsSync(BACKUP_DIR)) mkdirSync(BACKUP_DIR, { recursive: true });
 
 const db = new DatabaseSync(DB_PATH);
 db.exec(`
@@ -171,7 +175,76 @@ function getTransactions() {
   }));
 }
 
-function replaceTransactions(transactions) {
+function pruneBackups(now = Date.now()) {
+  const cutoff = now - BACKUP_RETENTION_DAYS * 24 * 60 * 60 * 1000;
+  for (const name of readdirSync(BACKUP_DIR)) {
+    const filePath = join(BACKUP_DIR, name);
+    const stats = statSync(filePath);
+    if (stats.isFile() && stats.mtimeMs < cutoff) rmSync(filePath);
+  }
+}
+
+function createBackup(reason, transactions) {
+  const createdAt = new Date().toISOString();
+  const stamp = createdAt.replace(/[:.]/g, '-');
+  const jsonPath = join(BACKUP_DIR, `transactions-${stamp}.json`);
+  const sqlitePath = join(BACKUP_DIR, `finance-tracker-${stamp}.sqlite`);
+
+  writeFileSync(jsonPath, JSON.stringify({ createdAt, reason, count: transactions.length, transactions }, null, 2));
+  copyFileSync(DB_PATH, sqlitePath);
+  pruneBackups();
+
+  return {
+    createdAt,
+    file: jsonPath.split('/').pop(),
+    jsonPath,
+    sqlitePath,
+    retentionDays: BACKUP_RETENTION_DAYS
+  };
+}
+
+function listBackups() {
+  pruneBackups();
+
+  return readdirSync(BACKUP_DIR)
+    .filter(name => name.startsWith('transactions-') && name.endsWith('.json'))
+    .map(name => {
+      const filePath = join(BACKUP_DIR, name);
+      const stats = statSync(filePath);
+      let parsed = {};
+
+      try {
+        parsed = JSON.parse(readFileSync(filePath, 'utf8'));
+      } catch {}
+
+      const transactions = Array.isArray(parsed) ? parsed : Array.isArray(parsed.transactions) ? parsed.transactions : [];
+
+      return {
+        file: name,
+        createdAt: parsed.createdAt || new Date(stats.mtimeMs).toISOString(),
+        reason: parsed.reason || 'backup',
+        count: Number.isFinite(parsed.count) ? parsed.count : transactions.length,
+        size: stats.size
+      };
+    })
+    .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+}
+
+function readBackupTransactions(file) {
+  if (!file || file !== file.split('/').pop() || !file.endsWith('.json')) {
+    throw new Error('Invalid backup file');
+  }
+
+  const filePath = join(BACKUP_DIR, file);
+  if (!existsSync(filePath)) throw new Error('Backup not found');
+
+  const parsed = JSON.parse(readFileSync(filePath, 'utf8'));
+  const transactions = Array.isArray(parsed) ? parsed : parsed.transactions;
+  if (!Array.isArray(transactions)) throw new Error('Backup is invalid');
+  return transactions;
+}
+
+function replaceTransactions(transactions, backupReason = 'transactions-put') {
   const insert = db.prepare(`
     INSERT INTO transactions (
       amount, reason, date, category, subcategory, payment_method, notes, needs_review, review_reason
@@ -199,6 +272,8 @@ function replaceTransactions(transactions) {
     db.exec('ROLLBACK');
     throw err;
   }
+
+  return createBackup(backupReason, getTransactions());
 }
 
 function serveStatic(req, res) {
@@ -276,6 +351,11 @@ const server = createServer(async (req, res) => {
       return;
     }
 
+    if (req.url === '/api/backups' && req.method === 'GET') {
+      sendJson(res, 200, listBackups());
+      return;
+    }
+
     if (req.url === '/api/transactions' && req.method === 'PUT') {
       const body = await readBody(req);
       const transactions = JSON.parse(body || '[]');
@@ -283,8 +363,35 @@ const server = createServer(async (req, res) => {
         sendJson(res, 400, { error: 'Expected a JSON array' });
         return;
       }
-      replaceTransactions(transactions);
-      sendJson(res, 200, { ok: true, count: transactions.length });
+      const backup = replaceTransactions(transactions);
+      sendJson(res, 200, { ok: true, count: transactions.length, backup });
+      return;
+    }
+
+    if (req.url === '/api/backups/restore' && req.method === 'POST') {
+      const body = JSON.parse((await readBody(req)) || '{}');
+      const file = String(body.file || '');
+      const restoredTransactions = readBackupTransactions(file);
+      const previousBackup = createBackup(`pre-restore:${file}`, getTransactions());
+      const backup = replaceTransactions(restoredTransactions, `restore:${file}`);
+      sendJson(res, 200, { ok: true, restoredFrom: file, count: restoredTransactions.length, previousBackup, backup });
+      return;
+    }
+
+    if (req.url === '/api/server/stop' && req.method === 'POST') {
+      const authorized = isAuthenticated(req) || (STOP_TOKEN && req.headers['x-stop-token'] === STOP_TOKEN);
+      if (!authorized) {
+        sendJson(res, 403, { error: 'Forbidden' });
+        return;
+      }
+
+      sendJson(res, 200, { ok: true, stopping: true });
+      setTimeout(() => {
+        server.close(() => {
+          db.close();
+          process.exit(0);
+        });
+      }, 100);
       return;
     }
 
