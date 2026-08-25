@@ -1,0 +1,10 @@
+{
+  "name": "Finance Vault Preview",
+  "short_name": "Vault Preview",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "description": "Offline-first encrypted finance tracker preview.",
+  "icons": []
+}

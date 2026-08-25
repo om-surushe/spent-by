@@ -1,0 +1,15 @@
+name = "finance-vault-worker"
+main = "worker/src/index.ts"
+compatibility_date = "2026-08-23"
+
+[[r2_buckets]]
+binding = "VAULTS"
+bucket_name = "finance-vault-private"
+preview_bucket_name = "finance-vault-private-preview"
+
+[vars]
+MAX_REQUEST_BYTES = "1048576"
+MAX_VAULT_BYTES = "5242880"
+MAX_RECENT_REQUEST_IDS = "100"
+ALLOW_INSECURE_DEV_CREATE = "1"
+CORS_ORIGIN = "http://localhost:4174"
