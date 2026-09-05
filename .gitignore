@@ -7,3 +7,6 @@ node_modules/
 ._*
 finance-login-credentials.txt
 github-actions-finance-deploy-key*
+*-expenses.json
+financial-profile-*.json
+review-queue.json

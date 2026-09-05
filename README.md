@@ -77,3 +77,9 @@ Issues and pull requests are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.
 ## License
 
 [MIT](LICENSE) © Om Surushe
+
+## Legacy app
+
+The repository root contains the original Node 22 and SQLite application. It supports authenticated server use, automatic backups, JSON import, and direct browser-local mode. Production requires `AUTH_USERNAME`, `AUTH_PASSWORD`, and `SESSION_SECRET`; it fails closed if they are missing. Real exports, database files, financial profiles, and credentials must remain outside Git.
+
+Keep this existing repository private because older Git history contains personal finance data. A history-clean repository is required before publishing the project as open source.

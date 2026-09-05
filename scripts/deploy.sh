@@ -5,6 +5,7 @@ APP_DIR="${APP_DIR:-/home/ubuntu/finance-tracker}"
 
 cd "$APP_DIR"
 mkdir -p data
+rm -f -- *-expenses.json financial-profile-*.json review-queue.json
 
 if [ ! -f .env.production ]; then
   echo "Missing $APP_DIR/.env.production" >&2
