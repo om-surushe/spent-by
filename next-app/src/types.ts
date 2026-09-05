@@ -13,6 +13,7 @@ export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 export type Subcategory = (typeof SUBCATEGORIES)[Category][number];
 
 export type TransactionData = {
+  kind?: 'transaction' | 'settings';
   amount: number;
   reason: string;
   date: string;
@@ -20,6 +21,16 @@ export type TransactionData = {
   subcategory: string;
   paymentMethod: PaymentMethod;
   notes: string;
+  needsReview?: boolean;
+  reviewReason?: string;
+  settings?: BudgetSettings;
+};
+
+export type BudgetSettings = {
+  Needs: number;
+  Wants: number;
+  Family: number;
+  Miscellaneous: number;
 };
 
 export type EncryptedRecord = {
