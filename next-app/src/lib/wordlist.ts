@@ -1,0 +1,23 @@
+export const WORDS = [
+  'amber','anchor','april','arrow','atlas','bamboo','beach','berry','bird','blaze','bloom','blue',
+  'brass','breeze','brook','cabin','cactus','candle','canyon','carbon','cedar','charm','citrus','cloud',
+  'cobalt','comet','coral','cotton','crane','creek','crystal','daisy','dawn','delta','desert','dove',
+  'drift','echo','elm','ember','falcon','fennel','fern','field','fire','flame','flora','fog',
+  'forest','frost','galaxy','garden','glade','glass','glow','grain','grape','grove','harbor','haze',
+  'hazel','heather','hill','honey','iris','ivory','jade','jasmine','juniper','kestrel','lagoon','lake',
+  'laurel','leaf','lemon','lilac','linen','lotus','lunar','maple','marble','meadow','mercury','mist',
+  'moon','moss','nectar','nova','oak','oasis','ocean','olive','onyx','opal','orchid','pearl',
+  'pebble','pepper','pine','plum','poppy','prairie','quartz','quill','rain','raven','reef','river',
+  'rose','saffron','sage','sand','satin','scarlet','shadow','shell','silver','sky','smoke','snow',
+  'solstice','sparrow','spice','spring','spruce','star','stone','storm','stream','sunset','surf','thistle',
+  'timber','topaz','trail','valley','velvet','violet','wave','willow','wind','winter','wood','zephyr',
+  'acorn','aster','aurora','basalt','bay','beacon','birch','bronze','brookside','canary','cliff','clover',
+  'copper','dahlia','elmwood','feather','finch','flint','harvest','heron','indigo','jet','kite','mango',
+  'melon','mint','nickel','north','petal','pond','ripple','robin','sierra','sleet','south','summit',
+  'teal','thunder','tulip','water','west','yarrow','zinc','alpine','ash','asteroid','barley','branch',
+  'brick','butter','caper','cherry','circle','coast','cove','crown','dune','estate','fable','fjord',
+  'ginger','glacier','harvests','island','kelp','linenwood','mistral','morning','nutmeg','pastel','peppermint','ridge',
+  'rosemary','sable','seabird','shore','silo','sprout','tide','vermilion','walnut','whisper','wildflower','wren',
+  'yard','yonder','zenith','basil','cinder','dandelion','fig','lyric','myrtle','sorrel','terra','umbra',
+  'vapor','wander','yolk','zebra'
+] as const;

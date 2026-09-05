@@ -607,6 +607,8 @@
                     <button onclick="navigateTo('review')">Review Cards</button>
                     <button onclick="navigateTo('transactions')">All Expenses</button>
                     <button onclick="openImportModal()">Import JSON</button>
+                    <button onclick="openImportModal()">Restore Backup</button>
+                    <button onclick="stopServer()" style="color: #b42318;">Stop App</button>
                 </div>
             </div>
         </header>
@@ -777,10 +779,19 @@
     <div id="importModal" class="modal-backdrop">
         <div class="modal-panel">
             <div class="modal-header">
-                <h2>Import JSON</h2>
+                <h2>Import JSON / Restore Backup</h2>
                 <button class="secondary" onclick="closeImportModal()">Close</button>
             </div>
-            <p class="muted" style="margin-bottom: 15px;">Import a JSON file or paste a JSON array.</p>
+            <p class="muted" style="margin-bottom: 15px;">Import a JSON file or restore one of the automatic backups.</p>
+            <div class="card" style="padding: 16px; margin-bottom: 16px;">
+                <div class="inline-actions">
+                    <h3>Backups</h3>
+                    <button type="button" class="secondary" onclick="loadBackups()">Refresh</button>
+                </div>
+                <p class="muted" style="margin-bottom: 12px;">Each save creates a backup. Restoring replaces current data and creates a fresh backup first.</p>
+                <div id="backupList"></div>
+                <div id="backupFeedback" style="margin-top: 12px;"></div>
+            </div>
             <div class="card" style="padding: 16px; margin-bottom: 16px;">
                 <div class="inline-actions">
                     <h3>AI Import Prompt</h3>
@@ -919,6 +930,7 @@
             ]
         };
         let transactions = [];
+        let backups = [];
         let editingIndex = null;
         let reviewIndex = 0;
         let reviewTouchStartX = null;
@@ -1079,10 +1091,101 @@
             }, 1800);
         }
 
-        function openImportModal() {
+        async function openImportModal() {
             closeMenu();
             renderImportPrompt();
             document.getElementById('importModal').classList.add('open');
+            await loadBackups();
+        }
+
+        async function loadBackups() {
+            const list = document.getElementById('backupList');
+            const feedback = document.getElementById('backupFeedback');
+            feedback.innerHTML = '';
+
+            if (!USE_API_STORAGE) {
+                list.innerHTML = '<p class="muted">Backups are available only in the desktop app.</p>';
+                return;
+            }
+
+            list.innerHTML = '<p class="muted">Loading backups...</p>';
+
+            try {
+                const response = await fetch('/api/backups');
+                if (!response.ok) throw new Error('Backup load failed');
+                backups = await response.json();
+                renderBackupList();
+            } catch (err) {
+                list.innerHTML = '<div class="alert error">Could not load backups.</div>';
+            }
+        }
+
+        function renderBackupList() {
+            const list = document.getElementById('backupList');
+
+            if (!backups.length) {
+                list.innerHTML = '<p class="muted">No backups yet. Add or edit a transaction first.</p>';
+                return;
+            }
+
+            list.innerHTML = backups.map(function(backup) {
+                const createdAt = new Date(backup.createdAt).toLocaleString();
+                return `
+                    <div class="card" style="padding: 12px; margin-bottom: 10px;">
+                        <div class="inline-actions" style="align-items: start; gap: 12px;">
+                            <div>
+                                <strong>${createdAt}</strong>
+                                <div class="muted">${backup.count} transactions • ${backup.reason}</div>
+                            </div>
+                            <button type="button" class="secondary" onclick="restoreBackup('${backup.file}')">Restore</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function restoreBackup(file) {
+            if (!confirm(`Restore backup ${file}? This will replace current transactions.`)) return;
+
+            const feedback = document.getElementById('backupFeedback');
+            feedback.innerHTML = '';
+
+            try {
+                const response = await fetch('/api/backups/restore', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ file })
+                });
+                if (!response.ok) throw new Error('Restore failed');
+                await loadTransactions();
+                populateAnalysisFilters();
+                populateReviewFilters();
+                populateTransactionSubcategoryFilter();
+                populateTransactionMonthFilter();
+                renderAnalysis();
+                renderTransactions();
+                renderReview();
+                feedback.innerHTML = `<div class="alert success">✓ Restored ${file}</div>`;
+                showToast('Backup restored');
+                await loadBackups();
+            } catch (err) {
+                feedback.innerHTML = '<div class="alert error">❌ Could not restore backup.</div>';
+            }
+        }
+
+        async function stopServer() {
+            closeMenu();
+            if (!confirm('Stop Finance Tracker on this Mac?')) return;
+            try {
+                const response = await fetch('/api/server/stop', { method: 'POST' });
+                if (!response.ok) throw new Error('Stop failed');
+                showToast('Stopping app...');
+                setTimeout(function() {
+                    document.body.innerHTML = '<div style="font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif; padding: 32px;"><h1>Finance Tracker stopped</h1><p>Use the desktop Start Finance Tracker button to run it again.</p></div>';
+                }, 400);
+            } catch (err) {
+                showToast('Could not stop app');
+            }
         }
 
         function closeImportModal() {

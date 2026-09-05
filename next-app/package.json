@@ -1,0 +1,29 @@
+{
+  "name": "finance-vault-next",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port 4174",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 0.0.0.0 --port 4174",
+    "worker:dev": "wrangler dev --local --port 8787",
+    "worker:types": "wrangler types --env preview",
+    "worker:check": "tsc --noEmit -p tsconfig.worker.json",
+    "worker:deploy:preview": "wrangler deploy --env preview --strict",
+    "worker:deploy:production": "wrangler deploy --env production --strict"
+  },
+  "dependencies": {
+    "dexie": "^4.0.11",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.6.2",
+    "vite": "^5.4.10",
+    "wrangler": "^4.32.0"
+  }
+}

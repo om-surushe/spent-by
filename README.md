@@ -1,83 +1,85 @@
-# TransactionsApp
+# Finance Vault
 
-Private personal-finance tracker that works in two modes:
+An open-source, offline-first personal finance tracker with zero-knowledge cloud sync.
 
-- open `index.html` directly for browser-local storage;
-- run the Node 22 server for SQLite persistence, login protection, and JSON APIs.
+Finance Vault encrypts transactions in the browser before they leave the device. The hosted backend stores ciphertext, coordinates multi-device merges, and never receives transaction details or the recovery phrase.
 
-The repository contains only sanitized sample data. Real exports, financial profiles, review queues, SQLite files, and credentials must stay outside Git.
+> **Status:** active prototype. The encrypted sync API is live in preview; the product UI and security hardening are still in progress. Do not use it as your only financial backup yet.
 
-## Features
+## Why it is different
 
-- manual transaction entry and bulk JSON import;
-- category and subcategory summaries;
-- review flags for unclear transactions;
-- JSON export for private backups;
-- localStorage when opened directly;
-- SQLite persistence when served by Node.
+- **Local-first:** reads and writes work from IndexedDB without a network connection.
+- **Zero-knowledge sync:** AES-GCM encryption happens in the browser.
+- **Passwordless recovery:** one recovery phrase derives separate encryption, identity, and request-authentication material.
+- **Conflict-safe:** atomic D1 batches merge records deterministically across devices.
+- **Resource-aware hosting:** per-vault storage, global signup capacity, payload, and request-rate limits protect the free service.
 
-## Local use
+## Architecture
 
-Requires Node.js 22.5 or newer for `node:sqlite`.
-
-```bash
-npm start
+```mermaid
+flowchart LR
+  UI[React PWA] --> DB[(Encrypted IndexedDB)]
+  UI -->|derive keys locally| Crypto[Web Crypto]
+  UI -->|signed ciphertext only| Worker[Cloudflare Worker]
+  Worker -->|atomic merge + quotas| D1[(Cloudflare D1)]
 ```
 
-Open `http://localhost:3000`. Local development allows authentication to be omitted. To test login locally:
+The backend uses a **local-first, zero-knowledge, last-write-wins record architecture**. Every record carries an update timestamp and device ID; the server uses both for deterministic conflict resolution. Signed requests include a timestamp and unique request ID for replay protection.
+
+See [the architecture document](docs/architecture.md) for the trust model, data flow, trade-offs, and quota design.
+
+## Hosted free tier
+
+- 1 MiB encrypted storage per free vault
+- 200 vaults per deployment
+- 1 MiB maximum sync request
+- IP and per-vault request-rate limits
+- production vault creation disabled until bot protection is connected
+
+An owner vault can be elevated separately before public registration opens, keeping personal capacity reserved.
+
+## Run locally
 
 ```bash
-cp .env.example .env
-set -a; . ./.env; set +a
-npm start
+cd next-app
+npm install
+npx wrangler d1 migrations apply finance-vault-preview --local
+npm run worker:dev
 ```
 
-You can also open `index.html` directly without the server. That mode stores data only in the current browser profile.
+In another terminal:
 
-## Production requirements
+```bash
+cd next-app
+npm run dev
+```
 
-Production fails closed unless all three values are configured:
+The original Node/SQLite prototype remains at the repository root while the new application is developed in `next-app/`.
+
+## Project layout
 
 ```text
-AUTH_USERNAME
-AUTH_PASSWORD
-SESSION_SECRET
+next-app/
+├── src/                 React PWA and browser cryptography
+├── worker/              Cloudflare sync API
+├── migrations/          Versioned D1 schema
+└── wrangler.jsonc       Local, preview, and production bindings
 ```
 
-Use a long random session secret and store all values outside Git. The Docker image sets `NODE_ENV=production`, so incomplete authentication prevents startup rather than exposing financial data.
+## Security
 
-SQLite data defaults to `data/finance-tracker.sqlite`. Use persistent storage for `data/`, and back it up separately.
+This project handles sensitive data and has not yet received an independent security audit. Please read [SECURITY.md](SECURITY.md) before testing with real data. Report vulnerabilities privately through GitHub Security Advisories.
 
-## Data import
+## Contributing
 
-Import a JSON array following [`data-format.md`](data-format.md). [`sample-data.json`](sample-data.json) is the only tracked fixture.
+Issues and pull requests are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md).
 
-Real data files are ignored, including:
+## License
 
-```text
-*-expenses.json
-financial-profile-*.json
-review-queue.json
-```
+[MIT](LICENSE) © Om Surushe
 
-Export private data regularly and store it in a location with appropriate filesystem permissions and backups.
+## Legacy app
 
-## Validation
+The repository root contains the original Node 22 and SQLite application. It supports authenticated server use, automatic backups, JSON import, and direct browser-local mode. Production requires `AUTH_USERNAME`, `AUTH_PASSWORD`, and `SESSION_SECRET`; it fails closed if they are missing. Real exports, database files, financial profiles, and credentials must remain outside Git.
 
-```bash
-npm run check
-```
-
-This checks server syntax, authentication behavior, and the sample JSON fixture without installing dependencies.
-
-## Deployment
-
-The GitHub Actions deployment workflow copies application code and sanitized fixtures to the configured private VM. It does not upload personal financial exports. The deployment script removes stale tracked-export filenames before rebuilding the container while preserving the SQLite volume.
-
-Required GitHub Actions secrets:
-
-- `SSH_HOST`
-- `SSH_USER`
-- `SSH_PRIVATE_KEY`
-
-Keep the repository private. No license has been selected.
+Keep this existing repository private because older Git history contains personal finance data. A history-clean repository is required before publishing the project as open source.
