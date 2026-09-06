@@ -1,5 +1,3 @@
-import type { PaymentMethod } from '../types';
-
 export type HomeSectionId = 'quick-add' | 'transactions' | 'monthly-budget' | 'review' | 'overview';
 
 export const HOME_SECTION_LABELS: Record<HomeSectionId, string> = {
@@ -23,24 +21,9 @@ type Props = {
   hidden: HomeSectionId[];
   onOrderChange: (next: HomeSectionId[]) => void;
   onHiddenChange: (next: HomeSectionId[]) => void;
-  sources: PaymentMethod[];
-  defaultSource: PaymentMethod;
-  onSourcesChange: (next: PaymentMethod[]) => void;
-  onDefaultSourceChange: (next: PaymentMethod) => void;
-  allSources: readonly PaymentMethod[];
 };
 
-export function HomeCustomizer({
-  order,
-  hidden,
-  onOrderChange,
-  onHiddenChange,
-  sources,
-  defaultSource,
-  onSourcesChange,
-  onDefaultSourceChange,
-  allSources
-}: Props) {
+export function HomeCustomizer({ order, hidden, onOrderChange, onHiddenChange }: Props) {
   function move(id: HomeSectionId, direction: -1 | 1) {
     const index = order.indexOf(id);
     const nextIndex = index + direction;
@@ -62,21 +45,12 @@ export function HomeCustomizer({
     onHiddenChange(hidden.includes(id) ? hidden.filter((item) => item !== id) : [...hidden, id]);
   }
 
-  function toggleSource(source: PaymentMethod) {
-    if (sources.includes(source)) {
-      if (sources.length === 1 || source === defaultSource) return;
-      onSourcesChange(sources.filter((item) => item !== source));
-      return;
-    }
-    onSourcesChange([...sources, source]);
-  }
-
   return (
     <details className="card home-customizer full-span">
       <summary>
         <span>
           <span className="eyebrow">Home</span>
-          <strong>Customize layout & sources</strong>
+          <strong>Customize layout</strong>
         </span>
         <span className="customize-hint">Presets, visibility, order</span>
       </summary>
@@ -133,39 +107,7 @@ export function HomeCustomizer({
               </div>
             ))}
           </div>
-          <p className="customizer-help">Drag with the handle on desktop. Use arrows on touch devices.</p>
-        </div>
-
-        <div>
-          <div className="section-head">
-            <div>
-              <p className="customizer-label">Sources</p>
-              <p className="subtle compact-copy">Choose which sources appear in Quick Add.</p>
-            </div>
-            <label className="default-source-select">
-              Default
-              <select value={defaultSource} onChange={(event) => onDefaultSourceChange(event.target.value as PaymentMethod)}>
-                {sources.map((source) => <option key={source} value={source}>{source === 'Card' ? 'Credit Card' : source}</option>)}
-              </select>
-            </label>
-          </div>
-          <div className="source-manager-grid">
-            {allSources.map((source) => {
-              const enabled = sources.includes(source);
-              const locked = enabled && (sources.length === 1 || source === defaultSource);
-              return (
-                <label className={`source-manager-chip ${enabled ? 'active' : ''}`} key={source}>
-                  <input
-                    type="checkbox"
-                    checked={enabled}
-                    disabled={locked}
-                    onChange={() => toggleSource(source)}
-                  />
-                  {source === 'Card' ? 'Credit Card' : source}
-                </label>
-              );
-            })}
-          </div>
+          <p className="customizer-help">Drag on desktop. Use the arrows on touch devices.</p>
         </div>
       </div>
     </details>
