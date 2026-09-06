@@ -4,7 +4,7 @@ import { createVaultMeta, decryptTransaction, deriveVault, encryptTransaction, g
 import { createRemoteVault, pullRemoteVault, pushRemoteVault } from './lib/sync';
 import { CATEGORIES, PAYMENT_METHODS, SUBCATEGORIES, type BudgetSettings, type Category, type EncryptedRecord, type PaymentMethod, type SyncStatus, type TransactionData, type TransactionRecord, type VaultMeta } from './types';
 import { QuickAddTransaction } from './components/QuickAddTransaction';
-import { HomeCustomizer, HOME_SECTION_LABELS, type HomeSectionId } from './components/HomeCustomizer';
+import { HomeCustomizer, type HomeSectionId } from './components/HomeCustomizer';
 
 const SESSION_KEY = 'finance-vault-preview-phrase';
 const DEFAULT_WORKER_URL = window.location.port === '4174' ? 'http://127.0.0.1:8787' : window.location.origin;
@@ -68,6 +68,7 @@ export default function App() {
     const saved = localStorage.getItem('finance-vault-default-source') as PaymentMethod | null;
     return saved && PAYMENT_METHODS.includes(saved) ? saved : 'UPI';
   });
+  const [autoSync, setAutoSync] = useState(() => localStorage.getItem('finance-vault-auto-sync') !== '0');
 
   useEffect(() => {
     void (async () => {
@@ -90,7 +91,7 @@ export default function App() {
 
     function markOnline() {
       setSyncStatus((current) => (current === 'offline' ? 'idle' : current));
-      if (phrase && vaultMeta) {
+      if (autoSync && phrase && vaultMeta) {
         void syncNow('Back online. Synced encrypted changes.');
       }
     }
@@ -101,7 +102,7 @@ export default function App() {
       window.removeEventListener('offline', markOffline);
       window.removeEventListener('online', markOnline);
     };
-  }, [phrase, vaultMeta, workerUrl]);
+  }, [autoSync, phrase, vaultMeta, workerUrl]);
 
   const activeSubcategories = useMemo(() => SUBCATEGORIES[form.category], [form.category]);
   const activeRecords = useMemo(() => records.filter((record) => !record.deletedAt && record.data.kind !== 'settings'), [records]);
@@ -140,6 +141,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('finance-vault-default-source', defaultSource);
   }, [defaultSource]);
+
+  useEffect(() => {
+    localStorage.setItem('finance-vault-auto-sync', autoSync ? '1' : '0');
+  }, [autoSync]);
 
   useEffect(() => {
     if (!sources.includes(form.paymentMethod)) {
@@ -246,7 +251,7 @@ export default function App() {
       setEditingId(null);
       setMessage(existing ? 'Transaction updated locally.' : 'Transaction saved locally.');
       setSyncStatus(navigator.onLine ? 'idle' : 'offline');
-      if (navigator.onLine) {
+      if (autoSync && navigator.onLine) {
         await syncNow(existing ? 'Transaction updated and synced.' : 'Transaction saved and synced.');
       }
     } catch (error) {
@@ -273,7 +278,7 @@ export default function App() {
       await reloadUnlockedRecords();
       setMessage('Deleted locally with tombstone.');
       setSyncStatus(navigator.onLine ? 'idle' : 'offline');
-      if (navigator.onLine) {
+      if (autoSync && navigator.onLine) {
         await syncNow('Deleted locally and synced encrypted changes.');
       }
     } catch (error) {
@@ -296,8 +301,9 @@ export default function App() {
       const { encryptionKey } = await deriveVault(phrase);
       await upsertEncryptedRecord(await encryptTransaction(record, encryptionKey));
       await reloadUnlockedRecords();
-      if (navigator.onLine) await syncNow(successMessage);
-      else setMessage(`${successMessage} It will sync when online.`);
+      if (autoSync && navigator.onLine) await syncNow(successMessage);
+      else if (!navigator.onLine) setMessage(`${successMessage} It will sync when online.`);
+      else setMessage(successMessage);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Update failed.');
     } finally {
@@ -385,7 +391,7 @@ export default function App() {
       await reloadUnlockedRecords();
       setImportText('');
       setShowImport(false);
-      if (navigator.onLine) await syncNow(`Imported and synced ${parsed.length} transactions.`);
+      if (autoSync && navigator.onLine) await syncNow(`Imported and synced ${parsed.length} transactions.`);
       else setMessage(`Imported ${parsed.length} transactions locally.`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Import failed.');
@@ -722,11 +728,30 @@ export default function App() {
 
           <details className="card full-span tools-card" style={{ order: 99 }}>
             <summary>
-              <span><span className="eyebrow">Tools</span><strong>Budget settings, backup & sync</strong></span>
-              <span className="customize-hint">Optional</span>
+              <span><span className="eyebrow">Settings</span><strong>Preferences, backup & sync</strong></span>
+              <span className="customize-hint">Keep it simple</span>
             </summary>
-            <div className="tools-grid">
-              <section>
+            <div className="settings-stack">
+              <section className="settings-panel">
+                <div className="setting-row">
+                  <div>
+                    <strong>Automatic sync</strong>
+                    <p className="subtle compact-copy">Sync after every change and whenever this device comes back online.</p>
+                  </div>
+                  <label className="switch">
+                    <input type="checkbox" checked={autoSync} onChange={(event) => setAutoSync(event.target.checked)} />
+                    <span aria-hidden="true" />
+                  </label>
+                </div>
+                <div className="sync-summary">
+                  <span className={`sync-pill sync-${syncStatus}`}>{syncStatus === 'ok' ? 'Synced' : syncStatus}</span>
+                  <span className="subtle">{lastSync}</span>
+                  <button className="button" disabled={busy || !navigator.onLine} onClick={() => void syncNow()}>Sync now</button>
+                </div>
+                <p className="subtle compact-copy">No interval setting: changes sync immediately. This keeps the behavior predictable.</p>
+              </section>
+
+              <section className="settings-panel">
                 <h2>Monthly targets</h2>
                 <form className="budget-grid" onSubmit={saveBudgets}>
                   {CATEGORIES.map((category) => <label key={category}>{category}<input type="number" min="0" value={budgetDraft[category] || ''} onChange={(event) => setBudgetDraft({ ...budgetDraft, [category]: Number(event.target.value) })} placeholder="0" /></label>)}
@@ -734,9 +759,9 @@ export default function App() {
                 </form>
               </section>
 
-              <section>
-                <h2>Local data</h2>
-                <p className="subtle">Transactions are encrypted on this device. Export whenever you want a portable copy.</p>
+              <section className="settings-panel">
+                <h2>Backup & privacy</h2>
+                <p className="subtle">Your transactions stay encrypted on this device. Export a copy whenever you want.</p>
                 <div className="actions">
                   <button className="button" type="button" onClick={exportReadableTransactions}>Export transactions</button>
                   <button className="button" type="button" onClick={() => void exportBackup()}>Encrypted backup</button>
@@ -744,15 +769,14 @@ export default function App() {
                 </div>
               </section>
 
-              <section>
-                <h2>Encrypted cloud sync</h2>
-                <p className="subtle">{lastSync}</p>
+              <details className="advanced-sync">
+                <summary>Advanced sync recovery</summary>
+                <p className="subtle">Only use these if sync is being repaired or this device is missing cloud data.</p>
                 <div className="actions">
                   <button className="button" disabled={busy} onClick={() => void createCloudVault()}>Create cloud vault</button>
-                  <button className="button" disabled={busy} onClick={() => void syncNow()}>Sync now</button>
                   <button className="button" disabled={busy} onClick={() => void pullCloud()}>Pull cloud</button>
                 </div>
-              </section>
+              </details>
             </div>
           </details>
         </main>
