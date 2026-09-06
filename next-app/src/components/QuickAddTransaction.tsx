@@ -120,104 +120,108 @@ export function QuickAddTransaction({
         <span className="pop-muted">Local first</span>
       </div>
 
-      <form onSubmit={onSubmit}>
-        <div className="quick-add-display" aria-live="polite">
-          <span className="expression">
-            {expression.replaceAll('*', '×').replaceAll('/', '÷') || 'Enter amount'}
-          </span>
-          <strong>{calculatedAmount === null ? '—' : `₹${formatAmount(calculatedAmount)}`}</strong>
+      <form className="quick-add-form" onSubmit={onSubmit}>
+        <div className="quick-add-info">
+          <div className="quick-add-display" aria-live="polite">
+            <span className="expression">
+              {expression.replaceAll('*', '×').replaceAll('/', '÷') || 'Enter amount'}
+            </span>
+            <strong>{calculatedAmount === null ? '—' : `₹${formatAmount(calculatedAmount)}`}</strong>
+          </div>
+
+          <label className="reason-field">
+            <span>Reason</span>
+            <input
+              value={form.reason}
+              onChange={(event) => setForm({ ...form, reason: event.target.value })}
+              placeholder="What did you spend on?"
+              required
+            />
+          </label>
+
+          <div className="source-block">
+            <div className="source-heading">
+              <span>Source</span>
+              <small>Choose where the money came from</small>
+            </div>
+            <div className="source-strip">
+              {sources.map((method) => (
+                <button
+                  className={`source-chip ${form.paymentMethod === method ? 'active' : ''}`}
+                  key={method}
+                  type="button"
+                  onClick={() => setForm({ ...form, paymentMethod: method })}
+                >
+                  {sourceLabel(method)}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <details className="transaction-details">
+            <summary>More details</summary>
+            <div className="details-grid">
+              <label>
+                Date
+                <input type="date" value={form.date} onChange={(event) => setForm({ ...form, date: event.target.value })} required />
+              </label>
+              <label>
+                Category
+                <select
+                  value={form.category}
+                  onChange={(event) => {
+                    const category = event.target.value as Category;
+                    setForm({ ...form, category, subcategory: subcategories[category]?.[0] ?? 'Other' });
+                  }}
+                >
+                  {categories.map((category) => <option key={category} value={category}>{category}</option>)}
+                </select>
+              </label>
+              <label>
+                Subcategory
+                <select value={form.subcategory} onChange={(event) => setForm({ ...form, subcategory: event.target.value })}>
+                  {(subcategories[form.category] ?? []).map((subcategory) => <option key={subcategory} value={subcategory}>{subcategory}</option>)}
+                </select>
+              </label>
+              <label className="full">
+                Notes
+                <textarea rows={2} value={form.notes} onChange={(event) => setForm({ ...form, notes: event.target.value })} />
+              </label>
+              <label className="review-toggle full">
+                <input
+                  type="checkbox"
+                  checked={Boolean(form.needsReview)}
+                  onChange={(event) => setForm({ ...form, needsReview: event.target.checked })}
+                />
+                Flag for review
+              </label>
+            </div>
+          </details>
+
+          <div className="quick-add-actions">
+            <button className="pop-button primary" disabled={busy || !form.reason.trim() || !(form.amount > 0)} type="submit">
+              {editingId ? 'Update transaction' : 'Save transaction'}
+            </button>
+            {editingId ? <button className="pop-button" type="button" onClick={onCancelEdit}>Cancel</button> : null}
+            <button className="pop-button quiet" type="button" onClick={onToggleImport}>Import JSON</button>
+          </div>
         </div>
 
-        <label className="reason-field">
-          <span>Reason</span>
-          <input
-            value={form.reason}
-            onChange={(event) => setForm({ ...form, reason: event.target.value })}
-            placeholder="What did you spend on?"
-            required
-          />
-        </label>
-
-        <div className="source-block">
-          <div className="source-heading">
-            <span>Source</span>
-            <small>Choose where the money came from</small>
-          </div>
-          <div className="source-strip">
-            {sources.map((method) => (
+        <div className="quick-add-calculator">
+          <div className="calculator-grid" aria-label="Calculator keypad">
+            {['7', '8', '9', '/', '4', '5', '6', '*', '1', '2', '3', '-', 'C', '0', '.', '+'].map((key) => (
               <button
-                className={`source-chip ${form.paymentMethod === method ? 'active' : ''}`}
-                key={method}
+                key={key}
                 type="button"
-                onClick={() => setForm({ ...form, paymentMethod: method })}
+                className={`calculator-key ${['+', '-', '*', '/'].includes(key) ? 'operator' : ''} ${key === 'C' ? 'clear' : ''}`}
+                onClick={() => press(key)}
               >
-                {sourceLabel(method)}
+                {key === '*' ? '×' : key === '/' ? '÷' : key === '-' ? '−' : key}
               </button>
             ))}
+            <button type="button" className="calculator-key wide" onClick={() => press('backspace')}>⌫</button>
+            <button type="button" className="calculator-key equals wide" onClick={() => press('=')}>=</button>
           </div>
-        </div>
-
-        <div className="calculator-grid" aria-label="Calculator keypad">
-          {['7', '8', '9', '/', '4', '5', '6', '*', '1', '2', '3', '-', 'C', '0', '.', '+'].map((key) => (
-            <button
-              key={key}
-              type="button"
-              className={`calculator-key ${['+', '-', '*', '/'].includes(key) ? 'operator' : ''} ${key === 'C' ? 'clear' : ''}`}
-              onClick={() => press(key)}
-            >
-              {key === '*' ? '×' : key === '/' ? '÷' : key === '-' ? '−' : key}
-            </button>
-          ))}
-          <button type="button" className="calculator-key wide" onClick={() => press('backspace')}>⌫</button>
-          <button type="button" className="calculator-key equals wide" onClick={() => press('=')}>=</button>
-        </div>
-
-        <details className="transaction-details">
-          <summary>More details</summary>
-          <div className="details-grid">
-            <label>
-              Date
-              <input type="date" value={form.date} onChange={(event) => setForm({ ...form, date: event.target.value })} required />
-            </label>
-            <label>
-              Category
-              <select
-                value={form.category}
-                onChange={(event) => {
-                  const category = event.target.value as Category;
-                  setForm({ ...form, category, subcategory: subcategories[category]?.[0] ?? 'Other' });
-                }}
-              >
-                {categories.map((category) => <option key={category} value={category}>{category}</option>)}
-              </select>
-            </label>
-            <label>
-              Subcategory
-              <select value={form.subcategory} onChange={(event) => setForm({ ...form, subcategory: event.target.value })}>
-                {(subcategories[form.category] ?? []).map((subcategory) => <option key={subcategory} value={subcategory}>{subcategory}</option>)}
-              </select>
-            </label>
-            <label className="full">
-              Notes
-              <textarea rows={2} value={form.notes} onChange={(event) => setForm({ ...form, notes: event.target.value })} />
-            </label>
-            <label className="review-toggle full">
-              <input
-                type="checkbox"
-                checked={Boolean(form.needsReview)}
-                onChange={(event) => setForm({ ...form, needsReview: event.target.checked })}
-              />
-              Flag for review
-            </label>
-          </div>
-        </details>
-
-        <div className="quick-add-actions">
-          <button className="pop-button primary" disabled={busy || !form.reason.trim() || !(form.amount > 0)} type="submit">
-            {editingId ? 'Update transaction' : 'Save transaction'}
-          </button>
-          {editingId ? <button className="pop-button" type="button" onClick={onCancelEdit}>Cancel</button> : null}
-          <button className="pop-button quiet" type="button" onClick={onToggleImport}>Import JSON</button>
         </div>
       </form>
     </section>
