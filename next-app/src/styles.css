@@ -745,8 +745,8 @@ label {
   }
 }
 
-/* Phone: compact two-line card, not a stretched table. */
-@media (max-width: 47.99rem) {
+/* Narrow ledger: compact two-line card, based on the component width. */
+@container (max-width: 47.99rem) {
   .filters {
     grid-template-columns: 1fr;
   }
