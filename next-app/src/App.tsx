@@ -4,6 +4,7 @@ import { createVaultMeta, decryptTransaction, deriveVault, encryptTransaction, g
 import { createRemoteVault, pullRemoteVault, pushRemoteVault } from './lib/sync';
 import { CATEGORIES, PAYMENT_METHODS, SUBCATEGORIES, type BudgetSettings, type Category, type EncryptedRecord, type PaymentMethod, type SyncStatus, type TransactionData, type TransactionRecord, type VaultMeta } from './types';
 import { QuickAddTransaction } from './components/QuickAddTransaction';
+import { HomeCustomizer, HOME_SECTION_LABELS, type HomeSectionId } from './components/HomeCustomizer';
 
 const SESSION_KEY = 'finance-vault-preview-phrase';
 const DEFAULT_WORKER_URL = window.location.port === '4174' ? 'http://127.0.0.1:8787' : window.location.origin;
@@ -23,6 +24,19 @@ const emptyForm: TransactionData = {
 };
 
 const emptyBudgets: BudgetSettings = { Needs: 0, Wants: 0, Family: 0, Miscellaneous: 0 };
+const DEFAULT_HOME_ORDER: HomeSectionId[] = ['quick-add', 'transactions', 'monthly-budget', 'review', 'overview'];
+const DEFAULT_SOURCES: PaymentMethod[] = [...PAYMENT_METHODS];
+
+function readLocalList<T extends string>(key: string, fallback: T[], allowed: readonly T[]) {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(key) ?? 'null') as unknown;
+    if (!Array.isArray(parsed)) return fallback;
+    const cleaned = parsed.filter((value): value is T => typeof value === 'string' && allowed.includes(value as T));
+    return cleaned.length ? Array.from(new Set(cleaned)) : fallback;
+  } catch {
+    return fallback;
+  }
+}
 
 function currency(amount: number) {
   return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
@@ -47,6 +61,13 @@ export default function App() {
   const [importText, setImportText] = useState('');
   const [showImport, setShowImport] = useState(false);
   const [budgetDraft, setBudgetDraft] = useState<BudgetSettings>(emptyBudgets);
+  const [homeOrder, setHomeOrder] = useState<HomeSectionId[]>(() => readLocalList('finance-vault-home-order', DEFAULT_HOME_ORDER, DEFAULT_HOME_ORDER));
+  const [hiddenSections, setHiddenSections] = useState<HomeSectionId[]>(() => readLocalList('finance-vault-home-hidden', [], DEFAULT_HOME_ORDER));
+  const [sources, setSources] = useState<PaymentMethod[]>(() => readLocalList('finance-vault-sources', DEFAULT_SOURCES, PAYMENT_METHODS));
+  const [defaultSource, setDefaultSource] = useState<PaymentMethod>(() => {
+    const saved = localStorage.getItem('finance-vault-default-source') as PaymentMethod | null;
+    return saved && PAYMENT_METHODS.includes(saved) ? saved : 'UPI';
+  });
 
   useEffect(() => {
     void (async () => {
@@ -91,13 +112,42 @@ export default function App() {
     const query = search.trim().toLowerCase();
     return activeRecords
       .filter((record) => month === 'All' || record.data.date.startsWith(month))
-      .filter((record) => !query || `${record.data.reason} ${record.data.notes} ${record.data.category} ${record.data.subcategory}`.toLowerCase().includes(query))
+      .filter((record) => !query || `${record.data.reason} ${record.data.notes} ${record.data.category} ${record.data.subcategory} ${record.data.paymentMethod}`.toLowerCase().includes(query))
       .sort((a, b) => `${b.data.date}|${b.updatedAt}`.localeCompare(`${a.data.date}|${a.updatedAt}`));
   }, [activeRecords, month, search]);
   const totalSpent = useMemo(() => activeRecords.reduce((sum, record) => sum + record.data.amount, 0), [activeRecords]);
   const categoryTotals = useMemo(() => Object.fromEntries(CATEGORIES.map((category) => [category, activeRecords.filter((record) => record.data.date.startsWith(today.slice(0, 7)) && record.data.category === category).reduce((sum, record) => sum + record.data.amount, 0)])) as Record<Category, number>, [activeRecords]);
 
   useEffect(() => { setBudgetDraft(budgets); }, [settingsRecord?.updatedAt]);
+
+  useEffect(() => {
+    localStorage.setItem('finance-vault-home-order', JSON.stringify(homeOrder));
+  }, [homeOrder]);
+
+  useEffect(() => {
+    localStorage.setItem('finance-vault-home-hidden', JSON.stringify(hiddenSections));
+  }, [hiddenSections]);
+
+  useEffect(() => {
+    localStorage.setItem('finance-vault-sources', JSON.stringify(sources));
+    if (!sources.includes(defaultSource)) {
+      const next = sources[0] ?? 'UPI';
+      setDefaultSource(next);
+      localStorage.setItem('finance-vault-default-source', next);
+    }
+  }, [sources, defaultSource]);
+
+  useEffect(() => {
+    localStorage.setItem('finance-vault-default-source', defaultSource);
+  }, [defaultSource]);
+
+  useEffect(() => {
+    if (!sources.includes(form.paymentMethod)) {
+      setForm((current) => ({ ...current, paymentMethod: defaultSource }));
+    }
+  }, [sources, defaultSource, form.paymentMethod]);
+
+  const sectionOrder = useMemo(() => Object.fromEntries(homeOrder.map((id, index) => [id, index + 1])) as Record<HomeSectionId, number>, [homeOrder]);
 
   async function loadRecords(unlockPhrase: string, meta: VaultMeta) {
     const { encryptionKey, vaultId } = await deriveVault(unlockPhrase);
@@ -192,7 +242,7 @@ export default function App() {
       };
       await upsertEncryptedRecord(await encryptTransaction(record, encryptionKey));
       await reloadUnlockedRecords();
-      setForm({ ...emptyForm, date: form.date, category: form.category, subcategory: SUBCATEGORIES[form.category][0] });
+      setForm({ ...emptyForm, date: form.date, category: form.category, subcategory: SUBCATEGORIES[form.category][0], paymentMethod: defaultSource });
       setEditingId(null);
       setMessage(existing ? 'Transaction updated locally.' : 'Transaction saved locally.');
       setSyncStatus(navigator.onLine ? 'idle' : 'offline');
@@ -518,7 +568,14 @@ export default function App() {
       ) : !phrase ? (
         <section className="card narrow">
           <h2>Unlock vault</h2>
-          <p className="subtle">Local data exists for vault <code>{vaultMeta.vaultId.slice(0, 12)}…</code>.</p>
+          <p className="subtle">Local vault found on this device.</p>
+          <div className="vault-id-block">
+            <span className="vault-id-label">Vault ID</span>
+            <div className="vault-id-row">
+              <code className="vault-id-value">{vaultMeta.vaultId}</code>
+              <button className="button" type="button" onClick={() => void navigator.clipboard.writeText(vaultMeta.vaultId)}>Copy</button>
+            </div>
+          </div>
           <textarea rows={5} value={draftPhrase} onChange={(event) => setDraftPhrase(event.target.value)} placeholder="paste your 24 words" />
           <button className="button primary" disabled={!draftPhrase.trim() || busy} onClick={() => void unlock(draftPhrase)}>Unlock</button>
         </section>
@@ -532,9 +589,10 @@ export default function App() {
             onSubmit={submitTransaction}
             onCancelEdit={() => {
               setEditingId(null);
-              setForm(emptyForm);
+              setForm({ ...emptyForm, paymentMethod: defaultSource });
             }}
             onToggleImport={() => setShowImport((value) => !value)}
+            sources={sources}
           />
 
           {showImport ? (
