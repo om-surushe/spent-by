@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { CATEGORIES, PAYMENT_METHODS, SUBCATEGORIES, type Category, type PaymentMethod, type TransactionData } from '../types';
 
 type Props = {
@@ -63,6 +63,14 @@ export function QuickAddTransaction({
   onToggleImport
 }: Props) {
   const [expression, setExpression] = useState(form.amount ? String(form.amount) : '');
+
+  useEffect(() => {
+    setExpression(form.amount ? String(form.amount) : '');
+  }, [editingId]);
+
+  useEffect(() => {
+    if (!form.amount && !form.reason && !editingId) setExpression('');
+  }, [form.amount, form.reason, editingId]);
 
   const calculatedAmount = useMemo(() => {
     if (!expression) return 0;
@@ -204,7 +212,7 @@ export function QuickAddTransaction({
         </details>
 
         <div className="quick-add-actions">
-          <button className="pop-button primary" disabled={busy || !form.reason || !form.amount} type="submit">
+          <button className="pop-button primary" disabled={busy || !form.reason.trim() || !(form.amount > 0)} type="submit">
             {editingId ? 'Update transaction' : 'Save transaction'}
           </button>
           {editingId ? <button className="pop-button" type="button" onClick={onCancelEdit}>Cancel</button> : null}
