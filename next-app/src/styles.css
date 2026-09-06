@@ -2121,3 +2121,154 @@ label {
     padding-right: 18px;
   }
 }
+
+
+/* Hard overflow containment: keep the document itself fixed to the viewport.
+   Horizontal movement is allowed only inside intentional rails. */
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.app-shell,
+.main-grid,
+.home-customizer,
+.home-slot,
+.card,
+.pop-card,
+.tools-card,
+.settings-panel,
+.customizer-body,
+.section-order-list,
+.section-order-row {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.home-customizer,
+.card,
+.pop-card,
+.tools-card {
+  overflow: hidden;
+}
+
+.preset-strip,
+.source-strip,
+.month-filter-rail,
+.category-grid,
+.review-grid,
+.overview-grid {
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* Phone-specific customizer layout: no child is allowed to size the parent wider. */
+@media (max-width: 599px) {
+  .home-customizer {
+    width: 100%;
+  }
+
+  .home-customizer > summary {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .customizer-body {
+    width: 100%;
+  }
+
+  .customizer-body > div {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .preset-strip {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .section-order-list {
+    width: 100%;
+  }
+
+  .section-order-row {
+    width: 100%;
+    grid-template-columns: 42px minmax(0, 1fr) 44px;
+    grid-template-areas:
+      "handle name arrows"
+      ". visibility arrows";
+    padding: 10px;
+    overflow: hidden;
+  }
+
+  .drag-handle {
+    grid-area: handle;
+    width: 38px;
+    height: 38px;
+  }
+
+  .section-order-name {
+    grid-area: name;
+    overflow-wrap: anywhere;
+  }
+
+  .visibility-toggle {
+    grid-area: visibility;
+    min-width: 0;
+    justify-self: start;
+  }
+
+  .reorder-fallback {
+    grid-area: arrows;
+    width: 44px;
+    min-width: 44px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+    align-self: center;
+  }
+
+  .reorder-fallback .icon-button {
+    width: 40px;
+    height: 40px;
+  }
+
+  .source-manager-grid {
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .source-manager-chip {
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .source-manager-chip {
+    white-space: normal;
+  }
+}
+
+@media (max-width: 360px) {
+  .section-order-row {
+    grid-template-columns: 38px minmax(0, 1fr);
+    grid-template-areas:
+      "handle name"
+      ". visibility"
+      ". arrows";
+  }
+
+  .reorder-fallback {
+    width: auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: row;
+  }
+
+  .source-manager-grid {
+    grid-template-columns: 1fr;
+  }
+}
