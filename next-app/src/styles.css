@@ -185,3 +185,257 @@ textarea { resize: vertical; }
   .ledger-row { flex-direction: column; }
   .ledger-side { justify-items: start; }
 }
+
+
+/* Pop Finance Tier 1 */
+:root {
+  color-scheme: light;
+  font-family: ui-rounded, "SF Pro Rounded", Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f7f1e7;
+  color: #251a12;
+}
+
+body {
+  background: #f7f1e7;
+  color: #251a12;
+}
+
+.app-shell {
+  max-width: 430px;
+  padding: 18px 14px 110px;
+}
+
+.hero, .card, .banner, .pop-card {
+  background: #fffdf8;
+  border: 3px solid #251a12;
+  border-radius: 24px;
+  backdrop-filter: none;
+  box-shadow: 4px 4px 0 #251a12;
+}
+
+.hero {
+  grid-template-columns: 1fr;
+  background: #f3cc63;
+  border-radius: 30px;
+}
+
+.eyebrow, .pop-eyebrow {
+  color: #251a12;
+  margin: 0 0 6px;
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.subtle, .subtle-list li, .ledger-row p, .pop-muted {
+  color: rgba(37, 26, 18, 0.58);
+}
+
+.button, .pop-button {
+  border: 2px solid #251a12;
+  background: #fff;
+  color: #251a12;
+  border-radius: 14px;
+  padding: 10px 14px;
+  font-weight: 800;
+  box-shadow: 2px 2px 0 #251a12;
+}
+
+.button.primary, .pop-button.primary {
+  background: #f3cc63;
+  border-color: #251a12;
+  color: #251a12;
+}
+
+.pop-button.quiet {
+  background: #b7ddf3;
+}
+
+input, select, textarea, .phrase-box, code {
+  background: #fff;
+  color: #251a12;
+  border: 2px solid #251a12;
+  border-radius: 14px;
+}
+
+label { color: #251a12; }
+
+.main-grid {
+  grid-template-columns: 1fr;
+}
+
+.pop-card {
+  padding: 16px;
+}
+
+.pop-section-head, .source-heading, .quick-add-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
+
+.pop-section-head h2 {
+  margin: 0;
+}
+
+.quick-add-display {
+  border: 3px solid #251a12;
+  border-radius: 18px;
+  background: #fff;
+  padding: 12px 14px;
+  box-shadow: 3px 3px 0 #251a12;
+  margin-bottom: 14px;
+}
+
+.quick-add-display .expression {
+  display: block;
+  min-height: 17px;
+  font-size: 12px;
+  color: rgba(37, 26, 18, 0.5);
+  margin-bottom: 2px;
+}
+
+.quick-add-display strong {
+  display: block;
+  font-size: 30px;
+  letter-spacing: -0.04em;
+}
+
+.reason-field {
+  margin-bottom: 14px;
+  font-weight: 800;
+}
+
+.reason-field span {
+  font-size: 12px;
+}
+
+.reason-field input {
+  margin-top: 7px;
+  padding: 14px 15px;
+  font-size: 16px;
+}
+
+.source-block {
+  margin-bottom: 14px;
+}
+
+.source-heading {
+  align-items: end;
+  margin-bottom: 8px;
+}
+
+.source-heading span {
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.source-heading small {
+  color: rgba(37, 26, 18, 0.55);
+}
+
+.source-strip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 0 4px;
+  scrollbar-width: none;
+}
+
+.source-strip::-webkit-scrollbar { display: none; }
+
+.source-chip {
+  flex: 0 0 auto;
+  border: 2px solid #251a12;
+  border-radius: 14px;
+  background: #fff;
+  padding: 9px 11px;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.source-chip.active {
+  background: #f3cc63;
+  box-shadow: 2px 2px 0 #251a12;
+}
+
+.calculator-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin: 10px 0 14px;
+}
+
+.calculator-key {
+  min-height: 50px;
+  border: 3px solid #251a12;
+  border-radius: 15px;
+  background: #fff;
+  font-size: 19px;
+  font-weight: 950;
+  box-shadow: 2px 2px 0 #251a12;
+}
+
+.calculator-key.operator { background: #b7ddf3; }
+.calculator-key.clear { background: #efc8d0; }
+.calculator-key.equals { background: #f3cc63; }
+.calculator-key.wide { grid-column: span 2; }
+
+.transaction-details {
+  margin-top: 10px;
+  border-top: 2px solid rgba(37, 26, 18, 0.15);
+  padding-top: 10px;
+}
+
+.transaction-details summary {
+  cursor: pointer;
+  font-weight: 900;
+  font-size: 13px;
+}
+
+.details-grid {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.review-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.review-toggle input {
+  width: auto;
+}
+
+.quick-add-actions {
+  margin-top: 14px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.ledger-row {
+  background: #fff;
+  border: 2px solid #251a12;
+  border-radius: 18px;
+}
+
+.category-stat, .review-card {
+  background: #fff;
+  border: 2px solid #251a12;
+}
+
+.category-needs { border-top: 4px solid #b7ddf3; }
+.category-wants { border-top: 4px solid #f3cc63; }
+.category-family { border-top: 4px solid #dfceee; }
+.category-miscellaneous { border-top: 4px solid #cfe8bc; }
+
+@media (min-width: 800px) {
+  .app-shell {
+    max-width: 900px;
+    padding: 24px;
+  }
+}
