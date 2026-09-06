@@ -11,7 +11,8 @@
     "worker:types": "wrangler types --env preview",
     "worker:check": "tsc --noEmit -p tsconfig.worker.json",
     "worker:deploy:preview": "wrangler deploy --env preview --strict",
-    "worker:deploy:production": "wrangler deploy --env production --strict"
+    "worker:deploy:production": "wrangler deploy --env production --strict",
+    "check:responsive": "node scripts/check-responsive-css.mjs"
   },
   "dependencies": {
     "dexie": "^4.0.11",
