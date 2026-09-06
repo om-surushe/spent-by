@@ -61,12 +61,16 @@ if (await page.getByRole('heading', { name: 'Add transaction' }).isVisible().cat
     await page.getByText('Responsive QA transaction', { exact: true }).waitFor({ timeout: 10_000 });
     await page.waitForTimeout(1000);
     const savedRows = await page.locator('.ledger-row').count();
+    console.log('QA rows after save:', savedRows);
     if (savedRows < 1) throw new Error('Transaction appeared after save but disappeared from the ledger');
   }
 }
 
+console.log('QA rows before opening details:', await page.locator('.ledger-row').count());
 await page.locator('.home-customizer').evaluate((el) => { el.open = true; });
+console.log('QA rows after opening customizer:', await page.locator('.ledger-row').count());
 await page.locator('.tools-card').evaluate((el) => { el.open = true; });
+console.log('QA rows after opening settings:', await page.locator('.ledger-row').count());
 
 const failures = [];
 const report = [];
@@ -74,6 +78,7 @@ const report = [];
 for (const [width, height] of widths) {
   await page.setViewportSize({ width, height });
   await page.waitForTimeout(150);
+  console.log(`QA rows at ${width}px:`, await page.locator('.ledger-row').count());
 
   const diagnostics = await page.evaluate(() => {
     const root = document.documentElement;
