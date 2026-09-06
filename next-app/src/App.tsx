@@ -578,18 +578,33 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <header className="hero">
-        <div>
-          <p className="eyebrow">Finance Vault</p>
-          <h1>Your money, private by design.</h1>
-          <p className="subtle">Track, review, analyse, import, and recover your finances. Plaintext stays on your devices.</p>
-        </div>
-        <div className="status-card">
-          <div><strong>Storage:</strong> encrypted locally + cloud backup</div>
-          <div><strong>Sync:</strong> {syncStatus}</div>
-          <div><strong>{lastSync}</strong></div>
-          <InstallAppPrompt />
-        </div>
+      <header className={vaultMeta && phrase ? 'app-header' : 'hero'}>
+        {vaultMeta && phrase ? (
+          <>
+            <div className="app-brand">
+              <span className="app-title">Finance Vault</span>
+              <span className={`sync-dot sync-${syncStatus}`} aria-hidden="true" />
+              <span className="app-sync-text">{syncStatus === 'ok' ? 'Synced' : syncStatus}</span>
+            </div>
+            <div className="app-header-actions">
+              <InstallAppPrompt />
+            </div>
+          </>
+        ) : (
+          <>
+            <div>
+              <p className="eyebrow">Finance Vault</p>
+              <h1>Your money, private by design.</h1>
+              <p className="subtle">Track, review, analyse, import, and recover your finances. Plaintext stays on your devices.</p>
+            </div>
+            <div className="status-card">
+              <div><strong>Storage:</strong> encrypted locally + cloud backup</div>
+              <div><strong>Sync:</strong> {syncStatus}</div>
+              <div><strong>{lastSync}</strong></div>
+              <InstallAppPrompt />
+            </div>
+          </>
+        )}
       </header>
 
       {message ? <div className="banner">{message}</div> : null}
