@@ -59,6 +59,9 @@ if (await page.getByRole('heading', { name: 'Add transaction' }).isVisible().cat
     if (await save.isDisabled()) throw new Error('Save transaction stayed disabled during QA setup');
     await save.click();
     await page.getByText('Responsive QA transaction', { exact: true }).waitFor({ timeout: 10_000 });
+    await page.waitForTimeout(1000);
+    const savedRows = await page.locator('.ledger-row').count();
+    if (savedRows < 1) throw new Error('Transaction appeared after save but disappeared from the ledger');
   }
 }
 
