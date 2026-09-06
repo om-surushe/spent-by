@@ -1296,6 +1296,7 @@ label {
 @media (min-width: 48rem) and (max-width: 63.99rem) {
   .main-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-flow: row dense;
   }
 
   .home-customizer,
@@ -1324,6 +1325,7 @@ label {
 @media (min-width: 64rem) {
   .main-grid {
     grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-auto-flow: row dense;
   }
 
   .home-customizer,
@@ -1347,15 +1349,7 @@ label {
   }
 
   .settings-stack {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .settings-stack > .label-manager {
-    grid-column: 1 / -1;
-  }
-
-  .settings-stack > .advanced-sync {
-    grid-column: 1 / -1;
+    grid-template-columns: 1fr;
   }
 }
 
@@ -1377,7 +1371,7 @@ label {
 
 
 /* Component-level fallbacks: widgets adapt to their own width, not device names. */
-@container (max-width: 22rem) {
+@container (max-width: 18rem) {
   .category-grid,
   .overview-grid {
     grid-template-columns: 1fr;
