@@ -105,6 +105,15 @@ for (const [width, height] of widths) {
       .filter((r) => r.left < -1 || r.right > vw + 1);
 
     const zeroWidth = [...document.querySelectorAll('button, input, select, textarea')]
+      .filter((el) => {
+        const style = getComputedStyle(el);
+        const rect = el.getBoundingClientRect();
+        return style.display !== 'none' &&
+          style.visibility !== 'hidden' &&
+          style.opacity !== '0' &&
+          rect.width > 0 &&
+          rect.height > 0;
+      })
       .map((el) => {
         const r = el.getBoundingClientRect();
         return { tag: el.tagName, text: el.textContent?.trim() || '', width: r.width, height: r.height };
