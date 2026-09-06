@@ -53,7 +53,12 @@ if (await page.getByRole('heading', { name: 'Add transaction' }).isVisible().cat
     await page.getByRole('button', { name: '2', exact: true }).click();
     await page.getByRole('button', { name: '3', exact: true }).click();
     await reason.fill('Responsive QA transaction');
-    await page.getByRole('button', { name: 'Save transaction' }).click();
+    await page.waitForTimeout(100);
+    const save = page.getByRole('button', { name: 'Save transaction' });
+    await save.waitFor({ state: 'visible' });
+    if (await save.isDisabled()) throw new Error('Save transaction stayed disabled during QA setup');
+    await save.click();
+    await page.getByText('Responsive QA transaction', { exact: true }).waitFor({ timeout: 10_000 });
   }
 }
 
