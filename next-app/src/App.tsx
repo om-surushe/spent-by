@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { clearVaultData, getVaultMeta, getWorkerUrl, listEncryptedRecords, setVaultMeta, upsertEncryptedRecord } from './lib/db';
 import { createVaultMeta, decryptTransaction, deriveVault, encryptTransaction, generateRecoveryPhrase, normalizePhrase } from './lib/crypto';
 import { createRemoteVault, pullRemoteVault, pushRemoteVault } from './lib/sync';
-import { CATEGORIES, PAYMENT_METHODS, SUBCATEGORIES, type BudgetSettings, type Category, type EncryptedRecord, type PaymentMethod, type SyncStatus, type TransactionData, type TransactionRecord, type VaultMeta } from './types';
+import { CATEGORIES, SUBCATEGORIES, type BudgetSettings, type Category, type EncryptedRecord, type SyncStatus, type TransactionData, type TransactionRecord, type VaultMeta } from './types';
+import { QuickAddTransaction } from './components/QuickAddTransaction';
 
 const SESSION_KEY = 'finance-vault-preview-phrase';
 const DEFAULT_WORKER_URL = window.location.port === '4174' ? 'http://127.0.0.1:8787' : window.location.origin;
@@ -523,74 +524,32 @@ export default function App() {
         </section>
       ) : (
         <main className="grid main-grid">
-          <section className="card" id="transaction-form">
-            <div className="section-head">
-              <h2>{editingId ? 'Edit transaction' : 'Add transaction'}</h2>
-              <button className="button" onClick={lockVault}>Lock vault</button>
-            </div>
-            <form className="form-grid" onSubmit={submitTransaction}>
-              <label>
-                Amount
-                <input type="number" min="0" step="0.01" value={form.amount || ''} onChange={(event) => setForm({ ...form, amount: Number(event.target.value) })} required />
-              </label>
-              <label>
-                Date
-                <input type="date" value={form.date} onChange={(event) => setForm({ ...form, date: event.target.value })} required />
-              </label>
-              <label className="full">
-                Reason
-                <input value={form.reason} onChange={(event) => setForm({ ...form, reason: event.target.value })} required />
-              </label>
-              <label>
-                Category
-                <select value={form.category} onChange={(event) => {
-                  const category = event.target.value as Category;
-                  setForm({ ...form, category, subcategory: SUBCATEGORIES[category][0] });
-                }}>
-                  {CATEGORIES.map((category) => <option key={category} value={category}>{category}</option>)}
-                </select>
-              </label>
-              <label>
-                Subcategory
-                <select value={form.subcategory} onChange={(event) => setForm({ ...form, subcategory: event.target.value })}>
-                  {activeSubcategories.map((subcategory) => <option key={subcategory} value={subcategory}>{subcategory}</option>)}
-                </select>
-              </label>
-              <label>
-                Payment
-                <select value={form.paymentMethod} onChange={(event) => setForm({ ...form, paymentMethod: event.target.value as PaymentMethod })}>
-                  {PAYMENT_METHODS.map((method) => <option key={method} value={method}>{method}</option>)}
-                </select>
-              </label>
-              <label className="full">
-                Notes
-                <textarea rows={3} value={form.notes} onChange={(event) => setForm({ ...form, notes: event.target.value })} />
-              </label>
-              <label className="check full">
-                <input type="checkbox" checked={Boolean(form.needsReview)} onChange={(event) => setForm({ ...form, needsReview: event.target.checked })} />
-                Flag this transaction for review
-              </label>
-              {form.needsReview ? <label className="full">
-                Review note
-                <input value={form.reviewReason ?? ''} onChange={(event) => setForm({ ...form, reviewReason: event.target.value })} placeholder="What needs checking?" />
-              </label> : null}
-              <div className="full actions">
-                <button className="button primary" disabled={busy} type="submit">{editingId ? 'Update transaction' : 'Add transaction'}</button>
-                {editingId ? <button className="button" type="button" onClick={() => { setEditingId(null); setForm(emptyForm); }}>Cancel edit</button> : null}
-                <button className="button" type="button" onClick={() => setShowImport((value) => !value)}>Import JSON</button>
-                <button className="button" type="button" onClick={exportReadableTransactions}>Export transactions</button>
-                <button className="button" type="button" onClick={() => void exportBackup()}>Export encrypted backup</button>
+          <QuickAddTransaction
+            form={form}
+            setForm={setForm}
+            busy={busy}
+            editingId={editingId}
+            onSubmit={submitTransaction}
+            onCancelEdit={() => {
+              setEditingId(null);
+              setForm(emptyForm);
+            }}
+            onToggleImport={() => setShowImport((value) => !value)}
+          />
+
+          {showImport ? (
+            <section className="pop-card import-panel full-span">
+              <div className="section-head">
+                <h2>Import transactions</h2>
+                <button className="button" onClick={() => void copyImportPrompt()}>Copy AI prompt</button>
               </div>
-            </form>
-            {showImport ? <div className="import-panel">
-              <div className="section-head"><h2>Import transactions</h2><button className="button" onClick={() => void copyImportPrompt()}>Copy AI prompt</button></div>
               <textarea rows={8} value={importText} onChange={(event) => setImportText(event.target.value)} placeholder='Paste a JSON array, for example [{"amount":500,"reason":"Lunch","date":"2026-09-06","category":"Wants"}]' />
               <div className="actions top-gap">
                 <label className="button file-button">Choose JSON file<input type="file" accept="application/json,.json" onChange={(event) => { const file = event.target.files?.[0]; if (file) void file.text().then(setImportText); }} /></label>
                 <button className="button primary" disabled={!importText.trim() || busy} onClick={() => void importTransactions()}>Import and sync</button>
               </div>
-            </div> : null}
-          </section>
+            </section>
+          ) : null}
 
           <section className="stack">
             <article className="card stats">
