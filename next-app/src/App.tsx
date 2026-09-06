@@ -5,6 +5,7 @@ import { createRemoteVault, pullRemoteVault, pushRemoteVault } from './lib/sync'
 import { CATEGORIES, PAYMENT_METHODS, SUBCATEGORIES, type BudgetSettings, type Category, type EncryptedRecord, type PaymentMethod, type SyncStatus, type TransactionData, type TransactionRecord, type VaultMeta } from './types';
 import { QuickAddTransaction } from './components/QuickAddTransaction';
 import { HomeCustomizer, type HomeSectionId } from './components/HomeCustomizer';
+import { FinanceLabelsSettings } from './components/FinanceLabelsSettings';
 
 const SESSION_KEY = 'finance-vault-preview-phrase';
 const DEFAULT_WORKER_URL = window.location.port === '4174' ? 'http://127.0.0.1:8787' : window.location.origin;
@@ -26,6 +27,10 @@ const emptyForm: TransactionData = {
 const emptyBudgets: BudgetSettings = { Needs: 0, Wants: 0, Family: 0, Miscellaneous: 0 };
 const DEFAULT_HOME_ORDER: HomeSectionId[] = ['quick-add', 'transactions', 'monthly-budget', 'review', 'overview'];
 const DEFAULT_SOURCES: PaymentMethod[] = [...PAYMENT_METHODS];
+const DEFAULT_CATEGORIES: Category[] = [...CATEGORIES];
+const DEFAULT_SUBCATEGORIES: Record<string, string[]> = Object.fromEntries(
+  Object.entries(SUBCATEGORIES).map(([category, values]) => [category, [...values]])
+);
 
 function readLocalList<T extends string>(key: string, fallback: T[], allowed: readonly T[]) {
   try {
@@ -35,6 +40,33 @@ function readLocalList<T extends string>(key: string, fallback: T[], allowed: re
     return cleaned.length ? Array.from(new Set(cleaned)) : fallback;
   } catch {
     return fallback;
+  }
+}
+
+function readLocalStringList(key: string, fallback: string[]) {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(key) ?? 'null') as unknown;
+    if (!Array.isArray(parsed)) return fallback;
+    const cleaned = parsed.filter((value): value is string => typeof value === 'string' && value.trim().length > 0);
+    return cleaned.length ? Array.from(new Set(cleaned)) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function readLocalSubcategories() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem('finance-vault-subcategories') ?? 'null') as unknown;
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return DEFAULT_SUBCATEGORIES;
+    const result: Record<string, string[]> = {};
+    for (const [category, values] of Object.entries(parsed as Record<string, unknown>)) {
+      if (!Array.isArray(values)) continue;
+      const cleaned = values.filter((value): value is string => typeof value === 'string' && value.trim().length > 0);
+      if (cleaned.length) result[category] = Array.from(new Set(cleaned));
+    }
+    return Object.keys(result).length ? result : DEFAULT_SUBCATEGORIES;
+  } catch {
+    return DEFAULT_SUBCATEGORIES;
   }
 }
 
@@ -63,10 +95,12 @@ export default function App() {
   const [budgetDraft, setBudgetDraft] = useState<BudgetSettings>(emptyBudgets);
   const [homeOrder, setHomeOrder] = useState<HomeSectionId[]>(() => readLocalList('finance-vault-home-order', DEFAULT_HOME_ORDER, DEFAULT_HOME_ORDER));
   const [hiddenSections, setHiddenSections] = useState<HomeSectionId[]>(() => readLocalList('finance-vault-home-hidden', [], DEFAULT_HOME_ORDER));
-  const [sources, setSources] = useState<PaymentMethod[]>(() => readLocalList('finance-vault-sources', DEFAULT_SOURCES, PAYMENT_METHODS));
+  const [sources, setSources] = useState<PaymentMethod[]>(() => readLocalStringList('finance-vault-sources', DEFAULT_SOURCES));
+  const [categories, setCategories] = useState<Category[]>(() => readLocalStringList('finance-vault-categories', DEFAULT_CATEGORIES));
+  const [subcategories, setSubcategories] = useState<Record<string, string[]>>(() => readLocalSubcategories());
   const [defaultSource, setDefaultSource] = useState<PaymentMethod>(() => {
     const saved = localStorage.getItem('finance-vault-default-source') as PaymentMethod | null;
-    return saved && PAYMENT_METHODS.includes(saved) ? saved : 'UPI';
+    return saved && sources.includes(saved) ? saved : 'UPI';
   });
   const [autoSync, setAutoSync] = useState(() => localStorage.getItem('finance-vault-auto-sync') !== '0');
 
@@ -104,7 +138,7 @@ export default function App() {
     };
   }, [autoSync, phrase, vaultMeta, workerUrl]);
 
-  const activeSubcategories = useMemo(() => SUBCATEGORIES[form.category], [form.category]);
+  const activeSubcategories = useMemo(() => subcategories[form.category] ?? [], [form.category, subcategories]);
   const activeRecords = useMemo(() => records.filter((record) => !record.deletedAt && record.data.kind !== 'settings'), [records]);
   const settingsRecord = useMemo(() => records.find((record) => !record.deletedAt && record.data.kind === 'settings'), [records]);
   const budgets = settingsRecord?.data.settings ?? emptyBudgets;
@@ -117,7 +151,7 @@ export default function App() {
       .sort((a, b) => `${b.data.date}|${b.updatedAt}`.localeCompare(`${a.data.date}|${a.updatedAt}`));
   }, [activeRecords, month, search]);
   const totalSpent = useMemo(() => activeRecords.reduce((sum, record) => sum + record.data.amount, 0), [activeRecords]);
-  const categoryTotals = useMemo(() => Object.fromEntries(CATEGORIES.map((category) => [category, activeRecords.filter((record) => record.data.date.startsWith(today.slice(0, 7)) && record.data.category === category).reduce((sum, record) => sum + record.data.amount, 0)])) as Record<Category, number>, [activeRecords]);
+  const categoryTotals = useMemo(() => Object.fromEntries(categories.map((category) => [category, activeRecords.filter((record) => record.data.date.startsWith(today.slice(0, 7)) && record.data.category === category).reduce((sum, record) => sum + record.data.amount, 0)])) as Record<Category, number>, [activeRecords, categories]);
 
   useEffect(() => { setBudgetDraft(budgets); }, [settingsRecord?.updatedAt]);
 
@@ -141,6 +175,19 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('finance-vault-default-source', defaultSource);
   }, [defaultSource]);
+
+  useEffect(() => {
+    localStorage.setItem('finance-vault-categories', JSON.stringify(categories));
+    localStorage.setItem('finance-vault-subcategories', JSON.stringify(subcategories));
+    if (!categories.includes(form.category)) {
+      const nextCategory = categories[0] ?? 'Needs';
+      setForm((current) => ({
+        ...current,
+        category: nextCategory,
+        subcategory: subcategories[nextCategory]?.[0] ?? 'Other'
+      }));
+    }
+  }, [categories, subcategories, form.category]);
 
   useEffect(() => {
     localStorage.setItem('finance-vault-auto-sync', autoSync ? '1' : '0');
@@ -247,7 +294,7 @@ export default function App() {
       };
       await upsertEncryptedRecord(await encryptTransaction(record, encryptionKey));
       await reloadUnlockedRecords();
-      setForm({ ...emptyForm, date: form.date, category: form.category, subcategory: SUBCATEGORIES[form.category][0], paymentMethod: defaultSource });
+      setForm({ ...emptyForm, date: form.date, category: form.category, subcategory: subcategories[form.category]?.[0] ?? 'Other', paymentMethod: defaultSource });
       setEditingId(null);
       setMessage(existing ? 'Transaction updated locally.' : 'Transaction saved locally.');
       setSyncStatus(navigator.onLine ? 'idle' : 'offline');
@@ -369,7 +416,7 @@ export default function App() {
       for (const [index, item] of parsed.entries()) {
         const category = item.category as Category;
         const amount = Number(item.amount);
-        if (!(amount > 0) || typeof item.reason !== 'string' || typeof item.date !== 'string' || !CATEGORIES.includes(category)) {
+        if (!(amount > 0) || typeof item.reason !== 'string' || typeof item.date !== 'string' || !categories.includes(category)) {
           throw new Error(`Row ${index + 1} has invalid amount, reason, date, or category.`);
         }
         const payment = (item.paymentMethod ?? item.payment_method ?? 'Other') as PaymentMethod;
@@ -379,8 +426,8 @@ export default function App() {
           reason: item.reason,
           date: item.date,
           category,
-          subcategory: typeof item.subcategory === 'string' ? item.subcategory : SUBCATEGORIES[category][0],
-          paymentMethod: PAYMENT_METHODS.includes(payment) ? payment : 'Other',
+          subcategory: typeof item.subcategory === 'string' ? item.subcategory : subcategories[category]?.[0] ?? 'Other',
+          paymentMethod: sources.includes(payment) ? payment : defaultSource,
           notes: typeof item.notes === 'string' ? item.notes : '',
           needsReview: Boolean(item.needsReview ?? item.needs_review),
           reviewReason: String(item.reviewReason ?? item.review_reason ?? '')
@@ -401,8 +448,8 @@ export default function App() {
   }
 
   async function copyImportPrompt() {
-    const categories = CATEGORIES.map((category) => `${category}: ${SUBCATEGORIES[category].join(', ')}`).join('\n');
-    await navigator.clipboard.writeText(`Convert my transaction text into a JSON array. Required fields: amount, reason, date (YYYY-MM-DD), category, subcategory, payment_method, notes, needs_review, review_reason. Allowed categories and subcategories:\n${categories}`);
+    const categoryPrompt = categories.map((category) => `${category}: ${(subcategories[category] ?? []).join(', ')}`).join('\n');
+    await navigator.clipboard.writeText(`Convert my transaction text into a JSON array. Required fields: amount, reason, date (YYYY-MM-DD), category, subcategory, payment_method, notes, needs_review, review_reason. Allowed categories and subcategories:\n${categoryPrompt}`);
     setMessage('AI import prompt copied.');
   }
 
@@ -613,6 +660,8 @@ export default function App() {
                 }}
                 onToggleImport={() => setShowImport((value) => !value)}
                 sources={sources}
+                categories={categories}
+                subcategories={subcategories}
               />
             </div>
           ) : null}
@@ -677,7 +726,7 @@ export default function App() {
                 <span className="subtle">{today.slice(0, 7)}</span>
               </div>
               <div className="category-grid">
-                {CATEGORIES.map((category) => <div className={`category-stat category-${category.toLowerCase()}`} key={category}>
+                {categories.map((category) => <div className={`category-stat category-${category.toLowerCase()}`} key={category}>
                   <span>{category}</span>
                   <strong>{currency(categoryTotals[category])}</strong>
                   {budgets[category] > 0 ? <small>{Math.round((categoryTotals[category] / budgets[category]) * 100)}% of {currency(budgets[category])}</small> : <small>No target set</small>}
@@ -751,10 +800,21 @@ export default function App() {
                 <p className="subtle compact-copy">No interval setting: changes sync immediately. This keeps the behavior predictable.</p>
               </section>
 
+              <FinanceLabelsSettings
+                sources={sources}
+                categories={categories}
+                subcategories={subcategories}
+                defaultSource={defaultSource}
+                onSourcesChange={setSources}
+                onCategoriesChange={setCategories}
+                onSubcategoriesChange={setSubcategories}
+                onDefaultSourceChange={setDefaultSource}
+              />
+
               <section className="settings-panel">
                 <h2>Monthly targets</h2>
                 <form className="budget-grid" onSubmit={saveBudgets}>
-                  {CATEGORIES.map((category) => <label key={category}>{category}<input type="number" min="0" value={budgetDraft[category] || ''} onChange={(event) => setBudgetDraft({ ...budgetDraft, [category]: Number(event.target.value) })} placeholder="0" /></label>)}
+                  {categories.map((category) => <label key={category}>{category}<input type="number" min="0" value={budgetDraft[category] || ''} onChange={(event) => setBudgetDraft({ ...budgetDraft, [category]: Number(event.target.value) })} placeholder="0" /></label>)}
                   <button className="button primary full" disabled={busy}>Save targets</button>
                 </form>
               </section>
