@@ -681,7 +681,7 @@ label {
   color: var(--danger);
 }
 
-.ledger-amount-mobile {
+.ledger-row .ledger-amount-mobile {
   display: none;
 }
 
@@ -1233,11 +1233,11 @@ label {
     justify-content: flex-end;
   }
 
-  .ledger-amount-desktop {
+  .ledger-row .ledger-amount-desktop {
     display: none;
   }
 
-  .ledger-amount-mobile {
+  .ledger-row .ledger-amount-mobile {
     display: inline;
   }
 
