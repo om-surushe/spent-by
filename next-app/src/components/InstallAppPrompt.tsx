@@ -8,7 +8,6 @@ interface BeforeInstallPromptEvent extends Event {
 export function InstallAppPrompt() {
   const [installEvent, setInstallEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [installed, setInstalled] = useState(false);
-  const [dismissed, setDismissed] = useState(() => sessionStorage.getItem('finance-vault-install-dismissed') === '1');
 
   useEffect(() => {
     const standalone =
@@ -28,7 +27,6 @@ export function InstallAppPrompt() {
     function onInstalled() {
       setInstalled(true);
       setInstallEvent(null);
-      sessionStorage.removeItem('finance-vault-install-dismissed');
     }
 
     window.addEventListener('beforeinstallprompt', onBeforeInstall);
@@ -43,36 +41,21 @@ export function InstallAppPrompt() {
   async function install() {
     if (!installEvent) return;
     await installEvent.prompt();
-    const choice = await installEvent.userChoice;
-    if (choice.outcome === 'accepted') {
-      setInstalled(true);
-    }
-    setInstallEvent(null);
+    await installEvent.userChoice;
   }
 
-  if (installed || dismissed || !installEvent) return null;
+  if (installed || !installEvent) return null;
 
   return (
-    <aside className="install-prompt" aria-label="Install Finance Vault">
-      <div className="install-prompt-icon" aria-hidden="true">↙</div>
-      <div className="install-prompt-copy">
-        <strong>Install Finance Vault</strong>
-        <span>Add it to your home screen for a faster, app-like experience.</span>
-      </div>
-      <button className="button primary install-action" type="button" onClick={() => void install()}>
-        Install
-      </button>
-      <button
-        className="install-dismiss"
-        type="button"
-        aria-label="Dismiss install prompt"
-        onClick={() => {
-          sessionStorage.setItem('finance-vault-install-dismissed', '1');
-          setDismissed(true);
-        }}
-      >
-        ×
-      </button>
-    </aside>
+    <button
+      className="install-fab"
+      type="button"
+      onClick={() => void install()}
+      aria-label="Install Finance Vault"
+      title="Install Finance Vault"
+    >
+      <span className="install-fab-icon" aria-hidden="true">↙</span>
+      <span>Install app</span>
+    </button>
   );
 }
