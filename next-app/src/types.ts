@@ -8,9 +8,9 @@ export const SUBCATEGORIES = {
   Miscellaneous: ['Fixed Home Expense', 'Recoverable', 'One-time', 'Travel', 'Unclear']
 } as const;
 
-export type Category = (typeof CATEGORIES)[number];
-export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
-export type Subcategory = (typeof SUBCATEGORIES)[Category][number];
+export type Category = string;
+export type PaymentMethod = string;
+export type Subcategory = string;
 
 export type TransactionData = {
   kind?: 'transaction' | 'settings';
@@ -26,12 +26,7 @@ export type TransactionData = {
   settings?: BudgetSettings;
 };
 
-export type BudgetSettings = {
-  Needs: number;
-  Wants: number;
-  Family: number;
-  Miscellaneous: number;
-};
+export type BudgetSettings = Record<string, number>;
 
 export type EncryptedRecord = {
   id: string;
