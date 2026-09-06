@@ -1744,3 +1744,49 @@ label {
     font-size: 0.74rem;
   }
 }
+
+
+/* Safer month filter: no native sheet or overlay menu */
+.month-filter-rail {
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+  overflow-x: auto;
+  padding: 2px 2px 5px;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+  overscroll-behavior-inline: contain;
+}
+
+.month-filter-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.month-filter-chip {
+  flex: 0 0 auto;
+  min-height: 42px;
+  padding: 8px 12px;
+  border: var(--border);
+  border-radius: 999px;
+  background: var(--surface-strong);
+  box-shadow: var(--shadow-sm);
+  font-weight: 850;
+  scroll-snap-align: start;
+  white-space: nowrap;
+}
+
+.month-filter-chip.active {
+  background: var(--yellow);
+}
+
+@media (max-width: 640px) {
+  .month-filter-rail {
+    margin-inline: -2px;
+    padding-inline: 2px 12px;
+  }
+
+  .month-filter-chip {
+    min-height: 40px;
+    font-size: 0.82rem;
+  }
+}
