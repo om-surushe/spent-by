@@ -97,11 +97,32 @@ for (const [width, height] of widths) {
       })
       .filter((r) => r.width < 1 || r.height < 1);
 
-    return { vw, scrollWidth: root.scrollWidth, scrollOverflow, outside, zeroWidth };
+    const elementOverflows = [...document.querySelectorAll('body *')]
+      .map((el) => {
+        const rect = el.getBoundingClientRect();
+        const style = getComputedStyle(el);
+        return {
+          tag: el.tagName,
+          className: typeof el.className === 'string' ? el.className : '',
+          text: (el.textContent || '').trim().slice(0, 60),
+          clientWidth: el.clientWidth,
+          scrollWidth: el.scrollWidth,
+          rectWidth: Math.round(rect.width),
+          display: style.display,
+          overflowX: style.overflowX,
+          minWidth: style.minWidth,
+          width: style.width
+        };
+      })
+      .filter((item) => item.scrollWidth > item.clientWidth + 2 && item.overflowX !== 'auto')
+      .sort((a, b) => (b.scrollWidth - b.clientWidth) - (a.scrollWidth - a.clientWidth))
+      .slice(0, 12);
+
+    return { vw, scrollWidth: root.scrollWidth, scrollOverflow, outside, zeroWidth, elementOverflows };
   });
 
   if (diagnostics.scrollOverflow > 1) {
-    failures.push(`${width}px: document overflows horizontally by ${diagnostics.scrollOverflow}px`);
+    failures.push(`${width}px: document overflows horizontally by ${diagnostics.scrollOverflow}px; likely elements: ${JSON.stringify(diagnostics.elementOverflows)}`);
   }
   if (diagnostics.outside.length) {
     failures.push(`${width}px: top-level cards leave viewport: ${JSON.stringify(diagnostics.outside)}`);
