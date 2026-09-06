@@ -1,5 +1,5 @@
 export const CATEGORIES = ['Needs', 'Wants', 'Family', 'Miscellaneous'] as const;
-export const PAYMENT_METHODS = ['Card', 'UPI', 'Cash', 'Bank', 'Other'] as const;
+export const PAYMENT_METHODS = ['Card', 'UPI', 'Splitwise', 'Cash', 'Bank', 'Other'] as const;
 
 export const SUBCATEGORIES = {
   Needs: ['Rent', 'Food Maid', 'Cleaning Maid', 'Groceries', 'Transport', 'Electricity', 'WiFi', 'Home Travel', 'Home Sent', 'Home EMI', 'Recharge', 'Medical', 'Education', 'Household', 'Other Needs'],
