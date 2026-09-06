@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { CATEGORIES, SUBCATEGORIES, type Category, type PaymentMethod, type TransactionData } from '../types';
+import { type Category, type PaymentMethod, type TransactionData } from '../types';
 
 type Props = {
   form: TransactionData;
@@ -10,16 +10,13 @@ type Props = {
   onCancelEdit: () => void;
   onToggleImport: () => void;
   sources: PaymentMethod[];
+  categories: Category[];
+  subcategories: Record<string, string[]>;
 };
 
-const SOURCE_LABELS: Record<PaymentMethod, string> = {
-  Card: 'Credit Card',
-  UPI: 'UPI',
-  Splitwise: 'Splitwise',
-  Cash: 'Cash',
-  Bank: 'Bank',
-  Other: 'Other'
-};
+function sourceLabel(source: string) {
+  return source === 'Card' ? 'Credit Card' : source;
+}
 
 function evaluate(expression: string): number | null {
   const tokens = expression.match(/\d+(?:\.\d+)?|[+\-*/]/g);
@@ -62,7 +59,9 @@ export function QuickAddTransaction({
   onSubmit,
   onCancelEdit,
   onToggleImport,
-  sources
+  sources,
+  categories,
+  subcategories
 }: Props) {
   const [expression, setExpression] = useState(form.amount ? String(form.amount) : '');
 
@@ -152,7 +151,7 @@ export function QuickAddTransaction({
                 type="button"
                 onClick={() => setForm({ ...form, paymentMethod: method })}
               >
-                {SOURCE_LABELS[method]}
+                {sourceLabel(method)}
               </button>
             ))}
           </div>
@@ -186,16 +185,16 @@ export function QuickAddTransaction({
                 value={form.category}
                 onChange={(event) => {
                   const category = event.target.value as Category;
-                  setForm({ ...form, category, subcategory: SUBCATEGORIES[category][0] });
+                  setForm({ ...form, category, subcategory: subcategories[category]?.[0] ?? 'Other' });
                 }}
               >
-                {CATEGORIES.map((category) => <option key={category} value={category}>{category}</option>)}
+                {categories.map((category) => <option key={category} value={category}>{category}</option>)}
               </select>
             </label>
             <label>
               Subcategory
               <select value={form.subcategory} onChange={(event) => setForm({ ...form, subcategory: event.target.value })}>
-                {SUBCATEGORIES[form.category].map((subcategory) => <option key={subcategory} value={subcategory}>{subcategory}</option>)}
+                {(subcategories[form.category] ?? []).map((subcategory) => <option key={subcategory} value={subcategory}>{subcategory}</option>)}
               </select>
             </label>
             <label className="full">
