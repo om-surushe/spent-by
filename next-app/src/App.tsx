@@ -645,7 +645,7 @@ export default function App() {
           />
 
           {!hiddenSections.includes('quick-add') ? (
-            <div className="home-slot" style={{ order: sectionOrder['quick-add'] }}>
+            <div className="home-slot dashboard-quick-add" style={{ order: sectionOrder['quick-add'] }}>
               <QuickAddTransaction
                 form={form}
                 setForm={setForm}
@@ -665,7 +665,7 @@ export default function App() {
           ) : null}
 
           {showImport ? (
-            <section className="pop-card import-panel full-span" style={{ order: sectionOrder['quick-add'] + 0.1 }}>
+            <section className="pop-card import-panel dashboard-import" style={{ order: sectionOrder['quick-add'] + 0.1 }}>
               <div className="section-head">
                 <h2>Import transactions</h2>
                 <button className="button" onClick={() => void copyImportPrompt()}>Copy AI prompt</button>
@@ -679,7 +679,7 @@ export default function App() {
           ) : null}
 
           {!hiddenSections.includes('transactions') ? (
-            <section className="card ledger full-span" style={{ order: sectionOrder.transactions }}>
+            <section className="card ledger dashboard-transactions" style={{ order: sectionOrder.transactions }}>
               <div className="section-head">
                 <div><p className="eyebrow">Quick check</p><h2>Transactions</h2></div>
                 <span className="subtle">{visibleRecords.length} shown</span>
@@ -720,7 +720,7 @@ export default function App() {
           ) : null}
 
           {!hiddenSections.includes('monthly-budget') ? (
-            <section className="card full-span" style={{ order: sectionOrder['monthly-budget'] }}>
+            <section className="card dashboard-budget" style={{ order: sectionOrder['monthly-budget'] }}>
               <div className="section-head">
                 <div><p className="eyebrow">Budget check</p><h2>This month</h2></div>
                 <span className="subtle">{new Date(`${today.slice(0, 7)}-01T00:00:00`).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}</span>
@@ -736,7 +736,7 @@ export default function App() {
           ) : null}
 
           {!hiddenSections.includes('review') ? (
-            <section className="card full-span" style={{ order: sectionOrder.review }}>
+            <section className="card dashboard-review" style={{ order: sectionOrder.review }}>
               <div className="section-head">
                 <div><p className="eyebrow">Review queue</p><h2>Needs attention</h2></div>
                 <strong>{activeRecords.filter((record) => record.data.needsReview).length}</strong>
@@ -758,7 +758,7 @@ export default function App() {
           ) : null}
 
           {!hiddenSections.includes('overview') ? (
-            <section className="card full-span" style={{ order: sectionOrder.overview }}>
+            <section className="card dashboard-overview" style={{ order: sectionOrder.overview }}>
               <div className="section-head">
                 <div><p className="eyebrow">Overview</p><h2>At a glance</h2></div>
                 <span className={`sync-pill sync-${syncStatus}`}>{syncStatus === 'ok' ? 'Synced' : syncStatus}</span>
