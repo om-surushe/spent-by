@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { CATEGORIES, PAYMENT_METHODS, SUBCATEGORIES, type Category, type PaymentMethod, type TransactionData } from '../types';
+import { CATEGORIES, SUBCATEGORIES, type Category, type PaymentMethod, type TransactionData } from '../types';
 
 type Props = {
   form: TransactionData;
@@ -9,6 +9,7 @@ type Props = {
   onSubmit: (event: React.FormEvent) => void;
   onCancelEdit: () => void;
   onToggleImport: () => void;
+  sources: PaymentMethod[];
 };
 
 const SOURCE_LABELS: Record<PaymentMethod, string> = {
@@ -60,7 +61,8 @@ export function QuickAddTransaction({
   editingId,
   onSubmit,
   onCancelEdit,
-  onToggleImport
+  onToggleImport,
+  sources
 }: Props) {
   const [expression, setExpression] = useState(form.amount ? String(form.amount) : '');
 
@@ -143,7 +145,7 @@ export function QuickAddTransaction({
             <small>Choose where the money came from</small>
           </div>
           <div className="source-strip">
-            {PAYMENT_METHODS.map((method) => (
+            {sources.map((method) => (
               <button
                 className={`source-chip ${form.paymentMethod === method ? 'active' : ''}`}
                 key={method}
