@@ -581,22 +581,38 @@ export default function App() {
         </section>
       ) : (
         <main className="grid main-grid">
-          <QuickAddTransaction
-            form={form}
-            setForm={setForm}
-            busy={busy}
-            editingId={editingId}
-            onSubmit={submitTransaction}
-            onCancelEdit={() => {
-              setEditingId(null);
-              setForm({ ...emptyForm, paymentMethod: defaultSource });
-            }}
-            onToggleImport={() => setShowImport((value) => !value)}
+          <HomeCustomizer
+            order={homeOrder}
+            hidden={hiddenSections}
+            onOrderChange={setHomeOrder}
+            onHiddenChange={setHiddenSections}
             sources={sources}
+            defaultSource={defaultSource}
+            onSourcesChange={setSources}
+            onDefaultSourceChange={setDefaultSource}
+            allSources={PAYMENT_METHODS}
           />
 
+          {!hiddenSections.includes('quick-add') ? (
+            <div className="home-slot" style={{ order: sectionOrder['quick-add'] }}>
+              <QuickAddTransaction
+                form={form}
+                setForm={setForm}
+                busy={busy}
+                editingId={editingId}
+                onSubmit={submitTransaction}
+                onCancelEdit={() => {
+                  setEditingId(null);
+                  setForm({ ...emptyForm, paymentMethod: defaultSource });
+                }}
+                onToggleImport={() => setShowImport((value) => !value)}
+                sources={sources}
+              />
+            </div>
+          ) : null}
+
           {showImport ? (
-            <section className="pop-card import-panel full-span">
+            <section className="pop-card import-panel full-span" style={{ order: sectionOrder['quick-add'] + 0.1 }}>
               <div className="section-head">
                 <h2>Import transactions</h2>
                 <button className="button" onClick={() => void copyImportPrompt()}>Copy AI prompt</button>
@@ -604,102 +620,141 @@ export default function App() {
               <textarea rows={8} value={importText} onChange={(event) => setImportText(event.target.value)} placeholder='Paste a JSON array, for example [{"amount":500,"reason":"Lunch","date":"2026-09-06","category":"Wants"}]' />
               <div className="actions top-gap">
                 <label className="button file-button">Choose JSON file<input type="file" accept="application/json,.json" onChange={(event) => { const file = event.target.files?.[0]; if (file) void file.text().then(setImportText); }} /></label>
-                <button className="button primary" disabled={!importText.trim() || busy} onClick={() => void importTransactions()}>Import and sync</button>
+                <button className="button primary" disabled={!importText.trim() || busy} onClick={() => void importTransactions()}>Import</button>
               </div>
             </section>
           ) : null}
 
-          <section className="stack">
-            <article className="card stats">
-              <div>
-                <p className="eyebrow">Vault</p>
-                <strong>{vaultMeta.vaultId.slice(0, 12)}…</strong>
+          {!hiddenSections.includes('transactions') ? (
+            <section className="card ledger full-span" style={{ order: sectionOrder.transactions }}>
+              <div className="section-head">
+                <div><p className="eyebrow">Quick check</p><h2>Transactions</h2></div>
+                <span className="subtle">{visibleRecords.length} shown</span>
               </div>
-              <div>
-                <p className="eyebrow">Transactions</p>
-                <strong>{activeRecords.length}</strong>
+              <div className="filters">
+                <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search reason, source, notes, or category" />
+                <select value={month} onChange={(event) => setMonth(event.target.value)}>
+                  <option value="All">All months</option>
+                  {months.map((value) => <option key={value} value={value}>{new Date(`${value}-01T00:00:00`).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}</option>)}
+                </select>
               </div>
-              <div>
-                <p className="eyebrow">Spent</p>
-                <strong>{currency(totalSpent)}</strong>
-              </div>
-            </article>
+              {visibleRecords.length === 0 ? (
+                <p className="empty">No matching transactions yet.</p>
+              ) : (
+                <div className="ledger-list">
+                  {visibleRecords.map((record) => (
+                    <article className="ledger-row" key={record.id}>
+                      <div>
+                        <strong>{record.data.reason}</strong>
+                        <p>{record.data.category} · {record.data.subcategory} · {record.data.paymentMethod === 'Card' ? 'Credit Card' : record.data.paymentMethod}</p>
+                        <p className="subtle">{record.data.date}{record.data.notes ? ` · ${record.data.notes}` : ''}</p>
+                        {record.data.needsReview ? <span className="review-badge">Needs review{record.data.reviewReason ? `: ${record.data.reviewReason}` : ''}</span> : null}
+                      </div>
+                      <div className="ledger-side">
+                        <strong>{currency(record.data.amount)}</strong>
+                        <div className="actions">
+                          <button className="button" onClick={() => startEdit(record)}>Edit</button>
+                          <button className="button danger" onClick={() => void deleteTransaction(record.id)}>Delete</button>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </section>
+          ) : null}
 
-            <article className="card">
-              <h2>This month</h2>
+          {!hiddenSections.includes('monthly-budget') ? (
+            <section className="card full-span" style={{ order: sectionOrder['monthly-budget'] }}>
+              <div className="section-head">
+                <div><p className="eyebrow">Budget check</p><h2>This month</h2></div>
+                <span className="subtle">{today.slice(0, 7)}</span>
+              </div>
               <div className="category-grid">
                 {CATEGORIES.map((category) => <div className={`category-stat category-${category.toLowerCase()}`} key={category}>
-                  <span>{category}</span><strong>{currency(categoryTotals[category])}</strong>
-                  {budgets[category] > 0 ? <small>{Math.round((categoryTotals[category] / budgets[category]) * 100)}% of monthly target</small> : <small>No target set</small>}
+                  <span>{category}</span>
+                  <strong>{currency(categoryTotals[category])}</strong>
+                  {budgets[category] > 0 ? <small>{Math.round((categoryTotals[category] / budgets[category]) * 100)}% of {currency(budgets[category])}</small> : <small>No target set</small>}
                 </div>)}
               </div>
-            </article>
+            </section>
+          ) : null}
 
-            <article className="card">
-              <h2>Encrypted cloud sync</h2>
-              <div className="actions top-gap">
-                <button className="button" disabled={busy} onClick={() => void createCloudVault()}>Create cloud vault</button>
-                <button className="button" disabled={busy} onClick={() => void syncNow()}>Sync now</button>
-                <button className="button" disabled={busy} onClick={() => void pullCloud()}>Pull cloud</button>
+          {!hiddenSections.includes('review') ? (
+            <section className="card full-span" style={{ order: sectionOrder.review }}>
+              <div className="section-head">
+                <div><p className="eyebrow">Review queue</p><h2>Needs attention</h2></div>
+                <strong>{activeRecords.filter((record) => record.data.needsReview).length}</strong>
               </div>
-              <p className="subtle top-gap">Changes save locally first and sync automatically when online. The server receives ciphertext only.</p>
-            </article>
-
-            <article className="card">
-              <h2>Private monthly targets</h2>
-              <p className="subtle">These targets are encrypted and sync with your vault.</p>
-              <form className="budget-grid" onSubmit={saveBudgets}>
-                {CATEGORIES.map((category) => <label key={category}>{category}<input type="number" min="0" value={budgetDraft[category] || ''} onChange={(event) => setBudgetDraft({ ...budgetDraft, [category]: Number(event.target.value) })} placeholder="0" /></label>)}
-                <button className="button primary full" disabled={busy}>Save targets</button>
-              </form>
-            </article>
-          </section>
-
-          <section className="card ledger full-span">
-            <div className="section-head">
-              <div><p className="eyebrow">Ledger</p><h2>Transactions</h2></div>
-              <span className="subtle">{visibleRecords.length} shown</span>
-            </div>
-            <div className="filters">
-              <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search reason, notes, or category" />
-              <select value={month} onChange={(event) => setMonth(event.target.value)}>
-                <option value="All">All months</option>
-                {months.map((value) => <option key={value} value={value}>{new Date(`${value}-01T00:00:00`).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}</option>)}
-              </select>
-            </div>
-            {visibleRecords.length === 0 ? (
-              <p className="empty">No matching transactions yet.</p>
-            ) : (
-              <div className="ledger-list">
-                {visibleRecords.map((record) => (
-                  <article className="ledger-row" key={record.id}>
-                    <div>
-                      <strong>{record.data.reason}</strong>
-                      <p>{record.data.category} · {record.data.subcategory} · {record.data.paymentMethod}</p>
-                      <p className="subtle">{record.data.date}{record.data.notes ? ` · ${record.data.notes}` : ''}</p>
-                      {record.data.needsReview ? <span className="review-badge">Needs review{record.data.reviewReason ? `: ${record.data.reviewReason}` : ''}</span> : null}
-                    </div>
-                    <div className="ledger-side">
-                      <strong>{currency(record.data.amount)}</strong>
-                      <div className="actions"><button className="button" onClick={() => startEdit(record)}>Edit</button><button className="button danger" onClick={() => void deleteTransaction(record.id)}>Delete</button></div>
-                    </div>
-                  </article>
-                ))}
+              <div className="review-grid">
+                {activeRecords.filter((record) => record.data.needsReview).map((record) => <article className="review-card" key={record.id}>
+                  <span>{record.data.date}</span>
+                  <strong>{currency(record.data.amount)}</strong>
+                  <h3>{record.data.reason}</h3>
+                  <p>{record.data.reviewReason || 'Check the category or details.'}</p>
+                  <div className="actions">
+                    <button className="button" onClick={() => startEdit(record)}>Edit details</button>
+                    <button className="button primary" disabled={busy} onClick={() => void markReviewed(record)}>Mark reviewed</button>
+                  </div>
+                </article>)}
+                {activeRecords.every((record) => !record.data.needsReview) ? <p className="empty">Review queue is clear.</p> : null}
               </div>
-            )}
-          </section>
+            </section>
+          ) : null}
 
-          <section className="card full-span">
-            <div className="section-head"><div><p className="eyebrow">Review queue</p><h2>Transactions needing attention</h2></div><strong>{activeRecords.filter((record) => record.data.needsReview).length}</strong></div>
-            <div className="review-grid">
-              {activeRecords.filter((record) => record.data.needsReview).map((record) => <article className="review-card" key={record.id}>
-                <span>{record.data.date}</span><strong>{currency(record.data.amount)}</strong><h3>{record.data.reason}</h3>
-                <p>{record.data.reviewReason || 'Check the category or details.'}</p>
-                <div className="actions"><button className="button" onClick={() => startEdit(record)}>Edit details</button><button className="button primary" disabled={busy} onClick={() => void markReviewed(record)}>Mark reviewed</button></div>
-              </article>)}
-              {activeRecords.every((record) => !record.data.needsReview) ? <p className="empty">Review queue is clear.</p> : null}
+          {!hiddenSections.includes('overview') ? (
+            <section className="card full-span" style={{ order: sectionOrder.overview }}>
+              <div className="section-head">
+                <div><p className="eyebrow">Overview</p><h2>At a glance</h2></div>
+                <span className={`sync-pill sync-${syncStatus}`}>{syncStatus === 'ok' ? 'Synced' : syncStatus}</span>
+              </div>
+              <div className="overview-grid">
+                <div className="overview-stat"><span>Transactions</span><strong>{activeRecords.length}</strong></div>
+                <div className="overview-stat"><span>Total spent</span><strong>{currency(totalSpent)}</strong></div>
+                <div className="overview-stat vault-overview">
+                  <span>Vault ID</span>
+                  <code>{vaultMeta.vaultId}</code>
+                  <button className="text-button" type="button" onClick={() => void navigator.clipboard.writeText(vaultMeta.vaultId)}>Copy</button>
+                </div>
+              </div>
+            </section>
+          ) : null}
+
+          <details className="card full-span tools-card" style={{ order: 99 }}>
+            <summary>
+              <span><span className="eyebrow">Tools</span><strong>Budget settings, backup & sync</strong></span>
+              <span className="customize-hint">Optional</span>
+            </summary>
+            <div className="tools-grid">
+              <section>
+                <h2>Monthly targets</h2>
+                <form className="budget-grid" onSubmit={saveBudgets}>
+                  {CATEGORIES.map((category) => <label key={category}>{category}<input type="number" min="0" value={budgetDraft[category] || ''} onChange={(event) => setBudgetDraft({ ...budgetDraft, [category]: Number(event.target.value) })} placeholder="0" /></label>)}
+                  <button className="button primary full" disabled={busy}>Save targets</button>
+                </form>
+              </section>
+
+              <section>
+                <h2>Local data</h2>
+                <p className="subtle">Transactions are encrypted on this device. Export whenever you want a portable copy.</p>
+                <div className="actions">
+                  <button className="button" type="button" onClick={exportReadableTransactions}>Export transactions</button>
+                  <button className="button" type="button" onClick={() => void exportBackup()}>Encrypted backup</button>
+                  <button className="button danger" type="button" onClick={lockVault}>Lock vault</button>
+                </div>
+              </section>
+
+              <section>
+                <h2>Encrypted cloud sync</h2>
+                <p className="subtle">{lastSync}</p>
+                <div className="actions">
+                  <button className="button" disabled={busy} onClick={() => void createCloudVault()}>Create cloud vault</button>
+                  <button className="button" disabled={busy} onClick={() => void syncNow()}>Sync now</button>
+                  <button className="button" disabled={busy} onClick={() => void pullCloud()}>Pull cloud</button>
+                </div>
+              </section>
             </div>
-          </section>
+          </details>
         </main>
       )}
     </div>
