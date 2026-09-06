@@ -827,6 +827,7 @@ label {
 
 .customizer-body {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   min-width: 0;
   max-width: 100%;
   overflow-x: clip;
@@ -834,6 +835,11 @@ label {
   margin-top: var(--space-4);
   padding-top: var(--space-4);
   border-top: 2px solid var(--muted-soft);
+}
+
+.customizer-body > * {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .customizer-label {
@@ -1200,30 +1206,18 @@ label {
   }
 
   .category-grid,
-  .review-grid,
   .overview-grid {
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(84%, 1fr);
-    grid-template-columns: none;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-flow: row;
+    overflow: visible;
   }
 
-  .category-grid::-webkit-scrollbar,
-  .review-grid::-webkit-scrollbar,
-  .overview-grid::-webkit-scrollbar {
-    display: none;
-  }
-
-  .category-stat,
-  .review-card,
-  .overview-stat {
-    scroll-snap-align: start;
+  .review-grid {
+    grid-template-columns: 1fr;
   }
 
   .vault-overview {
-    grid-column: auto;
+    grid-column: 1 / -1;
   }
 
   .ledger-row {
@@ -1288,7 +1282,8 @@ label {
     grid-template-columns: 1fr;
   }
 
-  .category-manager-grid {
+  .category-manager-grid,
+  .review-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1312,9 +1307,12 @@ label {
   }
 
   .dashboard-budget,
-  .dashboard-review,
   .dashboard-overview {
     grid-column: span 1;
+  }
+
+  .dashboard-review {
+    grid-column: 1 / -1;
   }
 
   .category-manager-grid {
@@ -1379,7 +1377,7 @@ label {
 
 
 /* Component-level fallbacks: widgets adapt to their own width, not device names. */
-@container (max-width: 28rem) {
+@container (max-width: 22rem) {
   .category-grid,
   .overview-grid {
     grid-template-columns: 1fr;
