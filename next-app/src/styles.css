@@ -1118,3 +1118,277 @@ label {
     min-width: 130px;
   }
 }
+
+
+/* Responsive layout pass + simplified settings */
+@media (min-width: 861px) {
+  .main-grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+
+  .home-customizer,
+  .main-grid > .full-span,
+  .tools-card {
+    grid-column: 1 / -1;
+  }
+
+  .home-slot {
+    grid-column: 1 / span 6;
+  }
+
+  .main-grid > section:not(.full-span) {
+    grid-column: span 6;
+  }
+}
+
+@media (min-width: 1180px) {
+  .app-shell {
+    padding-inline: 24px;
+  }
+
+  .home-slot {
+    grid-column: 1 / span 5;
+  }
+
+  .main-grid > section:not(.full-span) {
+    grid-column: span 7;
+  }
+}
+
+.settings-stack {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 2px solid var(--muted-soft);
+}
+
+.settings-panel,
+.advanced-sync {
+  padding: 14px;
+  border: var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-strong);
+}
+
+.setting-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+
+.setting-row > div {
+  min-width: 0;
+}
+
+.switch {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.switch input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.switch span {
+  position: relative;
+  display: block;
+  width: 52px;
+  height: 30px;
+  border: var(--border);
+  border-radius: 999px;
+  background: var(--pink);
+  box-shadow: 1px 1px 0 var(--ink);
+  transition: background 120ms ease;
+}
+
+.switch span::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border: var(--border);
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 120ms ease;
+}
+
+.switch input:checked + span {
+  background: var(--green);
+}
+
+.switch input:checked + span::after {
+  transform: translateX(22px);
+}
+
+.switch input:focus-visible + span {
+  outline: 3px solid var(--blue);
+  outline-offset: 3px;
+}
+
+.sync-summary {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 14px 0 8px;
+}
+
+.sync-summary .subtle {
+  margin: 0;
+  flex: 1 1 220px;
+}
+
+.advanced-sync > summary {
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.advanced-sync[open] > summary {
+  margin-bottom: 10px;
+}
+
+@media (max-width: 860px) {
+  .main-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-slot,
+  .main-grid > section,
+  .home-customizer,
+  .tools-card {
+    grid-column: 1;
+    width: 100%;
+  }
+
+  .home-slot > .quick-add-card,
+  .card,
+  .pop-card {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .status-card {
+    width: 100%;
+  }
+
+  .section-head,
+  .setting-row {
+    align-items: flex-start;
+  }
+
+  .setting-row {
+    flex-direction: column;
+  }
+
+  .switch {
+    align-self: flex-start;
+  }
+
+  .category-grid,
+  .overview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .vault-overview {
+    grid-column: auto;
+  }
+
+  .filters {
+    grid-template-columns: 1fr;
+  }
+
+  .ledger-row {
+    grid-template-columns: 1fr;
+  }
+
+  .ledger-side {
+    width: 100%;
+    justify-items: stretch;
+    text-align: left;
+  }
+
+  .ledger-side > strong {
+    font-size: 1.1rem;
+  }
+
+  .ledger-side .actions {
+    width: 100%;
+  }
+
+  .ledger-side .actions .button {
+    flex: 1 1 0;
+  }
+
+  .quick-add-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .quick-add-actions .pop-button {
+    width: 100%;
+  }
+
+  .source-strip {
+    margin-inline: -2px;
+    padding-inline: 2px;
+  }
+
+  .calculator-key {
+    min-height: 52px;
+  }
+}
+
+@media (max-width: 420px) {
+  .app-shell {
+    padding-inline: 8px;
+  }
+
+  .hero,
+  .card,
+  .pop-card,
+  .banner {
+    border-width: 2px;
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+
+  .hero {
+    border-radius: 24px;
+  }
+
+  .calculator-grid {
+    gap: 6px;
+  }
+
+  .calculator-key {
+    min-height: 48px;
+    border-width: 2px;
+  }
+
+  .section-order-row {
+    padding: 8px;
+  }
+
+  .vault-id-row {
+    flex-direction: column;
+  }
+
+  .vault-id-value {
+    width: 100%;
+  }
+
+  .vault-id-row .button {
+    width: 100%;
+  }
+}
