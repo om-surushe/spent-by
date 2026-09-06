@@ -1,5 +1,5 @@
-const CACHE = 'finance-vault-v2';
-const ASSETS = ['/', '/manifest.webmanifest'];
+const CACHE = 'finance-vault-v3';
+const ASSETS = ['/', '/manifest.webmanifest', '/favicon.svg'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(ASSETS)));
