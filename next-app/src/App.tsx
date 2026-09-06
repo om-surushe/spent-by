@@ -698,18 +698,23 @@ export default function App() {
               ) : (
                 <div className="ledger-list">
                   {visibleRecords.map((record) => (
-                    <article className="ledger-row" key={record.id}>
-                      <div>
-                        <strong>{record.data.reason}</strong>
-                        <p>{record.data.category} · {record.data.subcategory} · {record.data.paymentMethod === 'Card' ? 'Credit Card' : record.data.paymentMethod}</p>
-                        <p className="subtle">{record.data.date}{record.data.notes ? ` · ${record.data.notes}` : ''}</p>
+                    <article className="ledger-row ledger-row-compact" key={record.id}>
+                      <div className="ledger-main">
+                        <div className="ledger-title-line">
+                          <strong>{record.data.reason}</strong>
+                          <strong className="ledger-amount-mobile">{currency(record.data.amount)}</strong>
+                        </div>
+                        <p className="ledger-meta">
+                          {record.data.category} · {record.data.subcategory} · {record.data.paymentMethod === 'Card' ? 'Credit Card' : record.data.paymentMethod}
+                        </p>
+                        <p className="ledger-date-note">{record.data.date}{record.data.notes ? ` · ${record.data.notes}` : ''}</p>
                         {record.data.needsReview ? <span className="review-badge">Needs review{record.data.reviewReason ? `: ${record.data.reviewReason}` : ''}</span> : null}
                       </div>
-                      <div className="ledger-side">
-                        <strong>{currency(record.data.amount)}</strong>
-                        <div className="actions">
-                          <button className="button" onClick={() => startEdit(record)}>Edit</button>
-                          <button className="button danger" onClick={() => void deleteTransaction(record.id)}>Delete</button>
+                      <div className="ledger-side ledger-side-compact">
+                        <strong className="ledger-amount-desktop">{currency(record.data.amount)}</strong>
+                        <div className="ledger-actions-compact">
+                          <button className="compact-action" onClick={() => startEdit(record)}>Edit</button>
+                          <button className="compact-action danger-text" onClick={() => void deleteTransaction(record.id)}>Delete</button>
                         </div>
                       </div>
                     </article>
