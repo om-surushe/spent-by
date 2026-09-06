@@ -709,28 +709,28 @@ export default function App() {
                 <div className="ledger-list">
                   {visibleRecords.map((record) => (
                     <article className="ledger-row ledger-row-compact" key={record.id}>
-                      <div className="ledger-cell ledger-reason">
-                        <span className="ledger-cell-label">Reason</span>
-                        <strong>{record.data.reason}</strong>
+                      <div className="ledger-primary">
+                        <div className="ledger-title-line">
+                          <strong>{record.data.reason}</strong>
+                          <strong className="ledger-mobile-amount">{currency(record.data.amount)}</strong>
+                        </div>
+                        <span className="ledger-secondary">{record.data.category} · {record.data.subcategory}</span>
                         {record.data.needsReview ? <span className="review-badge">Needs review{record.data.reviewReason ? `: ${record.data.reviewReason}` : ''}</span> : null}
                       </div>
-                      <div className="ledger-cell">
-                        <span className="ledger-cell-label">Category</span>
-                        <span>{record.data.category} · {record.data.subcategory}</span>
-                      </div>
-                      <div className="ledger-cell">
+
+                      <div className="ledger-source">
                         <span className="ledger-cell-label">Source</span>
                         <span>{record.data.paymentMethod === 'Card' ? 'Credit Card' : record.data.paymentMethod}</span>
                       </div>
-                      <div className="ledger-cell ledger-date-cell">
+
+                      <div className="ledger-date-cell">
                         <span className="ledger-cell-label">Date</span>
                         <span>{record.data.date}</span>
                         {record.data.notes ? <small>{record.data.notes}</small> : null}
                       </div>
-                      <div className="ledger-cell ledger-amount-cell">
-                        <span className="ledger-cell-label">Amount</span>
-                        <strong>{currency(record.data.amount)}</strong>
-                      </div>
+
+                      <strong className="ledger-desktop-amount">{currency(record.data.amount)}</strong>
+
                       <div className="ledger-actions-compact">
                         <button className="compact-action" onClick={() => startEdit(record)}>Edit</button>
                         <button className="compact-action danger-text" onClick={() => void deleteTransaction(record.id)}>Delete</button>
