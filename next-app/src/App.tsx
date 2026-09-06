@@ -709,23 +709,31 @@ export default function App() {
                 <div className="ledger-list">
                   {visibleRecords.map((record) => (
                     <article className="ledger-row ledger-row-compact" key={record.id}>
-                      <div className="ledger-main">
-                        <div className="ledger-title-line">
-                          <strong>{record.data.reason}</strong>
-                          <strong className="ledger-amount-mobile">{currency(record.data.amount)}</strong>
-                        </div>
-                        <p className="ledger-meta">
-                          {record.data.category} · {record.data.subcategory} · {record.data.paymentMethod === 'Card' ? 'Credit Card' : record.data.paymentMethod}
-                        </p>
-                        <p className="ledger-date-note">{record.data.date}{record.data.notes ? ` · ${record.data.notes}` : ''}</p>
+                      <div className="ledger-cell ledger-reason">
+                        <span className="ledger-cell-label">Reason</span>
+                        <strong>{record.data.reason}</strong>
                         {record.data.needsReview ? <span className="review-badge">Needs review{record.data.reviewReason ? `: ${record.data.reviewReason}` : ''}</span> : null}
                       </div>
-                      <div className="ledger-side ledger-side-compact">
-                        <strong className="ledger-amount-desktop">{currency(record.data.amount)}</strong>
-                        <div className="ledger-actions-compact">
-                          <button className="compact-action" onClick={() => startEdit(record)}>Edit</button>
-                          <button className="compact-action danger-text" onClick={() => void deleteTransaction(record.id)}>Delete</button>
-                        </div>
+                      <div className="ledger-cell">
+                        <span className="ledger-cell-label">Category</span>
+                        <span>{record.data.category} · {record.data.subcategory}</span>
+                      </div>
+                      <div className="ledger-cell">
+                        <span className="ledger-cell-label">Source</span>
+                        <span>{record.data.paymentMethod === 'Card' ? 'Credit Card' : record.data.paymentMethod}</span>
+                      </div>
+                      <div className="ledger-cell ledger-date-cell">
+                        <span className="ledger-cell-label">Date</span>
+                        <span>{record.data.date}</span>
+                        {record.data.notes ? <small>{record.data.notes}</small> : null}
+                      </div>
+                      <div className="ledger-cell ledger-amount-cell">
+                        <span className="ledger-cell-label">Amount</span>
+                        <strong>{currency(record.data.amount)}</strong>
+                      </div>
+                      <div className="ledger-actions-compact">
+                        <button className="compact-action" onClick={() => startEdit(record)}>Edit</button>
+                        <button className="compact-action danger-text" onClick={() => void deleteTransaction(record.id)}>Delete</button>
                       </div>
                     </article>
                   ))}
