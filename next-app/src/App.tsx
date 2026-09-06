@@ -7,6 +7,7 @@ import { QuickAddTransaction } from './components/QuickAddTransaction';
 import { HomeCustomizer, type HomeSectionId } from './components/HomeCustomizer';
 import { FinanceLabelsSettings } from './components/FinanceLabelsSettings';
 import { InstallAppPrompt } from './components/InstallAppPrompt';
+import { MonthFilter } from './components/MonthFilter';
 
 const SESSION_KEY = 'finance-vault-preview-phrase';
 const DEFAULT_WORKER_URL = window.location.port === '4174' ? 'http://127.0.0.1:8787' : window.location.origin;
@@ -690,10 +691,7 @@ export default function App() {
               </div>
               <div className="filters">
                 <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search reason, source, notes, or category" />
-                <select value={month} onChange={(event) => setMonth(event.target.value)}>
-                  <option value="All">All months</option>
-                  {months.map((value) => <option key={value} value={value}>{new Date(`${value}-01T00:00:00`).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}</option>)}
-                </select>
+                <MonthFilter value={month} months={months} onChange={setMonth} />
               </div>
               {visibleRecords.length === 0 ? (
                 <p className="empty">No matching transactions yet.</p>
@@ -725,7 +723,7 @@ export default function App() {
             <section className="card full-span" style={{ order: sectionOrder['monthly-budget'] }}>
               <div className="section-head">
                 <div><p className="eyebrow">Budget check</p><h2>This month</h2></div>
-                <span className="subtle">{today.slice(0, 7)}</span>
+                <span className="subtle">{new Date(`${today.slice(0, 7)}-01T00:00:00`).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}</span>
               </div>
               <div className="category-grid">
                 {categories.map((category) => <div className={`category-stat category-${category.toLowerCase()}`} key={category}>
