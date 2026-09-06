@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Finance Vault</title>
+  <rect x="4" y="4" width="56" height="56" rx="16" fill="#f3cc63" stroke="#251a12" stroke-width="4"/>
+  <path d="M17 25.5h30v22H17z" fill="#fffdf8" stroke="#251a12" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M17 25.5 32 17l15 8.5" fill="#b7ddf3" stroke="#251a12" stroke-width="4" stroke-linejoin="round"/>
+  <circle cx="32" cy="36.5" r="4.5" fill="#efc8d0" stroke="#251a12" stroke-width="3"/>
+  <path d="M32 41v4.5" stroke="#251a12" stroke-width="3.5" stroke-linecap="round"/>
+</svg>
