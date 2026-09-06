@@ -456,8 +456,20 @@ label {
 .tools-card,
 .ledger,
 .settings-panel,
-.category-manager-card {
+.category-manager-card,
+.home-slot,
+.dashboard-import,
+.dashboard-transactions,
+.dashboard-budget,
+.dashboard-review,
+.dashboard-overview {
   min-width: 0;
+}
+
+.dashboard-budget,
+.dashboard-overview,
+.quick-add-card {
+  container-type: inline-size;
 }
 
 .quick-add-display {
@@ -1148,6 +1160,7 @@ label {
     padding: 0.75rem;
   }
 
+  .two-up,
   .form-grid,
   .budget-grid,
   .filters,
@@ -1264,11 +1277,10 @@ label {
 
 /* Large phones / small tablets */
 @media (min-width: 30rem) and (max-width: 47.99rem) {
-  .hero {
-    grid-template-columns: 1fr;
-  }
-
-  .main-grid {
+  .hero,
+  .main-grid,
+  .two-up,
+  .filters {
     grid-template-columns: 1fr;
   }
 
@@ -1358,5 +1370,18 @@ label {
 
   .dashboard-overview {
     grid-column: span 8;
+  }
+}
+
+
+/* Component-level fallbacks: widgets adapt to their own width, not device names. */
+@container (max-width: 28rem) {
+  .category-grid,
+  .overview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .vault-overview {
+    grid-column: auto;
   }
 }
