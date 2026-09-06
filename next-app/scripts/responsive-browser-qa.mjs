@@ -46,24 +46,24 @@ if (await page.getByRole('button', { name: 'Generate phrase' }).isVisible().catc
   await page.getByRole('button', { name: 'Create vault' }).click();
 }
 
-if (await page.getByRole('heading', { name: 'Add transaction' }).isVisible().catch(() => false)) {
+await page.getByRole('heading', { name: 'Add transaction' }).waitFor({ timeout: 15_000 });
+
+if (await page.locator('.ledger-row').count() === 0) {
   const reason = page.getByPlaceholder('What did you spend on?');
-  if (await reason.inputValue() === '') {
-    await page.getByRole('button', { name: '1', exact: true }).click();
-    await page.getByRole('button', { name: '2', exact: true }).click();
-    await page.getByRole('button', { name: '3', exact: true }).click();
-    await reason.fill('Responsive QA transaction');
-    await page.waitForTimeout(100);
-    const save = page.getByRole('button', { name: 'Save transaction' });
-    await save.waitFor({ state: 'visible' });
-    if (await save.isDisabled()) throw new Error('Save transaction stayed disabled during QA setup');
-    await save.click();
-    await page.getByText('Responsive QA transaction', { exact: true }).waitFor({ timeout: 10_000 });
-    await page.waitForTimeout(1000);
-    const savedRows = await page.locator('.ledger-row').count();
-    console.log('QA rows after save:', savedRows);
-    if (savedRows < 1) throw new Error('Transaction appeared after save but disappeared from the ledger');
-  }
+  await page.getByRole('button', { name: '1', exact: true }).click();
+  await page.getByRole('button', { name: '2', exact: true }).click();
+  await page.getByRole('button', { name: '3', exact: true }).click();
+  await reason.fill('Responsive QA transaction');
+  await page.waitForTimeout(100);
+  const save = page.getByRole('button', { name: 'Save transaction' });
+  await save.waitFor({ state: 'visible' });
+  if (await save.isDisabled()) throw new Error('Save transaction stayed disabled during QA setup');
+  await save.click();
+  await page.getByText('Responsive QA transaction', { exact: true }).waitFor({ timeout: 10_000 });
+  await page.waitForTimeout(1000);
+  const savedRows = await page.locator('.ledger-row').count();
+  console.log('QA rows after save:', savedRows);
+  if (savedRows < 1) throw new Error('Transaction appeared after save but disappeared from the ledger');
 }
 
 console.log('QA rows before opening details:', await page.locator('.ledger-row').count());
