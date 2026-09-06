@@ -1392,3 +1392,175 @@ label {
     width: 100%;
   }
 }
+
+
+/* Widget dashboard + configurable labels */
+.label-manager {
+  display: grid;
+  gap: 18px;
+}
+
+.label-manager-block {
+  display: grid;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 2px solid var(--muted-soft);
+}
+
+.label-list {
+  display: grid;
+  gap: 8px;
+}
+
+.label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+  padding: 9px 10px;
+  border: var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-strong);
+}
+
+.label-row > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-weight: 850;
+}
+
+.label-row-actions {
+  display: flex;
+  gap: 5px;
+  flex: 0 0 auto;
+}
+
+.danger-mini {
+  background: #fff1ed;
+  color: var(--danger);
+}
+
+.inline-add {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.inline-add.compact {
+  margin-top: 10px;
+}
+
+.category-manager-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.category-manager-card {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px;
+  border: var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-strong);
+}
+
+.subcategory-wrap {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.subcategory-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 6px 8px;
+  border: var(--border);
+  border-radius: 999px;
+  background: var(--blue);
+  font-size: 0.76rem;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.subcategory-chip button {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-weight: 950;
+  line-height: 1;
+}
+
+/* Cards behave like a small widget board: vertical page flow + horizontal swipe rails on touch. */
+@media (max-width: 640px) {
+  .category-grid,
+  .review-grid,
+  .overview-grid {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(78%, 1fr);
+    grid-template-columns: none;
+    gap: 10px;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: x mandatory;
+    padding: 2px 4px 7px 1px;
+    scrollbar-width: none;
+  }
+
+  .category-grid::-webkit-scrollbar,
+  .review-grid::-webkit-scrollbar,
+  .overview-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .category-stat,
+  .review-card,
+  .overview-stat {
+    scroll-snap-align: start;
+  }
+
+  .vault-overview {
+    grid-column: auto;
+  }
+
+  .category-manager-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 420px) {
+  .inline-add {
+    grid-template-columns: 1fr;
+  }
+
+  .inline-add .button {
+    width: 100%;
+  }
+
+  .label-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .label-row-actions {
+    width: 100%;
+  }
+
+  .label-row-actions .icon-button {
+    flex: 1 1 0;
+    width: auto;
+  }
+
+  .category-grid,
+  .review-grid,
+  .overview-grid {
+    grid-auto-columns: 86%;
+  }
+}
