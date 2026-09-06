@@ -76,6 +76,7 @@ for (const [width, height] of widths) {
     const root = document.documentElement;
     const vw = root.clientWidth;
     const scrollOverflow = root.scrollWidth - vw;
+    const transactionCount = document.querySelectorAll('.ledger-row').length;
 
     const topLevel = [
       ...document.querySelectorAll(
@@ -123,8 +124,12 @@ for (const [width, height] of widths) {
       .sort((a, b) => (b.scrollWidth - b.clientWidth) - (a.scrollWidth - a.clientWidth))
       .slice(0, 12);
 
-    return { vw, scrollWidth: root.scrollWidth, scrollOverflow, outside, zeroWidth, elementOverflows };
+    return { vw, scrollWidth: root.scrollWidth, scrollOverflow, transactionCount, outside, zeroWidth, elementOverflows };
   });
+
+  if (diagnostics.transactionCount < 1) {
+    failures.push(`${width}px: QA transaction is missing from the transaction list`);
+  }
 
   if (diagnostics.scrollOverflow > 1) {
     failures.push(`${width}px: document overflows horizontally by ${diagnostics.scrollOverflow}px; likely elements: ${JSON.stringify(diagnostics.elementOverflows)}`);
