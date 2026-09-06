@@ -578,7 +578,6 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <InstallAppPrompt />
       <header className="hero">
         <div>
           <p className="eyebrow">Finance Vault</p>
@@ -589,6 +588,7 @@ export default function App() {
           <div><strong>Storage:</strong> encrypted locally + cloud backup</div>
           <div><strong>Sync:</strong> {syncStatus}</div>
           <div><strong>{lastSync}</strong></div>
+          <InstallAppPrompt />
         </div>
       </header>
 
