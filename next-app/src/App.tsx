@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { clearVaultData, getVaultMeta, getWorkerUrl, listEncryptedRecords, setVaultMeta, upsertEncryptedRecord } from './lib/db';
 import { createVaultMeta, decryptTransaction, deriveVault, encryptTransaction, generateRecoveryPhrase, normalizePhrase } from './lib/crypto';
 import { createRemoteVault, pullRemoteVault, pushRemoteVault } from './lib/sync';
-import { CATEGORIES, SUBCATEGORIES, type BudgetSettings, type Category, type EncryptedRecord, type SyncStatus, type TransactionData, type TransactionRecord, type VaultMeta } from './types';
+import { CATEGORIES, PAYMENT_METHODS, SUBCATEGORIES, type BudgetSettings, type Category, type EncryptedRecord, type PaymentMethod, type SyncStatus, type TransactionData, type TransactionRecord, type VaultMeta } from './types';
 import { QuickAddTransaction } from './components/QuickAddTransaction';
 
 const SESSION_KEY = 'finance-vault-preview-phrase';
