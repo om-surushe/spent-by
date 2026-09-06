@@ -2416,3 +2416,121 @@ body,
     font-size: 0.74rem;
   }
 }
+
+
+/* Desktop dashboard composition */
+@media (min-width: 900px) {
+  :root {
+    --page-width: 1440px;
+  }
+
+  .app-shell {
+    max-width: var(--page-width);
+  }
+
+  .main-grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .home-customizer,
+  .tools-card {
+    grid-column: 1 / -1;
+  }
+
+  .dashboard-quick-add {
+    grid-column: span 5;
+  }
+
+  .dashboard-import {
+    grid-column: span 7;
+  }
+
+  .dashboard-transactions {
+    grid-column: span 7;
+  }
+
+  .dashboard-budget {
+    grid-column: span 5;
+  }
+
+  .dashboard-review {
+    grid-column: span 5;
+  }
+
+  .dashboard-overview {
+    grid-column: span 7;
+  }
+
+  .dashboard-import textarea {
+    min-height: 240px;
+  }
+
+  .ledger-list {
+    gap: 8px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .dashboard-quick-add {
+    grid-column: span 4;
+  }
+
+  .dashboard-import {
+    grid-column: span 8;
+  }
+
+  .dashboard-transactions {
+    grid-column: span 8;
+  }
+
+  .dashboard-budget {
+    grid-column: span 4;
+  }
+
+  .dashboard-review {
+    grid-column: span 4;
+  }
+
+  .dashboard-overview {
+    grid-column: span 8;
+  }
+}
+
+/* Tablet stays balanced without becoming a narrow mobile column */
+@media (min-width: 600px) and (max-width: 899px) {
+  .app-shell {
+    max-width: 900px;
+  }
+
+  .main-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .home-customizer,
+  .tools-card,
+  .dashboard-import,
+  .dashboard-transactions {
+    grid-column: 1 / -1;
+  }
+
+  .dashboard-quick-add,
+  .dashboard-budget,
+  .dashboard-review,
+  .dashboard-overview {
+    grid-column: span 1;
+  }
+}
+
+/* Phone remains single-column */
+@media (max-width: 599px) {
+  .dashboard-quick-add,
+  .dashboard-import,
+  .dashboard-transactions,
+  .dashboard-budget,
+  .dashboard-review,
+  .dashboard-overview {
+    grid-column: 1;
+    width: 100%;
+  }
+}
