@@ -6,6 +6,7 @@ import { CATEGORIES, PAYMENT_METHODS, SUBCATEGORIES, type BudgetSettings, type C
 import { QuickAddTransaction } from './components/QuickAddTransaction';
 import { HomeCustomizer, type HomeSectionId } from './components/HomeCustomizer';
 import { FinanceLabelsSettings } from './components/FinanceLabelsSettings';
+import { InstallAppPrompt } from './components/InstallAppPrompt';
 
 const SESSION_KEY = 'finance-vault-preview-phrase';
 const DEFAULT_WORKER_URL = window.location.port === '4174' ? 'http://127.0.0.1:8787' : window.location.origin;
@@ -576,6 +577,7 @@ export default function App() {
 
   return (
     <div className="app-shell">
+      <InstallAppPrompt />
       <header className="hero">
         <div>
           <p className="eyebrow">Finance Vault</p>
