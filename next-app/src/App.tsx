@@ -642,11 +642,6 @@ export default function App() {
             hidden={hiddenSections}
             onOrderChange={setHomeOrder}
             onHiddenChange={setHiddenSections}
-            sources={sources}
-            defaultSource={defaultSource}
-            onSourcesChange={setSources}
-            onDefaultSourceChange={setDefaultSource}
-            allSources={PAYMENT_METHODS}
           />
 
           {!hiddenSections.includes('quick-add') ? (
