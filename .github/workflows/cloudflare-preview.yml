@@ -28,6 +28,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Check responsive UI rules
+        run: npm run check:responsive
+
       - name: Build app
         run: npm run build
 
