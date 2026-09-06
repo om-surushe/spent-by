@@ -1319,15 +1319,12 @@ label {
     grid-column: 1 / -1;
   }
 
-  .dashboard-transactions {
-    grid-column: span 8;
+  .dashboard-transactions,
+  .dashboard-review {
+    grid-column: 1 / -1;
   }
 
   .dashboard-budget {
-    grid-column: span 4;
-  }
-
-  .dashboard-review {
     grid-column: span 5;
   }
 
@@ -1350,15 +1347,12 @@ label {
 
 /* Wide desktop */
 @media (min-width: 90rem) {
-  .dashboard-transactions {
-    grid-column: span 7;
+  .dashboard-transactions,
+  .dashboard-review {
+    grid-column: 1 / -1;
   }
 
   .dashboard-budget {
-    grid-column: span 5;
-  }
-
-  .dashboard-review {
     grid-column: span 4;
   }
 
