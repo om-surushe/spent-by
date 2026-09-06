@@ -2377,3 +2377,42 @@ body,
     font-size: 0.76rem;
   }
 }
+
+
+/* Final Tier 1 cleanup from browser inspection */
+.home-customizer .customizer-body {
+  gap: 16px;
+}
+
+.home-customizer .preset-strip {
+  padding-bottom: 6px;
+}
+
+.home-customizer .section-order-row {
+  min-height: 56px;
+}
+
+@media (max-width: 599px) {
+  .home-customizer > summary {
+    align-items: flex-start;
+  }
+
+  .home-customizer > summary::after {
+    width: 36px;
+    height: 36px;
+  }
+
+  .home-customizer .section-order-row {
+    min-height: 0;
+  }
+
+  .home-customizer .drag-handle,
+  .home-customizer .reorder-fallback .icon-button {
+    width: 36px;
+    height: 36px;
+  }
+
+  .home-customizer .visibility-toggle {
+    font-size: 0.74rem;
+  }
+}
