@@ -26,11 +26,6 @@
   border-color: color-mix(in srgb, var(--color-accent) 35%, transparent);
 }
 
-.status-card,
-.stats {
-  align-content: start;
-}
-
 .eyebrow {
   margin: 0 0 var(--space-2);
   color: var(--color-accent);
@@ -41,11 +36,11 @@
 
 .button {
   min-height: 42px;
+  padding: 10px 14px;
   border: 1px solid rgba(148, 163, 184, 0.24);
   border-radius: var(--radius-sm);
   background: transparent;
   color: inherit;
-  padding: 10px 14px;
   transition: border-color var(--transition-fast), background var(--transition-fast), opacity var(--transition-fast);
 }
 
@@ -93,101 +88,9 @@
   width: auto;
 }
 
-.checklist {
-  display: grid;
-  gap: var(--space-4);
-  margin: 0;
-  padding-left: 20px;
-}
-
-.ledger-list {
-  content-visibility: auto;
-}
-
-.ledger-row {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--space-7);
-  min-width: 0;
-  padding: var(--space-7);
-  border: 1px solid var(--color-border-soft);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface-muted);
-}
-
-.ledger-row > div:first-child {
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-.ledger-row strong {
-  display: block;
-  margin-bottom: var(--space-2);
-}
-
-.ledger-row p {
-  margin: var(--space-1) 0;
-}
-
-.ledger-side {
-  display: grid;
-  min-width: 110px;
-  gap: var(--space-4);
-  justify-items: end;
-}
-
 .empty {
   margin: 0;
   color: var(--color-text-muted);
-}
-
-.category-stat,
-.review-card {
-  display: grid;
-  min-width: 0;
-  gap: var(--space-2);
-  padding: var(--space-6);
-  border: 1px solid var(--color-border-soft);
-  border-radius: var(--radius-lg);
-  background: rgba(2, 6, 23, 0.5);
-  overflow-wrap: anywhere;
-}
-
-.category-stat span,
-.category-stat small,
-.review-card span,
-.review-card p {
-  color: var(--color-text-muted);
-}
-
-.category-stat strong {
-  font-size: 1.125rem;
-}
-
-.category-needs { border-top: 3px solid #38bdf8; }
-.category-wants { border-top: 3px solid #f59e0b; }
-.category-family { border-top: 3px solid #a78bfa; }
-.category-miscellaneous { border-top: 3px solid #34d399; }
-
-.import-panel {
-  margin-top: var(--space-9);
-  padding-top: var(--space-9);
-  border-top: 1px solid var(--color-border);
-}
-
-.file-button {
-  display: inline-flex;
-  width: auto;
-  cursor: pointer;
-}
-
-.file-button input {
-  display: none;
-}
-
-.review-card h3,
-.review-card p {
-  margin: 0;
 }
 
 .review-badge {
