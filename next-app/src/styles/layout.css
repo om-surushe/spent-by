@@ -1,7 +1,7 @@
 .app-shell {
   width: min(100%, var(--content-max));
   margin: 0 auto;
-  padding: clamp(12px, 2.5vw, 20px);
+  padding: clamp(0.75rem, 2.5vw, 1.25rem);
 }
 
 .grid {
@@ -52,7 +52,7 @@
   margin-top: var(--space-5);
 }
 
-@media (max-width: 900px) {
+@media (max-width: 56.25rem) {
   .hero,
   .two-up,
   .main-grid {
@@ -60,7 +60,7 @@
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 37.5rem) {
   .actions,
   .section-head {
     flex-direction: column;

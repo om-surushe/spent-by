@@ -1,6 +1,6 @@
 .ledger__filters {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(180px, 240px);
+  grid-template-columns: minmax(0, 1fr) minmax(11.25rem, 15rem);
   gap: var(--space-4);
   margin: var(--space-3) 0 var(--space-6);
 }
@@ -16,7 +16,7 @@
   justify-content: space-between;
   gap: var(--space-5);
   padding: var(--space-5);
-  border: 1px solid var(--color-border-soft);
+  border: var(--border-width) solid var(--color-border-soft);
   border-radius: var(--radius-lg);
   background: var(--color-surface-strong);
 }
@@ -32,17 +32,18 @@
 
 .ledger__details p {
   margin: var(--space-1) 0;
+  color: var(--color-text-muted);
   overflow-wrap: anywhere;
 }
 
 .ledger__side {
   display: grid;
-  min-width: 120px;
+  min-width: 7.5rem;
   justify-items: end;
   gap: var(--space-3);
 }
 
-@media (max-width: 700px) {
+@media (max-width: 43.75rem) {
   .ledger__filters {
     grid-template-columns: 1fr;
   }

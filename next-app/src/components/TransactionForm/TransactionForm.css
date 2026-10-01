@@ -7,7 +7,7 @@
 .transaction-form__import-panel {
   margin-top: var(--space-9);
   padding-top: var(--space-9);
-  border-top: 1px solid var(--color-border);
+  border-top: var(--border-width) solid var(--color-border);
 }
 
 .transaction-form__file-button {
@@ -20,7 +20,7 @@
   display: none;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 43.75rem) {
   .transaction-form__grid {
     grid-template-columns: 1fr;
   }

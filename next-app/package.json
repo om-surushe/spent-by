@@ -9,6 +9,7 @@
     "preview": "vite preview --host 0.0.0.0 --port 4174",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
+    "standards:check": "node scripts/check-standards.mjs",
     "worker:dev": "wrangler dev --local --port 8787",
     "worker:types": "wrangler types --env preview",
     "worker:check": "tsc --noEmit -p tsconfig.worker.json",
