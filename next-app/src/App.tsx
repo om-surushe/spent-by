@@ -243,6 +243,15 @@ export default function App() {
     }
   }
 
+  function chooseNewVault() {
+    sessionStorage.removeItem(SESSION_KEY);
+    setPhrase('');
+    setDraftPhrase('');
+    setGeneratedPhrase('');
+    setSavedPhrase(false);
+    setVaultMetaState(null);
+  }
+
   async function createVault() {
     if (!generatedPhrase || !savedPhrase) return;
     setBusy(true);
@@ -640,15 +649,10 @@ export default function App() {
         <section className="card narrow">
           <h2>Unlock vault</h2>
           <p className="subtle">Local vault found on this device.</p>
-          <div className="vault-id-block">
-            <span className="vault-id-label">Vault ID</span>
-            <div className="vault-id-row">
-              <code className="vault-id-value">{vaultMeta.vaultId}</code>
-              <button className="button" type="button" onClick={() => void navigator.clipboard.writeText(vaultMeta.vaultId)}>Copy</button>
-            </div>
-          </div>
           <textarea rows={5} value={draftPhrase} onChange={(event) => setDraftPhrase(event.target.value)} placeholder="paste your 24 words" />
-          <button className="button primary" disabled={!draftPhrase.trim() || busy} onClick={() => void unlock(draftPhrase)}>Unlock</button>
+          <button className="button primary" disabled={!draftPhrase.trim() || busy} onClick={() => void unlock(draftPhrase)}>Unlock existing vault</button>
+          <button className="button" type="button" disabled={busy} onClick={chooseNewVault}>Create a new vault instead</button>
+          <p className="subtle">Creating it will replace this device’s local encrypted vault data. The old cloud vault remains recoverable only with its phrase.</p>
         </section>
       ) : (
         <main className="grid main-grid">
