@@ -1,0 +1,80 @@
+.app-shell {
+  width: min(100%, var(--content-max));
+  margin: 0 auto;
+  padding: clamp(12px, 2.5vw, 20px);
+}
+
+.grid {
+  display: grid;
+  gap: var(--space-7);
+}
+
+.two-up {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.main-grid {
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  align-items: start;
+}
+
+.full-span,
+.full {
+  grid-column: 1 / -1;
+}
+
+.stack,
+.status-card {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.narrow {
+  width: min(100%, var(--content-narrow));
+}
+
+.actions,
+.section-head {
+  display: flex;
+  gap: var(--space-5);
+}
+
+.actions {
+  flex-wrap: wrap;
+}
+
+.section-head {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.top-gap {
+  margin-top: var(--space-5);
+}
+
+@media (max-width: 900px) {
+  .hero,
+  .two-up,
+  .main-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .actions,
+  .section-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .actions .button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .card,
+  .hero,
+  .banner {
+    border-radius: var(--radius-lg);
+  }
+}
