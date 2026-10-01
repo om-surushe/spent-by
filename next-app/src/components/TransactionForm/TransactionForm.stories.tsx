@@ -27,9 +27,28 @@ function StoryHarness() {
   );
 }
 
+const storyArgs = {
+  form: EMPTY_TRANSACTION,
+  editingId: null,
+  busy: false,
+  showImport: false,
+  importText: '',
+  onFormChange: () => {},
+  onSubmit: () => {},
+  onCancelEdit: () => {},
+  onToggleImport: () => {},
+  onExportTransactions: () => {},
+  onExportBackup: () => {},
+  onImportTextChange: () => {},
+  onImportTransactions: () => {},
+  onCopyImportPrompt: () => {},
+  onLockVault: () => {}
+};
+
 const meta = {
   title: 'Finance/TransactionForm',
   component: TransactionForm,
+  args: storyArgs,
   render: () => <StoryHarness />
 } satisfies Meta<typeof TransactionForm>;
 
@@ -37,4 +56,6 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
-export const Mobile: Story = { parameters: { viewport: { defaultViewport: 'mobile' } } };
+export const Mobile: Story = {
+  parameters: { viewport: { defaultViewport: 'mobile' } }
+};
