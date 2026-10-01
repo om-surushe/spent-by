@@ -15,6 +15,7 @@ on:
         type: choice
         options:
           - core
+          - legacy
           - storybook
           - screenshots
           - all
@@ -28,12 +29,9 @@ concurrency:
   group: intentional-quality-${{ github.event.pull_request.number || inputs.ref || github.ref }}
   cancel-in-progress: true
 
-env:
-  WORKING_DIRECTORY: next-app
-
 jobs:
   core:
-    name: Core validation
+    name: Finance Vault core validation
     if: >-
       (github.event_name == 'workflow_dispatch' && (inputs.suite == 'core' || inputs.suite == 'all')) ||
       (github.event_name == 'pull_request' && github.event.label.name == 'run-quality-gate')
@@ -58,6 +56,26 @@ jobs:
         run: npm run worker:check
       - name: Build app
         run: npm run build
+
+  legacy:
+    name: Legacy app validation
+    if: >-
+      (github.event_name == 'workflow_dispatch' && (inputs.suite == 'legacy' || inputs.suite == 'all')) ||
+      (github.event_name == 'pull_request' && github.event.label.name == 'run-legacy-checks')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout requested ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.event.pull_request.head.sha }}
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Run legacy checks
+        run: npm run check
 
   storybook:
     name: Storybook validation
