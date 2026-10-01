@@ -32,6 +32,23 @@ The app is intentionally split by responsibility so the main files read like a m
 - `src/types.ts`
   - Shared domain types and category/payment configuration.
 
+## Styling
+
+The React components do not own visual styling. Shared application styling lives under `src/styles` and is composed through `src/styles/index.css`.
+
+- `src/styles/theme.css`
+  - App-wide design tokens: colors, spacing, radii, typography, content widths and transitions.
+- `src/styles/base.css`
+  - Element defaults, typography, form controls and global document behavior.
+- `src/styles/layout.css`
+  - Reusable grids/flex layouts and responsive breakpoints.
+- `src/styles/components.css`
+  - Reusable visual classes for cards, buttons, ledger rows, category blocks, review cards and other UI patterns.
+- `src/styles/index.css`
+  - Single stylesheet entrypoint imported by `src/main.tsx`.
+
+Prefer semantic class names over `style={{ ... }}` in JSX. Reuse theme tokens before introducing literal colors, spacing or radii. Responsive behavior belongs in the shared layout/component styles rather than being repeated inside components.
+
 ## Cloudflare Worker
 
 - `worker/src/index.ts`
@@ -60,6 +77,9 @@ The Worker entrypoint delegates authentication, persistence and vault-domain ope
 ## Where to add future features
 
 - New visual section: add a component under `src/components`.
+- New app-wide design token or theme value: add it to `src/styles/theme.css`.
+- New reusable layout/responsive pattern: add it to `src/styles/layout.css`.
+- New reusable component visual style: add it to `src/styles/components.css`.
 - Pure formatting/calculation: add a helper under `src/utils`.
 - Local persistence change: keep it in `src/lib/db.ts`.
 - Encryption change: keep it in `src/lib/crypto.ts`.
