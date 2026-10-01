@@ -1,0 +1,136 @@
+name: Intentional Quality Gate
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Git ref to validate
+        required: true
+        default: main
+        type: string
+      suite:
+        description: Validation suite to run
+        required: true
+        default: core
+        type: choice
+        options:
+          - core
+          - storybook
+          - screenshots
+          - all
+  pull_request:
+    types: [labeled]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: intentional-quality-${{ github.event.pull_request.number || inputs.ref || github.ref }}
+  cancel-in-progress: true
+
+env:
+  WORKING_DIRECTORY: next-app
+
+jobs:
+  core:
+    name: Core validation
+    if: >-
+      (github.event_name == 'workflow_dispatch' && (inputs.suite == 'core' || inputs.suite == 'all')) ||
+      (github.event_name == 'pull_request' && github.event.label.name == 'run-quality-gate')
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: next-app
+    steps:
+      - name: Checkout requested ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.event.pull_request.head.sha }}
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: next-app/package-lock.json
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Type-check worker
+        run: npm run worker:check
+      - name: Build app
+        run: npm run build
+
+  storybook:
+    name: Storybook validation
+    if: >-
+      (github.event_name == 'workflow_dispatch' && (inputs.suite == 'storybook' || inputs.suite == 'all')) ||
+      (github.event_name == 'pull_request' && github.event.label.name == 'run-storybook-checks')
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: next-app
+    steps:
+      - name: Checkout requested ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.event.pull_request.head.sha }}
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: next-app/package-lock.json
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Build Storybook
+        run: npm run build-storybook
+
+  responsive-screenshots:
+    name: Responsive screenshots
+    if: >-
+      (github.event_name == 'workflow_dispatch' && (inputs.suite == 'screenshots' || inputs.suite == 'all')) ||
+      (github.event_name == 'pull_request' && github.event.label.name == 'run-responsive-screenshots')
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: next-app
+    steps:
+      - name: Checkout requested ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.event.pull_request.head.sha }}
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: next-app/package-lock.json
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Build app
+        run: npm run build
+      - name: Install Chromium for screenshots
+        run: npx --yes playwright@1.55.0 install --with-deps chromium
+      - name: Start local preview
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 4174 > /tmp/finance-vault-preview.log 2>&1 &
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:4174 >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/finance-vault-preview.log
+          exit 1
+      - name: Capture responsive screenshots
+        run: |
+          mkdir -p screenshots
+          npx --yes playwright@1.55.0 screenshot --browser=chromium --viewport-size="375,812" --full-page http://127.0.0.1:4174 screenshots/mobile-375x812.png
+          npx --yes playwright@1.55.0 screenshot --browser=chromium --viewport-size="768,1024" --full-page http://127.0.0.1:4174 screenshots/tablet-768x1024.png
+          npx --yes playwright@1.55.0 screenshot --browser=chromium --viewport-size="1440,900" --full-page http://127.0.0.1:4174 screenshots/desktop-1440x900.png
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: finance-vault-responsive-screenshots
+          path: next-app/screenshots/*.png
+          if-no-files-found: error
+          retention-days: 7
