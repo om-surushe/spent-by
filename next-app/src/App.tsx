@@ -1,6 +1,7 @@
 import { type CSSProperties, useEffect, useMemo, useState } from 'react';
-import { clearVaultData, getVaultMeta, getWorkerUrl, listEncryptedRecords, setVaultMeta, upsertEncryptedRecord } from './lib/db';
+import { clearVaultData, getVaultMeta, getWorkerUrl, listEncryptedRecords, setVaultMeta, upsertEncryptedRecord, upsertEncryptedRecords } from './lib/db';
 import { createVaultMeta, decryptTransaction, deriveVault, encryptTransaction, generateRecoveryPhrase, normalizePhrase } from './lib/crypto';
+import { normalizeAmount } from './lib/money';
 import { createRemoteVault, pullRemoteVault, pushRemoteVault } from './lib/sync';
 import { CATEGORIES, PAYMENT_METHODS, SUBCATEGORIES, type BudgetSettings, type Category, type EncryptedRecord, type PaymentMethod, type SyncStatus, type TransactionData, type TransactionRecord, type VaultMeta } from './types';
 import { QuickAddTransaction } from './components/QuickAddTransaction';
@@ -301,7 +302,7 @@ export default function App() {
         updatedAt: timestamp,
         deletedAt: null,
         deviceId: vaultMeta.deviceId,
-        data: form
+        data: { ...form, amount: normalizeAmount(form.amount) }
       };
       await upsertEncryptedRecord(await encryptTransaction(record, encryptionKey));
       await reloadUnlockedRecords();
@@ -381,16 +382,25 @@ export default function App() {
   async function saveBudgets(event: React.FormEvent) {
     event.preventDefault();
     if (!vaultMeta) return;
-    const timestamp = new Date().toISOString();
-    const record: TransactionRecord = {
+    try {
+      const timestamp = new Date().toISOString();
+      const record: TransactionRecord = {
       id: settingsRecord?.id ?? crypto.randomUUID(),
       createdAt: settingsRecord?.createdAt ?? timestamp,
       updatedAt: timestamp,
       deletedAt: null,
       deviceId: vaultMeta.deviceId,
-      data: { ...emptyForm, kind: 'settings', reason: 'Private budget settings', settings: budgetDraft }
-    };
-    await updateRecord(record, 'Private budgets saved and synced.');
+      data: {
+        ...emptyForm,
+        kind: 'settings',
+        reason: 'Private budget settings',
+        settings: Object.fromEntries(Object.entries(budgetDraft).map(([category, amount]) => [category, amount ? normalizeAmount(amount, `${category} target`) : 0]))
+      }
+      };
+      await updateRecord(record, 'Private budgets saved and synced.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Budget save failed.');
+    }
   }
 
   function downloadJson(filename: string, value: unknown) {
@@ -422,30 +432,29 @@ export default function App() {
     try {
       const parsed = JSON.parse(importText) as Array<Record<string, unknown>>;
       if (!Array.isArray(parsed)) throw new Error('Import must be a JSON array.');
-      const { encryptionKey } = await deriveVault(phrase);
       const timestamp = new Date().toISOString();
-      for (const [index, item] of parsed.entries()) {
+      const recordsToImport = parsed.map((item, index): TransactionRecord => {
         const category = item.category as Category;
-        const amount = Number(item.amount);
-        if (!(amount > 0) || typeof item.reason !== 'string' || typeof item.date !== 'string' || !categories.includes(category)) {
-          throw new Error(`Row ${index + 1} has invalid amount, reason, date, or category.`);
+        if (typeof item.reason !== 'string' || !item.reason.trim() || typeof item.date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(item.date) || !categories.includes(category)) {
+          throw new Error(`Row ${index + 1} has an invalid reason, date, or category.`);
         }
         const payment = (item.paymentMethod ?? item.payment_method ?? 'Other') as PaymentMethod;
         const data: TransactionData = {
           ...emptyForm,
-          amount,
-          reason: item.reason,
+          amount: normalizeAmount(item.amount, `Row ${index + 1} amount`),
+          reason: item.reason.trim(),
           date: item.date,
           category,
           subcategory: typeof item.subcategory === 'string' ? item.subcategory : subcategories[category]?.[0] ?? 'Other',
           paymentMethod: sources.includes(payment) ? payment : defaultSource,
           notes: typeof item.notes === 'string' ? item.notes : '',
-          needsReview: Boolean(item.needsReview ?? item.needs_review),
-          reviewReason: String(item.reviewReason ?? item.review_reason ?? '')
+          needsReview: item.needsReview === true || item.needs_review === true,
+          reviewReason: typeof (item.reviewReason ?? item.review_reason) === 'string' ? String(item.reviewReason ?? item.review_reason) : ''
         };
-        const record: TransactionRecord = { id: crypto.randomUUID(), createdAt: timestamp, updatedAt: timestamp, deletedAt: null, deviceId: vaultMeta.deviceId, data };
-        await upsertEncryptedRecord(await encryptTransaction(record, encryptionKey));
-      }
+        return { id: crypto.randomUUID(), createdAt: timestamp, updatedAt: timestamp, deletedAt: null, deviceId: vaultMeta.deviceId, data };
+      });
+      const { encryptionKey } = await deriveVault(phrase);
+      await upsertEncryptedRecords(await Promise.all(recordsToImport.map((record) => encryptTransaction(record, encryptionKey))));
       await reloadUnlockedRecords();
       setImportText('');
       setShowImport(false);
@@ -827,6 +836,7 @@ export default function App() {
                 categories={categories}
                 subcategories={subcategories}
                 defaultSource={defaultSource}
+                usedCategories={activeRecords.map((record) => record.data.category)}
                 onSourcesChange={setSources}
                 onCategoriesChange={setCategories}
                 onSubcategoriesChange={setSubcategories}

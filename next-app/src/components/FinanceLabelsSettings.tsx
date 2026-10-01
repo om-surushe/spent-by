@@ -5,6 +5,7 @@ type Props = {
   categories: string[];
   subcategories: Record<string, string[]>;
   defaultSource: string;
+  usedCategories: string[];
   onSourcesChange: (next: string[]) => void;
   onCategoriesChange: (next: string[]) => void;
   onSubcategoriesChange: (next: Record<string, string[]>) => void;
@@ -24,6 +25,7 @@ export function FinanceLabelsSettings({
   categories,
   subcategories,
   defaultSource,
+  usedCategories,
   onSourcesChange,
   onCategoriesChange,
   onSubcategoriesChange,
@@ -115,7 +117,8 @@ export function FinanceLabelsSettings({
                   <button
                     className="icon-button danger-mini"
                     type="button"
-                    disabled={categories.length === 1}
+                    disabled={categories.length === 1 || usedCategories.includes(category)}
+                    title={usedCategories.includes(category) ? 'Categories with transactions cannot be archived.' : undefined}
                     onClick={() => {
                       onCategoriesChange(categories.filter((item) => item !== category));
                       const next = { ...subcategories };

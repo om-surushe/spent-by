@@ -55,3 +55,7 @@ export async function listEncryptedRecords() {
 export async function upsertEncryptedRecord(record: EncryptedRecord) {
   await db.records.put(record);
 }
+
+export async function upsertEncryptedRecords(records: EncryptedRecord[]) {
+  await db.transaction('rw', db.records, () => db.records.bulkPut(records));
+}
