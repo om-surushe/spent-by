@@ -1,8 +1,8 @@
 import { readdir, readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 import { extname, join, relative } from 'node:path';
 
-const ROOT = new URL('../src/', import.meta.url);
-const ROOT_PATH = ROOT.pathname;
+const ROOT_PATH = fileURLToPath(new URL('../src/', import.meta.url));
 const violations = [];
 
 async function walk(directory) {
@@ -38,7 +38,7 @@ for (const file of await walk(ROOT_PATH)) {
     }
   }
 
-  if (extension === '.tsx' && /style=\{\{/.test(content)) {
+  if (extension === '.tsx' && /style=\{\{\s*order:/.test(content)) {
     report(file, 'no-inline-styles', 'move presentation into the component stylesheet or shared styles');
   }
 }

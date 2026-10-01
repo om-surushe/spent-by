@@ -1,5 +1,5 @@
 import type React from 'react';
-import { CATEGORIES, PAYMENT_METHODS, SUBCATEGORIES, type Category, type PaymentMethod, type TransactionData } from '../../types';
+import { CATEGORIES, PAYMENT_METHODS, SUBCATEGORIES, type PaymentMethod, type TransactionData } from '../../types';
 import './TransactionForm.css';
 
 type TransactionFormProps = {
@@ -37,7 +37,7 @@ export function TransactionForm({
   onCopyImportPrompt,
   onLockVault
 }: TransactionFormProps) {
-  const activeSubcategories = SUBCATEGORIES[form.category];
+  const activeSubcategories = SUBCATEGORIES[form.category as keyof typeof SUBCATEGORIES] ?? [];
 
   return (
     <section className="card transaction-form" id="transaction-form">
@@ -62,7 +62,7 @@ export function TransactionForm({
         <label>
           Category
           <select value={form.category} onChange={(event) => {
-            const category = event.target.value as Category;
+            const category = event.target.value as keyof typeof SUBCATEGORIES;
             onFormChange({ ...form, category, subcategory: SUBCATEGORIES[category][0] });
           }}>
             {CATEGORIES.map((category) => <option key={category} value={category}>{category}</option>)}
