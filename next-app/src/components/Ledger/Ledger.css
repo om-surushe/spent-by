@@ -1,6 +1,6 @@
 .ledger__filters {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(180px, 240px);
+  grid-template-columns: minmax(0, 1fr) minmax(11.25rem, 15rem);
   gap: var(--space-4);
   margin: var(--space-3) 0 var(--space-9);
 }
@@ -16,7 +16,7 @@
   justify-content: space-between;
   gap: var(--space-5);
   padding: var(--space-5);
-  border: 1px solid var(--color-border-soft);
+  border: 0.0625rem solid var(--color-border-soft);
   border-radius: var(--radius-lg);
   background: var(--color-surface-strong);
 }
@@ -37,12 +37,12 @@
 
 .ledger__side {
   display: grid;
-  min-width: 120px;
+  min-width: 7.5rem;
   justify-items: end;
   gap: var(--space-3);
 }
 
-@media (max-width: 700px) {
+@media (max-width: 43.75rem) {
   .ledger__filters {
     grid-template-columns: 1fr;
     margin-bottom: var(--space-7);
