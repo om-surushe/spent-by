@@ -1,10 +1,10 @@
 .hero,
 .card,
 .banner {
-  border: 1px solid var(--color-border);
+  border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-xl);
   background: var(--color-surface);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(0.75rem);
 }
 
 .hero {
@@ -12,17 +12,17 @@
   grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr);
   gap: var(--space-9);
   margin-bottom: var(--space-7);
-  padding: clamp(18px, 3vw, 24px);
+  padding: clamp(1.125rem, 3vw, 1.5rem);
 }
 
 .card {
   min-width: 0;
-  padding: clamp(16px, 2.5vw, 20px);
+  padding: clamp(1rem, 2.5vw, 1.25rem);
 }
 
 .banner {
   margin-bottom: var(--space-7);
-  padding: 14px 18px;
+  padding: 0.875rem 1.125rem;
   border-color: color-mix(in srgb, var(--color-accent) 35%, transparent);
 }
 
@@ -35,9 +35,9 @@
 }
 
 .button {
-  min-height: 42px;
-  padding: 10px 14px;
-  border: 1px solid rgba(148, 163, 184, 0.24);
+  min-height: 2.625rem;
+  padding: 0.625rem 0.875rem;
+  border: var(--border-width) solid var(--color-border-interactive);
   border-radius: var(--radius-sm);
   background: transparent;
   color: inherit;
@@ -45,8 +45,8 @@
 }
 
 .button:hover:not(:disabled) {
-  border-color: rgba(148, 163, 184, 0.5);
-  background: rgba(148, 163, 184, 0.08);
+  border-color: var(--color-border-interactive-hover);
+  background: var(--color-surface-interactive-hover);
 }
 
 .button.primary {
@@ -57,7 +57,7 @@
 }
 
 .button.danger {
-  border-color: rgba(248, 113, 113, 0.4);
+  border-color: var(--color-danger-border);
   color: var(--color-danger);
 }
 
@@ -69,7 +69,7 @@
 .phrase-box {
   margin: var(--space-7) 0;
   padding: var(--space-7);
-  border: 1px solid var(--color-border);
+  border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface-strong);
   line-height: 1.7;
@@ -96,9 +96,9 @@
 .review-badge {
   display: inline-block;
   margin-top: var(--space-2);
-  padding: 4px 8px;
+  padding: 0.25rem 0.5rem;
   border-radius: var(--radius-pill);
-  background: rgba(245, 158, 11, 0.14);
+  background: var(--color-warning-surface);
   color: var(--color-warning);
   font-size: 0.75rem;
 }
