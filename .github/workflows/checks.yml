@@ -1,8 +1,33 @@
-name: Checks
+name: Legacy App Checks
 
 on:
   pull_request:
+    paths:
+      - 'server.js'
+      - 'auth-config.js'
+      - 'auth-config.test.js'
+      - 'scripts/**'
+      - 'package.json'
+      - 'sample-data.json'
+      - '.github/workflows/checks.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'server.js'
+      - 'auth-config.js'
+      - 'auth-config.test.js'
+      - 'scripts/**'
+      - 'package.json'
+      - 'sample-data.json'
+      - '.github/workflows/checks.yml'
   workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: legacy-checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   validate:
