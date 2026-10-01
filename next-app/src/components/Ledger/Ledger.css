@@ -2,7 +2,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(180px, 240px);
   gap: var(--space-4);
-  margin: var(--space-3) 0 var(--space-6);
+  margin: var(--space-3) 0 var(--space-9);
 }
 
 .ledger__list {
@@ -45,6 +45,7 @@
 @media (max-width: 700px) {
   .ledger__filters {
     grid-template-columns: 1fr;
+    margin-bottom: var(--space-7);
   }
 
   .ledger__row {
