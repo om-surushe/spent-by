@@ -72,9 +72,13 @@ Rules:
 1. Do not use JSX `style={{ ... }}` for normal presentation.
 2. Prefer semantic class names over presentation-oriented names.
 3. Use CSS custom properties from `theme.css`; avoid repeating hard-coded app colors and spacing values.
-4. Keep responsive behavior with the component when it is component-specific.
-5. Keep only broadly reusable layout behavior in global styles.
-6. Design mobile-first enough that components remain usable from 320px wide screens upward.
+4. Use responsive/relative CSS units. Application CSS should use `rem`, `em`, `%`, `fr`, viewport units or functions such as `clamp()` rather than `px`.
+5. Exact `px` viewport values are allowed only in tooling/tests such as Storybook or Playwright where they intentionally emulate a device viewport.
+6. Keep responsive behavior with the component when it is component-specific.
+7. Keep only broadly reusable layout behavior in global styles.
+8. Design mobile-first enough that components remain usable from 20rem wide screens upward.
+
+Run `npm run standards:check` to enforce the mechanically checkable rules.
 
 ## Naming conventions
 
@@ -86,6 +90,8 @@ Rules:
 - CSS component classes: component-prefixed BEM-style names such as `ledger__row` and `dashboard-sidebar__category-card`.
 - Boolean variables/functions should read as predicates where practical (`isLoading`, `hasError`, `canSync`).
 - Avoid abbreviations unless they are established domain terms.
+
+More detailed standards and audit findings live in `CODING_STANDARDS.md`.
 
 ## Storybook
 
@@ -133,14 +139,17 @@ The Worker entrypoint delegates authentication, persistence and vault-domain ope
 
 ## CI/CD philosophy
 
-Pipelines should run because a meaningful event occurred, not simply because any file changed.
+Pipelines run because a meaningful event was intentionally requested, not simply because a file changed.
 
-- Finance Vault CI is path-scoped to `next-app/**` and skips automatic runs while a pull request is still a draft.
-- Legacy checks run only when legacy application files change.
-- Superseded CI runs are cancelled to avoid spending compute on stale commits.
-- Storybook validation is opt-in: run it manually or add the `run-storybook-checks` label to a PR.
-- Preview deployment is manual and accepts an explicit ref.
-- Production legacy deployment runs only on a published release or an intentional manual dispatch; it no longer deploys on every push to `main`.
+The `Intentional Quality Gate` can be run manually for a chosen ref or requested on a PR with a label:
+
+- `core` / `run-quality-gate` - coding standards, worker type-check and app build.
+- `legacy` / `run-legacy-checks` - legacy app checks.
+- `storybook` / `run-storybook-checks` - Storybook build.
+- `screenshots` / `run-responsive-screenshots` - responsive screenshots for mobile, tablet and desktop.
+- `all` - all validation suites.
+
+Ordinary pushes, PR updates and merges do not automatically spend runner compute. Superseded intentional quality runs are cancelled. Preview deployment remains manual with an explicit ref. Production legacy deployment runs only on a published release or an intentional manual dispatch.
 
 ## Where to add future features
 
