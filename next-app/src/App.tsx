@@ -1,31 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
+import { DashboardSidebar } from './components/DashboardSidebar';
+import { Ledger } from './components/Ledger';
+import { ReviewQueue } from './components/ReviewQueue';
+import { TransactionForm } from './components/TransactionForm';
+import { UnlockVault } from './components/UnlockVault';
+import { VaultSetup } from './components/VaultSetup';
+import { DEFAULT_WORKER_URL, EMPTY_BUDGETS, EMPTY_TRANSACTION, SESSION_KEY, TODAY } from './constants';
 import { clearVaultData, getVaultMeta, getWorkerUrl, listEncryptedRecords, setVaultMeta, upsertEncryptedRecord } from './lib/db';
 import { createVaultMeta, decryptTransaction, deriveVault, encryptTransaction, generateRecoveryPhrase, normalizePhrase } from './lib/crypto';
 import { createRemoteVault, pullRemoteVault, pushRemoteVault } from './lib/sync';
 import { CATEGORIES, PAYMENT_METHODS, SUBCATEGORIES, type BudgetSettings, type Category, type EncryptedRecord, type PaymentMethod, type SyncStatus, type TransactionData, type TransactionRecord, type VaultMeta } from './types';
-
-const SESSION_KEY = 'finance-vault-preview-phrase';
-const DEFAULT_WORKER_URL = window.location.port === '4174' ? 'http://127.0.0.1:8787' : window.location.origin;
-const today = new Date().toISOString().slice(0, 10);
-
-const emptyForm: TransactionData = {
-  kind: 'transaction',
-  amount: 0,
-  reason: '',
-  date: today,
-  category: 'Needs',
-  subcategory: SUBCATEGORIES.Needs[0],
-  paymentMethod: 'UPI',
-  notes: '',
-  needsReview: false,
-  reviewReason: ''
-};
-
-const emptyBudgets: BudgetSettings = { Needs: 0, Wants: 0, Family: 0, Miscellaneous: 0 };
-
-function currency(amount: number) {
-  return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
-}
 
 export default function App() {
   const [vaultMeta, setVaultMetaState] = useState<VaultMeta | null>(null);
@@ -34,7 +18,7 @@ export default function App() {
   const [generatedPhrase, setGeneratedPhrase] = useState('');
   const [savedPhrase, setSavedPhrase] = useState(false);
   const [records, setRecords] = useState<TransactionRecord[]>([]);
-  const [form, setForm] = useState<TransactionData>(emptyForm);
+  const [form, setForm] = useState<TransactionData>(EMPTY_TRANSACTION);
   const [busy, setBusy] = useState(true);
   const [message, setMessage] = useState('');
   const [workerUrl, setWorkerUrlState] = useState(DEFAULT_WORKER_URL);
@@ -45,7 +29,7 @@ export default function App() {
   const [month, setMonth] = useState('All');
   const [importText, setImportText] = useState('');
   const [showImport, setShowImport] = useState(false);
-  const [budgetDraft, setBudgetDraft] = useState<BudgetSettings>(emptyBudgets);
+  const [budgetDraft, setBudgetDraft] = useState<BudgetSettings>(EMPTY_BUDGETS);
 
   useEffect(() => {
     void (async () => {
@@ -53,11 +37,8 @@ export default function App() {
       setVaultMetaState(meta ?? null);
       if (savedWorkerUrl) setWorkerUrlState(savedWorkerUrl);
       const saved = sessionStorage.getItem(SESSION_KEY);
-      if (saved && meta) {
-        await unlock(saved, meta);
-      } else {
-        setBusy(false);
-      }
+      if (saved && meta) await unlock(saved, meta);
+      else setBusy(false);
     })();
   }, []);
 
@@ -68,9 +49,7 @@ export default function App() {
 
     function markOnline() {
       setSyncStatus((current) => (current === 'offline' ? 'idle' : current));
-      if (phrase && vaultMeta) {
-        void syncNow('Back online. Synced encrypted changes.');
-      }
+      if (phrase && vaultMeta) void syncNow('Back online. Synced encrypted changes.');
     }
 
     window.addEventListener('offline', markOffline);
@@ -81,11 +60,19 @@ export default function App() {
     };
   }, [phrase, vaultMeta, workerUrl]);
 
-  const activeSubcategories = useMemo(() => SUBCATEGORIES[form.category], [form.category]);
-  const activeRecords = useMemo(() => records.filter((record) => !record.deletedAt && record.data.kind !== 'settings'), [records]);
-  const settingsRecord = useMemo(() => records.find((record) => !record.deletedAt && record.data.kind === 'settings'), [records]);
-  const budgets = settingsRecord?.data.settings ?? emptyBudgets;
-  const months = useMemo(() => Array.from(new Set(activeRecords.map((record) => record.data.date.slice(0, 7)))).sort().reverse(), [activeRecords]);
+  const activeRecords = useMemo(
+    () => records.filter((record) => !record.deletedAt && record.data.kind !== 'settings'),
+    [records]
+  );
+  const settingsRecord = useMemo(
+    () => records.find((record) => !record.deletedAt && record.data.kind === 'settings'),
+    [records]
+  );
+  const budgets = settingsRecord?.data.settings ?? EMPTY_BUDGETS;
+  const months = useMemo(
+    () => Array.from(new Set(activeRecords.map((record) => record.data.date.slice(0, 7)))).sort().reverse(),
+    [activeRecords]
+  );
   const visibleRecords = useMemo(() => {
     const query = search.trim().toLowerCase();
     return activeRecords
@@ -93,10 +80,25 @@ export default function App() {
       .filter((record) => !query || `${record.data.reason} ${record.data.notes} ${record.data.category} ${record.data.subcategory}`.toLowerCase().includes(query))
       .sort((a, b) => `${b.data.date}|${b.updatedAt}`.localeCompare(`${a.data.date}|${a.updatedAt}`));
   }, [activeRecords, month, search]);
-  const totalSpent = useMemo(() => activeRecords.reduce((sum, record) => sum + record.data.amount, 0), [activeRecords]);
-  const categoryTotals = useMemo(() => Object.fromEntries(CATEGORIES.map((category) => [category, activeRecords.filter((record) => record.data.date.startsWith(today.slice(0, 7)) && record.data.category === category).reduce((sum, record) => sum + record.data.amount, 0)])) as Record<Category, number>, [activeRecords]);
+  const totalSpent = useMemo(
+    () => activeRecords.reduce((sum, record) => sum + record.data.amount, 0),
+    [activeRecords]
+  );
+  const categoryTotals = useMemo(
+    () => Object.fromEntries(
+      CATEGORIES.map((category) => [
+        category,
+        activeRecords
+          .filter((record) => record.data.date.startsWith(TODAY.slice(0, 7)) && record.data.category === category)
+          .reduce((sum, record) => sum + record.data.amount, 0)
+      ])
+    ) as Record<Category, number>,
+    [activeRecords]
+  );
 
-  useEffect(() => { setBudgetDraft(budgets); }, [settingsRecord?.updatedAt]);
+  useEffect(() => {
+    setBudgetDraft(budgets);
+  }, [settingsRecord?.updatedAt]);
 
   async function loadRecords(unlockPhrase: string, meta: VaultMeta) {
     const { encryptionKey, vaultId } = await deriveVault(unlockPhrase);
@@ -154,7 +156,8 @@ export default function App() {
       setDraftPhrase('');
       setGeneratedPhrase('');
       setSavedPhrase(false);
-      setForm(emptyForm);
+      setForm(EMPTY_TRANSACTION);
+
       if (navigator.onLine) {
         await createRemoteVault({ workerUrl, authToken: derived.authToken, authHash: derived.authHash, deviceId: meta.deviceId, vaultId: meta.vaultId });
         setLastSync(`Cloud vault created: ${new Date().toLocaleString()}`);
@@ -191,13 +194,11 @@ export default function App() {
       };
       await upsertEncryptedRecord(await encryptTransaction(record, encryptionKey));
       await reloadUnlockedRecords();
-      setForm({ ...emptyForm, date: form.date, category: form.category, subcategory: SUBCATEGORIES[form.category][0] });
+      setForm({ ...EMPTY_TRANSACTION, date: form.date, category: form.category, subcategory: SUBCATEGORIES[form.category][0] });
       setEditingId(null);
       setMessage(existing ? 'Transaction updated locally.' : 'Transaction saved locally.');
       setSyncStatus(navigator.onLine ? 'idle' : 'offline');
-      if (navigator.onLine) {
-        await syncNow(existing ? 'Transaction updated and synced.' : 'Transaction saved and synced.');
-      }
+      if (navigator.onLine) await syncNow(existing ? 'Transaction updated and synced.' : 'Transaction saved and synced.');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Save failed.');
     } finally {
@@ -213,18 +214,13 @@ export default function App() {
     setMessage('');
     try {
       const { encryptionKey } = await deriveVault(phrase);
-      const tombstone: TransactionRecord = {
-        ...existing,
-        deletedAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
+      const timestamp = new Date().toISOString();
+      const tombstone: TransactionRecord = { ...existing, deletedAt: timestamp, updatedAt: timestamp };
       await upsertEncryptedRecord(await encryptTransaction(tombstone, encryptionKey));
       await reloadUnlockedRecords();
       setMessage('Deleted locally with tombstone.');
       setSyncStatus(navigator.onLine ? 'idle' : 'offline');
-      if (navigator.onLine) {
-        await syncNow('Deleted locally and synced encrypted changes.');
-      }
+      if (navigator.onLine) await syncNow('Deleted locally and synced encrypted changes.');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Delete failed.');
     } finally {
@@ -234,7 +230,7 @@ export default function App() {
 
   function startEdit(record: TransactionRecord) {
     setEditingId(record.id);
-    setForm({ ...emptyForm, ...record.data, kind: 'transaction' });
+    setForm({ ...EMPTY_TRANSACTION, ...record.data, kind: 'transaction' });
     document.getElementById('transaction-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
@@ -273,7 +269,7 @@ export default function App() {
       updatedAt: timestamp,
       deletedAt: null,
       deviceId: vaultMeta.deviceId,
-      data: { ...emptyForm, kind: 'settings', reason: 'Private budget settings', settings: budgetDraft }
+      data: { ...EMPTY_TRANSACTION, kind: 'settings', reason: 'Private budget settings', settings: budgetDraft }
     };
     await updateRecord(record, 'Private budgets saved and synced.');
   }
@@ -288,7 +284,7 @@ export default function App() {
   }
 
   function exportReadableTransactions() {
-    downloadJson(`finance-vault-transactions-${today}.json`, activeRecords.map((record) => ({
+    downloadJson(`finance-vault-transactions-${TODAY}.json`, activeRecords.map((record) => ({
       amount: record.data.amount,
       reason: record.data.reason,
       date: record.data.date,
@@ -309,6 +305,7 @@ export default function App() {
       if (!Array.isArray(parsed)) throw new Error('Import must be a JSON array.');
       const { encryptionKey } = await deriveVault(phrase);
       const timestamp = new Date().toISOString();
+
       for (const [index, item] of parsed.entries()) {
         const category = item.category as Category;
         const amount = Number(item.amount);
@@ -317,7 +314,7 @@ export default function App() {
         }
         const payment = (item.paymentMethod ?? item.payment_method ?? 'Other') as PaymentMethod;
         const data: TransactionData = {
-          ...emptyForm,
+          ...EMPTY_TRANSACTION,
           amount,
           reason: item.reason,
           date: item.date,
@@ -328,9 +325,17 @@ export default function App() {
           needsReview: Boolean(item.needsReview ?? item.needs_review),
           reviewReason: String(item.reviewReason ?? item.review_reason ?? '')
         };
-        const record: TransactionRecord = { id: crypto.randomUUID(), createdAt: timestamp, updatedAt: timestamp, deletedAt: null, deviceId: vaultMeta.deviceId, data };
+        const record: TransactionRecord = {
+          id: crypto.randomUUID(),
+          createdAt: timestamp,
+          updatedAt: timestamp,
+          deletedAt: null,
+          deviceId: vaultMeta.deviceId,
+          data
+        };
         await upsertEncryptedRecord(await encryptTransaction(record, encryptionKey));
       }
+
       await reloadUnlockedRecords();
       setImportText('');
       setShowImport(false);
@@ -351,7 +356,7 @@ export default function App() {
 
   async function exportBackup() {
     const encryptedRecords = await listEncryptedRecords();
-    downloadJson(`finance-vault-encrypted-${today}.json`, { vaultMeta, encryptedRecords });
+    downloadJson(`finance-vault-encrypted-${TODAY}.json`, { vaultMeta, encryptedRecords });
   }
 
   function lockVault() {
@@ -379,43 +384,15 @@ export default function App() {
     if (!vaultMeta || !phrase) return;
     const derived = await deriveVault(phrase);
     await withSync(async () => {
-      await createRemoteVault({
-        workerUrl,
-        authToken: derived.authToken,
-        authHash: derived.authHash,
-        deviceId: vaultMeta.deviceId,
-        vaultId: vaultMeta.vaultId
-      });
+      await createRemoteVault({ workerUrl, authToken: derived.authToken, authHash: derived.authHash, deviceId: vaultMeta.deviceId, vaultId: vaultMeta.vaultId });
     }, 'Cloud vault created.');
-  }
-
-  async function pushCloud() {
-    if (!vaultMeta || !phrase) return;
-    const derived = await deriveVault(phrase);
-    await withSync(async () => {
-      const encryptedRecords = await listEncryptedRecords();
-      await pushRemoteVault({
-        workerUrl,
-        authToken: derived.authToken,
-        authHash: derived.authHash,
-        deviceId: vaultMeta.deviceId,
-        vaultId: vaultMeta.vaultId,
-        records: encryptedRecords
-      });
-    }, 'Encrypted records pushed to cloud.');
   }
 
   async function pullCloud() {
     if (!vaultMeta || !phrase) return;
     const derived = await deriveVault(phrase);
     await withSync(async () => {
-      const snapshot = await pullRemoteVault({
-        workerUrl,
-        authToken: derived.authToken,
-        authHash: derived.authHash,
-        deviceId: vaultMeta.deviceId,
-        vaultId: vaultMeta.vaultId
-      });
+      const snapshot = await pullRemoteVault({ workerUrl, authToken: derived.authToken, authHash: derived.authHash, deviceId: vaultMeta.deviceId, vaultId: vaultMeta.vaultId });
       await applySnapshot(snapshot);
       setMessage(`Pulled ${snapshot.records.length} encrypted records from cloud.`);
     });
@@ -445,13 +422,7 @@ export default function App() {
     try {
       const derived = await deriveVault(draftPhrase);
       const meta = createVaultMeta(derived.vaultId);
-      const snapshot = await pullRemoteVault({
-        workerUrl,
-        authToken: derived.authToken,
-        authHash: derived.authHash,
-        deviceId: meta.deviceId,
-        vaultId: meta.vaultId
-      });
+      const snapshot = await pullRemoteVault({ workerUrl, authToken: derived.authToken, authHash: derived.authHash, deviceId: meta.deviceId, vaultId: meta.vaultId });
       await clearVaultData();
       await setVaultMeta(meta);
       await applySnapshot(snapshot, meta, derived.normalizedPhrase);
@@ -488,201 +459,78 @@ export default function App() {
       {message ? <div className="banner">{message}</div> : null}
 
       {!vaultMeta ? (
-        <section className="grid two-up">
-          <article className="card">
-            <h2>Create new vault</h2>
-            <p className="subtle">Generate one recovery phrase for encryption, sync, and recovery. We cannot reset it.</p>
-            <button className="button" onClick={() => setGeneratedPhrase(generateRecoveryPhrase())}>Generate phrase</button>
-            {generatedPhrase ? (
-              <>
-                <div className="phrase-box">{generatedPhrase}</div>
-                <label className="check">
-                  <input type="checkbox" checked={savedPhrase} onChange={(event) => setSavedPhrase(event.target.checked)} />
-                  I saved these 24 words.
-                </label>
-                <button className="button primary" disabled={!savedPhrase || busy} onClick={() => void createVault()}>Create vault</button>
-              </>
-            ) : null}
-          </article>
-
-          <article className="card">
-            <h2>Recover existing cloud vault</h2>
-            <p className="subtle">Use this on a fresh browser or device to restore your encrypted transactions and private settings.</p>
-            <textarea rows={5} value={draftPhrase} onChange={(event) => setDraftPhrase(event.target.value)} placeholder="paste your 24 words" />
-            <div className="actions">
-              <button className="button primary" disabled={!draftPhrase.trim() || busy} onClick={() => void recoverFromCloud()}>Recover from cloud</button>
-            </div>
-          </article>
-        </section>
+        <VaultSetup
+          draftPhrase={draftPhrase}
+          generatedPhrase={generatedPhrase}
+          savedPhrase={savedPhrase}
+          busy={busy}
+          onDraftPhraseChange={setDraftPhrase}
+          onGeneratePhrase={() => setGeneratedPhrase(generateRecoveryPhrase())}
+          onSavedPhraseChange={setSavedPhrase}
+          onCreateVault={() => void createVault()}
+          onRecoverFromCloud={() => void recoverFromCloud()}
+        />
       ) : !phrase ? (
-        <section className="card narrow">
-          <h2>Unlock vault</h2>
-          <p className="subtle">Local data exists for vault <code>{vaultMeta.vaultId.slice(0, 12)}…</code>.</p>
-          <textarea rows={5} value={draftPhrase} onChange={(event) => setDraftPhrase(event.target.value)} placeholder="paste your 24 words" />
-          <button className="button primary" disabled={!draftPhrase.trim() || busy} onClick={() => void unlock(draftPhrase)}>Unlock</button>
-        </section>
+        <UnlockVault
+          vaultMeta={vaultMeta}
+          draftPhrase={draftPhrase}
+          busy={busy}
+          onDraftPhraseChange={setDraftPhrase}
+          onUnlock={() => void unlock(draftPhrase)}
+        />
       ) : (
         <main className="grid main-grid">
-          <section className="card" id="transaction-form">
-            <div className="section-head">
-              <h2>{editingId ? 'Edit transaction' : 'Add transaction'}</h2>
-              <button className="button" onClick={lockVault}>Lock vault</button>
-            </div>
-            <form className="form-grid" onSubmit={submitTransaction}>
-              <label>
-                Amount
-                <input type="number" min="0" step="0.01" value={form.amount || ''} onChange={(event) => setForm({ ...form, amount: Number(event.target.value) })} required />
-              </label>
-              <label>
-                Date
-                <input type="date" value={form.date} onChange={(event) => setForm({ ...form, date: event.target.value })} required />
-              </label>
-              <label className="full">
-                Reason
-                <input value={form.reason} onChange={(event) => setForm({ ...form, reason: event.target.value })} required />
-              </label>
-              <label>
-                Category
-                <select value={form.category} onChange={(event) => {
-                  const category = event.target.value as Category;
-                  setForm({ ...form, category, subcategory: SUBCATEGORIES[category][0] });
-                }}>
-                  {CATEGORIES.map((category) => <option key={category} value={category}>{category}</option>)}
-                </select>
-              </label>
-              <label>
-                Subcategory
-                <select value={form.subcategory} onChange={(event) => setForm({ ...form, subcategory: event.target.value })}>
-                  {activeSubcategories.map((subcategory) => <option key={subcategory} value={subcategory}>{subcategory}</option>)}
-                </select>
-              </label>
-              <label>
-                Payment
-                <select value={form.paymentMethod} onChange={(event) => setForm({ ...form, paymentMethod: event.target.value as PaymentMethod })}>
-                  {PAYMENT_METHODS.map((method) => <option key={method} value={method}>{method}</option>)}
-                </select>
-              </label>
-              <label className="full">
-                Notes
-                <textarea rows={3} value={form.notes} onChange={(event) => setForm({ ...form, notes: event.target.value })} />
-              </label>
-              <label className="check full">
-                <input type="checkbox" checked={Boolean(form.needsReview)} onChange={(event) => setForm({ ...form, needsReview: event.target.checked })} />
-                Flag this transaction for review
-              </label>
-              {form.needsReview ? <label className="full">
-                Review note
-                <input value={form.reviewReason ?? ''} onChange={(event) => setForm({ ...form, reviewReason: event.target.value })} placeholder="What needs checking?" />
-              </label> : null}
-              <div className="full actions">
-                <button className="button primary" disabled={busy} type="submit">{editingId ? 'Update transaction' : 'Add transaction'}</button>
-                {editingId ? <button className="button" type="button" onClick={() => { setEditingId(null); setForm(emptyForm); }}>Cancel edit</button> : null}
-                <button className="button" type="button" onClick={() => setShowImport((value) => !value)}>Import JSON</button>
-                <button className="button" type="button" onClick={exportReadableTransactions}>Export transactions</button>
-                <button className="button" type="button" onClick={() => void exportBackup()}>Export encrypted backup</button>
-              </div>
-            </form>
-            {showImport ? <div className="import-panel">
-              <div className="section-head"><h2>Import transactions</h2><button className="button" onClick={() => void copyImportPrompt()}>Copy AI prompt</button></div>
-              <textarea rows={8} value={importText} onChange={(event) => setImportText(event.target.value)} placeholder='Paste a JSON array, for example [{"amount":500,"reason":"Lunch","date":"2026-09-06","category":"Wants"}]' />
-              <div className="actions top-gap">
-                <label className="button file-button">Choose JSON file<input type="file" accept="application/json,.json" onChange={(event) => { const file = event.target.files?.[0]; if (file) void file.text().then(setImportText); }} /></label>
-                <button className="button primary" disabled={!importText.trim() || busy} onClick={() => void importTransactions()}>Import and sync</button>
-              </div>
-            </div> : null}
-          </section>
+          <TransactionForm
+            form={form}
+            editingId={editingId}
+            busy={busy}
+            showImport={showImport}
+            importText={importText}
+            onFormChange={setForm}
+            onSubmit={submitTransaction}
+            onCancelEdit={() => { setEditingId(null); setForm(EMPTY_TRANSACTION); }}
+            onToggleImport={() => setShowImport((value) => !value)}
+            onExportTransactions={exportReadableTransactions}
+            onExportBackup={() => void exportBackup()}
+            onImportTextChange={setImportText}
+            onImportTransactions={() => void importTransactions()}
+            onCopyImportPrompt={() => void copyImportPrompt()}
+            onLockVault={lockVault}
+          />
 
-          <section className="stack">
-            <article className="card stats">
-              <div>
-                <p className="eyebrow">Vault</p>
-                <strong>{vaultMeta.vaultId.slice(0, 12)}…</strong>
-              </div>
-              <div>
-                <p className="eyebrow">Transactions</p>
-                <strong>{activeRecords.length}</strong>
-              </div>
-              <div>
-                <p className="eyebrow">Spent</p>
-                <strong>{currency(totalSpent)}</strong>
-              </div>
-            </article>
+          <DashboardSidebar
+            vaultMeta={vaultMeta}
+            activeCount={activeRecords.length}
+            totalSpent={totalSpent}
+            categoryTotals={categoryTotals}
+            budgets={budgets}
+            budgetDraft={budgetDraft}
+            busy={busy}
+            onBudgetDraftChange={setBudgetDraft}
+            onSaveBudgets={saveBudgets}
+            onCreateCloudVault={() => void createCloudVault()}
+            onSyncNow={() => void syncNow()}
+            onPullCloud={() => void pullCloud()}
+          />
 
-            <article className="card">
-              <h2>This month</h2>
-              <div className="category-grid">
-                {CATEGORIES.map((category) => <div className={`category-stat category-${category.toLowerCase()}`} key={category}>
-                  <span>{category}</span><strong>{currency(categoryTotals[category])}</strong>
-                  {budgets[category] > 0 ? <small>{Math.round((categoryTotals[category] / budgets[category]) * 100)}% of monthly target</small> : <small>No target set</small>}
-                </div>)}
-              </div>
-            </article>
+          <Ledger
+            records={activeRecords}
+            visibleRecords={visibleRecords}
+            search={search}
+            month={month}
+            months={months}
+            onSearchChange={setSearch}
+            onMonthChange={setMonth}
+            onEdit={startEdit}
+            onDelete={(id) => void deleteTransaction(id)}
+          />
 
-            <article className="card">
-              <h2>Encrypted cloud sync</h2>
-              <div className="actions top-gap">
-                <button className="button" disabled={busy} onClick={() => void createCloudVault()}>Create cloud vault</button>
-                <button className="button" disabled={busy} onClick={() => void syncNow()}>Sync now</button>
-                <button className="button" disabled={busy} onClick={() => void pullCloud()}>Pull cloud</button>
-              </div>
-              <p className="subtle top-gap">Changes save locally first and sync automatically when online. The server receives ciphertext only.</p>
-            </article>
-
-            <article className="card">
-              <h2>Private monthly targets</h2>
-              <p className="subtle">These targets are encrypted and sync with your vault.</p>
-              <form className="budget-grid" onSubmit={saveBudgets}>
-                {CATEGORIES.map((category) => <label key={category}>{category}<input type="number" min="0" value={budgetDraft[category] || ''} onChange={(event) => setBudgetDraft({ ...budgetDraft, [category]: Number(event.target.value) })} placeholder="0" /></label>)}
-                <button className="button primary full" disabled={busy}>Save targets</button>
-              </form>
-            </article>
-          </section>
-
-          <section className="card ledger full-span">
-            <div className="section-head">
-              <div><p className="eyebrow">Ledger</p><h2>Transactions</h2></div>
-              <span className="subtle">{visibleRecords.length} shown</span>
-            </div>
-            <div className="filters">
-              <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search reason, notes, or category" />
-              <select value={month} onChange={(event) => setMonth(event.target.value)}>
-                <option value="All">All months</option>
-                {months.map((value) => <option key={value} value={value}>{new Date(`${value}-01T00:00:00`).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}</option>)}
-              </select>
-            </div>
-            {visibleRecords.length === 0 ? (
-              <p className="empty">No matching transactions yet.</p>
-            ) : (
-              <div className="ledger-list">
-                {visibleRecords.map((record) => (
-                  <article className="ledger-row" key={record.id}>
-                    <div>
-                      <strong>{record.data.reason}</strong>
-                      <p>{record.data.category} · {record.data.subcategory} · {record.data.paymentMethod}</p>
-                      <p className="subtle">{record.data.date}{record.data.notes ? ` · ${record.data.notes}` : ''}</p>
-                      {record.data.needsReview ? <span className="review-badge">Needs review{record.data.reviewReason ? `: ${record.data.reviewReason}` : ''}</span> : null}
-                    </div>
-                    <div className="ledger-side">
-                      <strong>{currency(record.data.amount)}</strong>
-                      <div className="actions"><button className="button" onClick={() => startEdit(record)}>Edit</button><button className="button danger" onClick={() => void deleteTransaction(record.id)}>Delete</button></div>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            )}
-          </section>
-
-          <section className="card full-span">
-            <div className="section-head"><div><p className="eyebrow">Review queue</p><h2>Transactions needing attention</h2></div><strong>{activeRecords.filter((record) => record.data.needsReview).length}</strong></div>
-            <div className="review-grid">
-              {activeRecords.filter((record) => record.data.needsReview).map((record) => <article className="review-card" key={record.id}>
-                <span>{record.data.date}</span><strong>{currency(record.data.amount)}</strong><h3>{record.data.reason}</h3>
-                <p>{record.data.reviewReason || 'Check the category or details.'}</p>
-                <div className="actions"><button className="button" onClick={() => startEdit(record)}>Edit details</button><button className="button primary" disabled={busy} onClick={() => void markReviewed(record)}>Mark reviewed</button></div>
-              </article>)}
-              {activeRecords.every((record) => !record.data.needsReview) ? <p className="empty">Review queue is clear.</p> : null}
-            </div>
-          </section>
+          <ReviewQueue
+            records={activeRecords}
+            busy={busy}
+            onEdit={startEdit}
+            onMarkReviewed={(record) => void markReviewed(record)}
+          />
         </main>
       )}
     </div>
