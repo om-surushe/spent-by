@@ -1,6 +1,7 @@
 import { getMovementSign, getMovementType } from '../../../../domain/moneyMovement';
 import type { TransactionRecord } from '../../../../types';
 import { formatCurrency } from '../../../../utils/format';
+import './MoneyMovementLedger.css';
 
 type MoneyMovementLedgerProps = {
   records: TransactionRecord[];
