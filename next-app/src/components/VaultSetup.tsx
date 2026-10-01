@@ -1,1 +1,0 @@
-export { VaultSetup } from './VaultSetup';
