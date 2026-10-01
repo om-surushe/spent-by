@@ -52,6 +52,8 @@ jobs:
           cache-dependency-path: next-app/package-lock.json
       - name: Install dependencies
         run: npm install --no-audit --no-fund
+      - name: Check coding standards
+        run: npm run standards:check
       - name: Type-check worker
         run: npm run worker:check
       - name: Build app
