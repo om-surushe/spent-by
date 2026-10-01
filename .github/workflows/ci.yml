@@ -1,15 +1,26 @@
-name: CI
+name: Finance Vault CI
 
 on:
   pull_request:
+    paths:
+      - 'next-app/**'
+      - '.github/workflows/ci.yml'
   push:
     branches: [main]
+    paths:
+      - 'next-app/**'
+      - '.github/workflows/ci.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: finance-vault-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  encrypted-vault:
+  validate:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -21,7 +32,9 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: next-app/package-lock.json
-      - run: npm ci
-      - run: npm run worker:types
-      - run: npm run worker:check
-      - run: npm run build
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Type-check worker
+        run: npm run worker:check
+      - name: Build app
+        run: npm run build
