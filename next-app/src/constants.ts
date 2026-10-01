@@ -6,6 +6,7 @@ export const TODAY = new Date().toISOString().slice(0, 10);
 
 export const EMPTY_TRANSACTION: TransactionData = {
   kind: 'transaction',
+  movementType: 'Expense',
   amount: 0,
   reason: '',
   date: TODAY,

@@ -1,5 +1,6 @@
 export const CATEGORIES = ['Needs', 'Wants', 'Family', 'Miscellaneous'] as const;
 export const PAYMENT_METHODS = ['Card', 'UPI', 'Cash', 'Bank', 'Other'] as const;
+export const MONEY_MOVEMENT_TYPES = ['Expense', 'Income', 'Transfer', 'Refund', 'Reimbursement'] as const;
 
 export const SUBCATEGORIES = {
   Needs: ['Rent', 'Food Maid', 'Cleaning Maid', 'Groceries', 'Transport', 'Electricity', 'WiFi', 'Home Travel', 'Home Sent', 'Home EMI', 'Recharge', 'Medical', 'Education', 'Household', 'Other Needs'],
@@ -10,10 +11,12 @@ export const SUBCATEGORIES = {
 
 export type Category = (typeof CATEGORIES)[number];
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
+export type MoneyMovementType = (typeof MONEY_MOVEMENT_TYPES)[number];
 export type Subcategory = (typeof SUBCATEGORIES)[Category][number];
 
 export type TransactionData = {
   kind?: 'transaction' | 'settings';
+  movementType?: MoneyMovementType;
   amount: number;
   reason: string;
   date: string;
