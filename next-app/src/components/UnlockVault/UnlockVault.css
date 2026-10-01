@@ -1,0 +1,7 @@
+.unlock-vault {
+  width: min(100%, var(--content-narrow));
+}
+
+.unlock-vault .button {
+  margin-top: var(--space-4);
+}
