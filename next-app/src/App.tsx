@@ -793,11 +793,6 @@ export default function App() {
               <div className="overview-grid">
                 <div className="overview-stat"><span>Transactions</span><strong>{activeRecords.length}</strong></div>
                 <div className="overview-stat"><span>Total spent</span><strong>{currency(totalSpent)}</strong></div>
-                <div className="overview-stat vault-overview">
-                  <span>Vault ID</span>
-                  <code>{vaultMeta.vaultId}</code>
-                  <button className="text-button" type="button" onClick={() => void navigator.clipboard.writeText(vaultMeta.vaultId)}>Copy</button>
-                </div>
               </div>
             </section>
           ) : null}
@@ -822,7 +817,7 @@ export default function App() {
                 <div className="sync-summary">
                   <span className={`sync-pill sync-${syncStatus}`}>{syncStatus === 'ok' ? 'Synced' : syncStatus}</span>
                   <span className="subtle">{lastSync}</span>
-                  <button className="button" disabled={busy || !navigator.onLine} onClick={() => void syncNow()}>Sync now</button>
+                  <button className="button" disabled={busy} onClick={() => void syncNow()}>Sync now</button>
                 </div>
                 <p className="subtle compact-copy">No interval setting: changes sync immediately. This keeps the behavior predictable.</p>
               </section>
