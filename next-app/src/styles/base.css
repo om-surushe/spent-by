@@ -3,12 +3,12 @@
 }
 
 html {
-  min-width: 320px;
+  min-width: 20rem;
   background: var(--color-bg);
 }
 
 body {
-  min-width: 320px;
+  min-width: 20rem;
   min-height: 100vh;
   margin: 0;
   overflow-x: hidden;
@@ -58,7 +58,7 @@ code,
 textarea,
 input,
 select {
-  border: 1px solid var(--color-border);
+  border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface-strong);
   color: inherit;
@@ -68,7 +68,7 @@ input,
 select,
 textarea {
   width: 100%;
-  padding: 12px 14px;
+  padding: 0.75rem 0.875rem;
 }
 
 textarea {
@@ -82,7 +82,6 @@ label {
 }
 
 .subtle,
-.subtle-list li,
-.ledger-row p {
+.subtle-list li {
   color: var(--color-text-muted);
 }
