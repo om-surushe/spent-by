@@ -3,6 +3,7 @@ import { formatCurrency, formatMonth } from '../../utils/format';
 import './Ledger.css';
 
 type LedgerProps = {
+  records?: TransactionRecord[];
   visibleRecords: TransactionRecord[];
   search: string;
   month: string;
