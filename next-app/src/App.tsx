@@ -109,6 +109,10 @@ export default function App() {
     return saved && sources.includes(saved) ? saved : 'UPI';
   });
   const [autoSync, setAutoSync] = useState(() => localStorage.getItem('finance-vault-auto-sync') !== '0');
+  const [syncIntervalMinutes, setSyncIntervalMinutes] = useState(() => {
+    const saved = Number(localStorage.getItem('finance-vault-sync-interval-minutes'));
+    return [0, 1, 5, 15, 30, 60].includes(saved) ? saved : 5;
+  });
 
   useEffect(() => {
     void (async () => {
@@ -143,6 +147,14 @@ export default function App() {
       window.removeEventListener('online', markOnline);
     };
   }, [autoSync, phrase, vaultMeta, workerUrl]);
+
+  useEffect(() => {
+    if (!autoSync || syncIntervalMinutes === 0 || syncStatus !== 'pending' || !phrase || !vaultMeta) return;
+    const timer = window.setInterval(() => {
+      if (navigator.onLine) void syncNow('Scheduled encrypted sync complete.');
+    }, syncIntervalMinutes * 60_000);
+    return () => window.clearInterval(timer);
+  }, [autoSync, phrase, syncIntervalMinutes, syncStatus, vaultMeta, workerUrl]);
 
   const activeSubcategories = useMemo(() => subcategories[form.category] ?? [], [form.category, subcategories]);
   const activeRecords = useMemo(() => records.filter((record) => !record.deletedAt && record.data.kind !== 'settings'), [records]);
@@ -198,6 +210,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('finance-vault-auto-sync', autoSync ? '1' : '0');
   }, [autoSync]);
+
+  useEffect(() => {
+    localStorage.setItem('finance-vault-sync-interval-minutes', String(syncIntervalMinutes));
+  }, [syncIntervalMinutes]);
 
   useEffect(() => {
     if (!sources.includes(form.paymentMethod)) {
@@ -334,8 +350,8 @@ export default function App() {
       setForm({ ...emptyForm, date: form.date, category: form.category, subcategory: subcategories[form.category]?.[0] ?? 'Other', paymentMethod: defaultSource });
       setEditingId(null);
       setMessage(existing ? 'Transaction updated locally.' : 'Transaction saved locally.');
-      setSyncStatus(navigator.onLine ? 'idle' : 'offline');
-      if (autoSync && navigator.onLine) {
+      setSyncStatus(navigator.onLine ? (autoSync && syncIntervalMinutes === 0 ? 'idle' : 'pending') : 'offline');
+      if (autoSync && syncIntervalMinutes === 0 && navigator.onLine) {
         await syncNow(existing ? 'Transaction updated and synced.' : 'Transaction saved and synced.');
       }
     } catch (error) {
@@ -361,8 +377,8 @@ export default function App() {
       await upsertEncryptedRecord(await encryptTransaction(tombstone, encryptionKey));
       await reloadUnlockedRecords();
       setMessage('Deleted locally with tombstone.');
-      setSyncStatus(navigator.onLine ? 'idle' : 'offline');
-      if (autoSync && navigator.onLine) {
+      setSyncStatus(navigator.onLine ? (autoSync && syncIntervalMinutes === 0 ? 'idle' : 'pending') : 'offline');
+      if (autoSync && syncIntervalMinutes === 0 && navigator.onLine) {
         await syncNow('Deleted locally and synced encrypted changes.');
       }
     } catch (error) {
@@ -385,7 +401,8 @@ export default function App() {
       const { encryptionKey } = await deriveVault(phrase);
       await upsertEncryptedRecord(await encryptTransaction(record, encryptionKey));
       await reloadUnlockedRecords();
-      if (autoSync && navigator.onLine) await syncNow(successMessage);
+      setSyncStatus(navigator.onLine ? (autoSync && syncIntervalMinutes === 0 ? 'idle' : 'pending') : 'offline');
+      if (autoSync && syncIntervalMinutes === 0 && navigator.onLine) await syncNow(successMessage);
       else if (!navigator.onLine) setMessage(`${successMessage} It will sync when online.`);
       else setMessage(successMessage);
     } catch (error) {
@@ -829,7 +846,7 @@ export default function App() {
                 <div className="setting-row">
                   <div>
                     <strong>Automatic sync</strong>
-                    <p className="subtle compact-copy">Sync after every change and whenever this device comes back online.</p>
+                    <p className="subtle compact-copy">Sync encrypted changes on your chosen schedule and whenever this device comes back online.</p>
                   </div>
                   <label className="switch">
                     <input type="checkbox" checked={autoSync} onChange={(event) => setAutoSync(event.target.checked)} />
@@ -841,7 +858,17 @@ export default function App() {
                   <span className="subtle">{lastSync}</span>
                   <button className="button" disabled={busy} onClick={() => void syncNow()}>Sync now</button>
                 </div>
-                <p className="subtle compact-copy">No interval setting: changes sync immediately. This keeps the behavior predictable.</p>
+                <label className="setting-select">
+                  Sync interval
+                  <select value={syncIntervalMinutes} disabled={!autoSync} onChange={(event) => setSyncIntervalMinutes(Number(event.target.value))}>
+                    <option value={0}>After every change</option>
+                    <option value={1}>Every minute</option>
+                    <option value={5}>Every 5 minutes</option>
+                    <option value={15}>Every 15 minutes</option>
+                    <option value={30}>Every 30 minutes</option>
+                    <option value={60}>Every hour</option>
+                  </select>
+                </label>
               </section>
 
               <FinanceLabelsSettings

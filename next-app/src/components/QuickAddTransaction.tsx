@@ -196,12 +196,6 @@ export function QuickAddTransaction({
             </div>
           </details>
 
-          <div className="quick-add-actions">
-            <button className="pop-button primary" disabled={busy || !form.reason.trim() || !(form.amount > 0)} type="submit">
-              {editingId ? 'Update transaction' : 'Save transaction'}
-            </button>
-            {editingId ? <button className="pop-button" type="button" onClick={onCancelEdit}>Cancel</button> : null}
-          </div>
         </div>
 
         <div className="quick-add-calculator">
@@ -218,6 +212,12 @@ export function QuickAddTransaction({
             ))}
             <button type="button" className="calculator-key wide" onClick={() => press('backspace')}>⌫</button>
             <button type="button" className="calculator-key equals wide" onClick={() => press('=')}>=</button>
+          </div>
+          <div className="quick-add-actions calculator-actions">
+            <button className="pop-button primary" disabled={busy || !form.reason.trim() || !(form.amount > 0)} type="submit">
+              {editingId ? 'Update transaction' : 'Save transaction'}
+            </button>
+            {editingId ? <button className="pop-button" type="button" onClick={onCancelEdit}>Cancel</button> : null}
           </div>
         </div>
       </form>

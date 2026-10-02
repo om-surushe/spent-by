@@ -507,6 +507,10 @@ label {
   grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
 }
 
+.quick-add-card {
+  overflow: clip;
+}
+
 .quick-add-card .pop-section-head {
   margin-bottom: var(--space-3);
 }
@@ -646,6 +650,15 @@ label {
 
 .quick-add-actions {
   margin-top: var(--space-3);
+}
+
+.calculator-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.calculator-actions .pop-button {
+  width: 100%;
 }
 
 .ledger .filters {
@@ -1177,6 +1190,24 @@ label {
   transform: translateX(1.35rem);
 }
 
+.setting-select {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.setting-select select {
+  width: auto;
+  min-width: 12rem;
+}
+
+.setting-select select:disabled {
+  opacity: 0.55;
+}
+
 .sync-summary {
   display: flex;
   flex-wrap: wrap;
@@ -1598,6 +1629,11 @@ label {
   .reason-field,
   .source-block {
     margin-bottom: var(--space-3);
+  }
+
+  .quick-add-calculator {
+    position: sticky;
+    top: var(--space-3);
   }
 
   .quick-add-calculator .calculator-grid {
