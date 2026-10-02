@@ -1,85 +1,83 @@
-# Finance Vault
+<div align="center">
 
-An open-source, offline-first personal finance tracker with zero-knowledge cloud sync.
+# Spent by Om
 
-Finance Vault encrypts transactions in the browser before they leave the device. The hosted backend stores ciphertext, coordinates multi-device merges, and never receives transaction details or the recovery phrase.
+**A private, manual expense tracker.**
 
-> **Status:** active prototype. The encrypted sync API is live in preview; the product UI and security hardening are still in progress. Do not use it as your only financial backup yet.
+[![CI](https://github.com/om-surushe/spent-by/actions/workflows/check.yml/badge.svg)](https://github.com/om-surushe/spent-by/actions/workflows/check.yml)
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Live app](https://img.shields.io/badge/live%20app-spent--by.om--surushe.workers.dev-brightgreen)](https://spent-by.om-surushe.workers.dev)
 
-## Why it is different
+[Open Spent by Om](https://spent-by.om-surushe.workers.dev)
 
-- **Local-first:** reads and writes work from IndexedDB without a network connection.
-- **Zero-knowledge sync:** AES-GCM encryption happens in the browser.
-- **Passwordless recovery:** one recovery phrase derives separate encryption, identity, and request-authentication material.
-- **Conflict-safe:** atomic D1 batches merge records deterministically across devices.
-- **Resource-aware hosting:** per-vault storage, global signup capacity, payload, and request-rate limits protect the free service.
+</div>
 
-## Architecture
+Spent by Om is an offline-first PWA for recording what you spend, without bank connections, income feeds, or account aggregation. It is designed for a simple daily habit: add an expense, review the month, and keep the data private.
 
-```mermaid
-flowchart LR
-  UI[React PWA] --> DB[(Encrypted IndexedDB)]
-  UI -->|derive keys locally| Crypto[Web Crypto]
-  UI -->|signed ciphertext only| Worker[Cloudflare Worker]
-  Worker -->|atomic merge + quotas| D1[(Cloudflare D1)]
-```
+## How it works
 
-The backend uses a **local-first, zero-knowledge, last-write-wins record architecture**. Every record carries an update timestamp and device ID; the server uses both for deterministic conflict resolution. Signed requests include a timestamp and unique request ID for replay protection.
+[![Expense lifecycle diagram](docs/diagrams/money-data-flow.svg)](docs/diagrams/money-data-flow.excalidraw)
 
-See [the architecture document](docs/architecture.md) for the trust model, data flow, trade-offs, and quota design.
+An expense stays on your device first. It is encrypted before optional cloud sync, and remains readable in the ledger while offline.
 
-## Hosted free tier
+[![Private cloud sync diagram](docs/diagrams/worker-sync-boundary.svg)](docs/diagrams/worker-sync-boundary.excalidraw)
 
-- 1 MiB encrypted storage per free vault
-- 200 vaults per deployment
-- 1 MiB maximum sync request
-- IP and per-vault request-rate limits
-- production vault creation disabled until bot protection is connected
+The Worker only verifies and stores encrypted records; it never receives the recovery phrase or plaintext expense data.
 
-An owner vault can be elevated separately before public registration opens, keeping personal capacity reserved.
+## Highlights
+
+- **Fast manual entry** — calculator keypad, presets, date, category, account, payment source, and optional notes.
+- **Expense-focused overview** — monthly totals, budget categories, search, filters, ledger review, and export/import.
+- **Private by default** — data is encrypted in the browser before optional cloud sync; the server never receives the recovery phrase or plaintext records.
+- **Local-first** — IndexedDB keeps the app usable offline. Cloud sync is optional and can run immediately or on a chosen interval.
+- **Recovery-ready** — copy or download the recovery phrase to restore the encrypted vault on another device.
+- **Installable** — works as a responsive PWA on desktop and mobile.
+
+## Intentionally not included
+
+No bank connections, income tracking, shared accounts, subscriptions, or ad-tech. This is a personal record of expenses you enter yourself.
 
 ## Run locally
 
-```bash
-cd next-app
-npm install
-npx wrangler d1 migrations apply finance-vault-preview --local
-npm run worker:dev
-```
-
-In another terminal:
+Requires Node.js 20 or later.
 
 ```bash
-cd next-app
+git clone https://github.com/om-surushe/spent-by.git
+cd spent-by/next-app
+npm ci
 npm run dev
 ```
 
-The original Node/SQLite prototype remains at the repository root while the new application is developed in `next-app/`.
+Validate a change with:
 
-## Project layout
-
-```text
-next-app/
-├── src/                 React PWA and browser cryptography
-├── worker/              Cloudflare sync API
-├── migrations/          Versioned D1 schema
-└── wrangler.jsonc       Local, preview, and production bindings
+```bash
+npm test
+npm run build
+npm run standards:check
+npm run check:responsive
+npm run worker:check
 ```
+
+## Architecture maps
+
+Open the [Excalidraw architecture diagrams](docs/diagrams/README.md) for the vault, expense, dashboard, sync, and deployment flows.
+
+## Deployment
+
+The deployed application and Cloudflare Worker live in [`next-app/`](next-app/).
+
+- Pull requests and pushes to `main` run validation.
+- Preview and production deployments are manual GitHub Actions workflows.
+- Production: [spent-by.om-surushe.workers.dev](https://spent-by.om-surushe.workers.dev)
+
+The repository root includes an earlier Node/SQLite prototype for reference; it is not deployed.
 
 ## Security
 
-This project handles sensitive data and has not yet received an independent security audit. Please read [SECURITY.md](SECURITY.md) before testing with real data. Report vulnerabilities privately through GitHub Security Advisories.
+The recovery phrase is the only way to restore an encrypted vault. Keep it private and backed up; do not commit financial exports, recovery phrases, credentials, local databases, or Cloudflare tokens.
 
-## Contributing
-
-Issues and pull requests are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md).
+See [SECURITY.md](SECURITY.md) for reporting guidance.
 
 ## License
 
 [MIT](LICENSE) © Om Surushe
-
-## Legacy app
-
-The repository root contains the original Node 22 and SQLite application. It supports authenticated server use, automatic backups, JSON import, and direct browser-local mode. Production requires `AUTH_USERNAME`, `AUTH_PASSWORD`, and `SESSION_SECRET`; it fails closed if they are missing. Real exports, database files, financial profiles, and credentials must remain outside Git.
-
-Keep this existing repository private because older Git history contains personal finance data. A history-clean repository is required before publishing the project as open source.
