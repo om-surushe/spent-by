@@ -8,7 +8,6 @@ type Props = {
   editingId: string | null;
   onSubmit: (event: React.FormEvent) => void;
   onCancelEdit: () => void;
-  onToggleImport: () => void;
   sources: PaymentMethod[];
   categories: Category[];
   subcategories: Record<string, string[]>;
@@ -58,7 +57,6 @@ export function QuickAddTransaction({
   editingId,
   onSubmit,
   onCancelEdit,
-  onToggleImport,
   sources,
   categories,
   subcategories
@@ -203,7 +201,6 @@ export function QuickAddTransaction({
               {editingId ? 'Update transaction' : 'Save transaction'}
             </button>
             {editingId ? <button className="pop-button" type="button" onClick={onCancelEdit}>Cancel</button> : null}
-            <button className="pop-button quiet" type="button" onClick={onToggleImport}>Import JSON</button>
           </div>
         </div>
 

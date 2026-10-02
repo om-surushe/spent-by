@@ -94,7 +94,6 @@ export default function App() {
   const [search, setSearch] = useState('');
   const [month, setMonth] = useState('All');
   const [importText, setImportText] = useState('');
-  const [showImport, setShowImport] = useState(false);
   const [budgetDraft, setBudgetDraft] = useState<BudgetSettings>(emptyBudgets);
   const [homeOrder, setHomeOrder] = useState<HomeSectionId[]>(() => readLocalList('finance-vault-home-order', DEFAULT_HOME_ORDER, DEFAULT_HOME_ORDER));
   const [hiddenSections, setHiddenSections] = useState<HomeSectionId[]>(() => readLocalList('finance-vault-home-hidden', [], DEFAULT_HOME_ORDER));
@@ -242,6 +241,28 @@ export default function App() {
     } finally {
       setBusy(false);
     }
+  }
+
+  async function copyRecoveryPhrase() {
+    if (!generatedPhrase) return;
+    try {
+      await navigator.clipboard.writeText(generatedPhrase);
+      setMessage('Recovery phrase copied. Save it somewhere secure, then confirm below.');
+    } catch {
+      setMessage('Copy failed. Select and copy the phrase manually.');
+    }
+  }
+
+  function downloadRecoveryPhrase() {
+    if (!generatedPhrase) return;
+    const file = new Blob([`${generatedPhrase}\n`], { type: 'text/plain' });
+    const url = URL.createObjectURL(file);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'finance-vault-recovery-phrase.txt';
+    link.click();
+    URL.revokeObjectURL(url);
+    setMessage('Recovery phrase downloaded. Store the file somewhere secure.');
   }
 
   function chooseNewVault() {
@@ -457,7 +478,6 @@ export default function App() {
       await upsertEncryptedRecords(await Promise.all(recordsToImport.map((record) => encryptTransaction(record, encryptionKey))));
       await reloadUnlockedRecords();
       setImportText('');
-      setShowImport(false);
       if (autoSync && navigator.onLine) await syncNow(`Imported and synced ${parsed.length} transactions.`);
       else setMessage(`Imported ${parsed.length} transactions locally.`);
     } catch (error) {
@@ -628,15 +648,19 @@ export default function App() {
       {message ? <div className="banner">{message}</div> : null}
 
       {!vaultMeta ? (
-        <section className="grid two-up">
-          <article className="card">
+        <section className="grid two-up vault-access">
+          <article className="card vault-create">
             <h2>Create new vault</h2>
             <p className="subtle">Generate one recovery phrase for encryption, sync, and recovery. We cannot reset it.</p>
             <button className="button" onClick={() => setGeneratedPhrase(generateRecoveryPhrase())}>Generate phrase</button>
             {generatedPhrase ? (
               <>
                 <div className="phrase-box">{generatedPhrase}</div>
-                <label className="check">
+                <div className="actions phrase-actions" aria-label="Save recovery phrase">
+                  <button className="button" type="button" onClick={() => void copyRecoveryPhrase()}>Copy phrase</button>
+                  <button className="button" type="button" onClick={downloadRecoveryPhrase}>Download .txt</button>
+                </div>
+                <label className="check phrase-confirmation">
                   <input type="checkbox" checked={savedPhrase} onChange={(event) => setSavedPhrase(event.target.checked)} />
                   I saved these 24 words.
                 </label>
@@ -645,7 +669,7 @@ export default function App() {
             ) : null}
           </article>
 
-          <article className="card">
+          <article className="card vault-recovery">
             <h2>Recover existing cloud vault</h2>
             <p className="subtle">Use this on a fresh browser or device to restore your encrypted transactions and private settings.</p>
             <textarea rows={5} value={draftPhrase} onChange={(event) => setDraftPhrase(event.target.value)} placeholder="paste your 24 words" />
@@ -684,26 +708,11 @@ export default function App() {
                   setEditingId(null);
                   setForm({ ...emptyForm, paymentMethod: defaultSource });
                 }}
-                onToggleImport={() => setShowImport((value) => !value)}
                 sources={sources}
                 categories={categories}
                 subcategories={subcategories}
               />
             </div>
-          ) : null}
-
-          {showImport ? (
-            <section className="pop-card import-panel dashboard-import" style={{ '--section-order': sectionOrder['quick-add'] + 0.1 } as CSSProperties}>
-              <div className="section-head">
-                <h2>Import transactions</h2>
-                <button className="button" onClick={() => void copyImportPrompt()}>Copy AI prompt</button>
-              </div>
-              <textarea rows={8} value={importText} onChange={(event) => setImportText(event.target.value)} placeholder='Paste a JSON array, for example [{"amount":500,"reason":"Lunch","date":"2026-09-06","category":"Wants"}]' />
-              <div className="actions top-gap">
-                <label className="button file-button">Choose JSON file<input type="file" accept="application/json,.json" onChange={(event) => { const file = event.target.files?.[0]; if (file) void file.text().then(setImportText); }} /></label>
-                <button className="button primary" disabled={!importText.trim() || busy} onClick={() => void importTransactions()}>Import</button>
-              </div>
-            </section>
           ) : null}
 
           {!hiddenSections.includes('transactions') ? (
@@ -849,6 +858,18 @@ export default function App() {
                   {categories.map((category) => <label key={category}>{category}<input type="number" min="0" value={budgetDraft[category] || ''} onChange={(event) => setBudgetDraft({ ...budgetDraft, [category]: Number(event.target.value) })} placeholder="0" /></label>)}
                   <button className="button primary full" disabled={busy}>Save targets</button>
                 </form>
+              </section>
+
+              <section className="settings-panel import-panel">
+                <div className="section-head">
+                  <div><h2>Import transactions</h2><p className="subtle compact-copy">Bring in a JSON export without mixing it into daily transaction entry.</p></div>
+                  <button className="button" type="button" onClick={() => void copyImportPrompt()}>Copy AI prompt</button>
+                </div>
+                <textarea rows={8} value={importText} onChange={(event) => setImportText(event.target.value)} placeholder='Paste a JSON array, for example [{"amount":500,"reason":"Lunch","date":"2026-09-06","category":"Wants"}]' />
+                <div className="actions top-gap">
+                  <label className="button file-button">Choose JSON file<input type="file" accept="application/json,.json" onChange={(event) => { const file = event.target.files?.[0]; if (file) void file.text().then(setImportText); }} /></label>
+                  <button className="button primary" disabled={!importText.trim() || busy} onClick={() => void importTransactions()}>Import transactions</button>
+                </div>
               </section>
 
               <section className="settings-panel">

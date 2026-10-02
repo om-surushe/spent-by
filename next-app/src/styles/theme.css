@@ -373,6 +373,32 @@ textarea {
   resize: vertical;
 }
 
+.vault-access {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 30rem), 1fr));
+}
+
+.vault-create {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.vault-create .phrase-box {
+  align-self: stretch;
+}
+
+.phrase-actions {
+  margin-bottom: var(--space-4);
+}
+
+.phrase-confirmation {
+  margin-bottom: var(--space-3);
+}
+
+.vault-recovery .actions {
+  margin-top: var(--space-4);
+}
+
 .phrase-box {
   margin: var(--space-4) 0;
   padding: var(--space-4);
@@ -471,6 +497,10 @@ label {
 .quick-add-card,
 .ledger {
   container-type: inline-size;
+}
+
+.quick-add-card .pop-section-head {
+  margin-bottom: var(--space-3);
 }
 
 .quick-add-display {
