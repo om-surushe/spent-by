@@ -641,7 +641,7 @@ export default function App() {
         {vaultMeta && phrase ? (
           <>
             <div className="app-brand">
-              <span className="app-title">Finance Vault</span>
+              <span className="app-title">Spent by Om</span>
               <span className={`sync-dot sync-${syncStatus}`} aria-hidden="true" />
               <span className="app-sync-text">{syncStatus === 'ok' ? 'Synced' : syncStatus}</span>
             </div>
@@ -652,7 +652,7 @@ export default function App() {
         ) : (
           <>
             <div>
-              <p className="eyebrow">Finance Vault</p>
+              <p className="eyebrow">Spent by Om</p>
               <h1>Your money, private by design.</h1>
               <p className="subtle">Track, review, analyse, import, and recover your finances. Plaintext stays on your devices.</p>
             </div>

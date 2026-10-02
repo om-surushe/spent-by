@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "finance-vault-worker-local",
+  "name": "spent-by-local",
   "main": "worker/src/index.ts",
   "compatibility_date": "2026-09-05",
   "compatibility_flags": ["nodejs_compat"],
@@ -14,8 +14,8 @@
   "d1_databases": [{ "binding": "DB", "database_name": "finance-vault-preview", "database_id": "f87ef6ee-edaa-4db5-9a28-aa5b54c36eed", "migrations_dir": "migrations" }],
   "env": {
     "preview": {
-      "name": "finance-vault-worker-preview",
-      "vars": { "ENVIRONMENT": "preview", "ALLOW_VAULT_CREATE": "1", "CORS_ORIGIN": "https://finance-vault-worker-preview.omsurushe1907.workers.dev", "MAX_REQUEST_BYTES": "1048576", "MAX_VAULT_BYTES": "1048576" },
+      "name": "spent-by-preview",
+      "vars": { "ENVIRONMENT": "preview", "ALLOW_VAULT_CREATE": "1", "CORS_ORIGIN": "https://spent-by-preview.om-surushe.workers.dev", "MAX_REQUEST_BYTES": "1048576", "MAX_VAULT_BYTES": "1048576" },
       "d1_databases": [{ "binding": "DB", "database_name": "finance-vault-preview", "database_id": "f87ef6ee-edaa-4db5-9a28-aa5b54c36eed", "migrations_dir": "migrations" }],
       "ratelimits": [
         { "name": "IP_LIMITER", "namespace_id": "2001", "simple": { "limit": 30, "period": 60 } },
@@ -23,8 +23,8 @@
       ]
     },
     "production": {
-      "name": "finance-vault-worker",
-      "vars": { "ENVIRONMENT": "production", "ALLOW_VAULT_CREATE": "0", "CORS_ORIGIN": "https://finance.usechapter.club", "MAX_REQUEST_BYTES": "1048576", "MAX_VAULT_BYTES": "1048576" },
+      "name": "spent-by",
+      "vars": { "ENVIRONMENT": "production", "ALLOW_VAULT_CREATE": "1", "CORS_ORIGIN": "https://spent-by.om-surushe.workers.dev", "MAX_REQUEST_BYTES": "1048576", "MAX_VAULT_BYTES": "1048576" },
       "d1_databases": [{ "binding": "DB", "database_name": "finance-vault", "database_id": "eb05e322-7c05-4861-8780-2eb849e59b2b", "migrations_dir": "migrations" }],
       "ratelimits": [
         { "name": "IP_LIMITER", "namespace_id": "2101", "simple": { "limit": 30, "period": 60 } },

@@ -1,10 +1,10 @@
-name: Deploy Finance Vault Preview
+name: Deploy Spent by Production
 
 on:
   workflow_dispatch:
     inputs:
       ref:
-        description: Git ref to deploy to the Cloudflare preview environment
+        description: Git ref to deploy to production
         required: true
         default: main
         type: string
@@ -13,13 +13,13 @@ permissions:
   contents: read
 
 concurrency:
-  group: finance-vault-preview-deploy
+  group: finance-vault-production-deploy
   cancel-in-progress: false
 
 jobs:
-  deploy-preview:
+  deploy-production:
     runs-on: ubuntu-latest
-    environment: preview
+    environment: production
     defaults:
       run:
         working-directory: next-app
@@ -52,11 +52,11 @@ jobs:
       - name: Build app
         run: npm run build
 
-      - name: Apply preview migrations
-        run: npx wrangler d1 migrations apply finance-vault-preview --remote --env preview
+      - name: Apply production migrations
+        run: npx wrangler d1 migrations apply finance-vault --remote --env production
 
-      - name: Deploy Cloudflare preview
-        run: npm run worker:deploy:preview
+      - name: Deploy Cloudflare production
+        run: npm run worker:deploy:production
 
-      - name: Preview URL
-        run: echo "https://spent-by-preview.om-surushe.workers.dev/?product=1"
+      - name: Production URL
+        run: echo "https://spent-by.om-surushe.workers.dev/?product=1"

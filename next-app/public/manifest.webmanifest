@@ -1,6 +1,6 @@
 {
-  "name": "Finance Vault",
-  "short_name": "Finance Vault",
+  "name": "Spent by Om",
+  "short_name": "Spent",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f7f1e7",

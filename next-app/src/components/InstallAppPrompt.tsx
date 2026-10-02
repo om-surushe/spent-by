@@ -51,8 +51,8 @@ export function InstallAppPrompt() {
       className="install-fab"
       type="button"
       onClick={() => void install()}
-      aria-label="Install Finance Vault"
-      title="Install Finance Vault"
+      aria-label="Install Spent by Om"
+      title="Install Spent by Om"
     >
       <span className="install-fab-icon" aria-hidden="true">↙</span>
       <span>Install app</span>
