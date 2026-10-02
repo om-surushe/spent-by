@@ -499,6 +499,14 @@ label {
   container-type: inline-size;
 }
 
+.dashboard-budget {
+  grid-column: 1 / -1;
+}
+
+.dashboard-budget .category-grid {
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+}
+
 .quick-add-card .pop-section-head {
   margin-bottom: var(--space-3);
 }
@@ -1496,7 +1504,7 @@ label {
 
   .dashboard-budget,
   .dashboard-overview {
-    grid-column: span 1;
+    grid-column: 1 / -1;
   }
 
   .dashboard-review {
@@ -1527,12 +1535,9 @@ label {
     grid-column: 1 / -1;
   }
 
-  .dashboard-budget {
-    grid-column: span 5;
-  }
-
+  .dashboard-budget,
   .dashboard-overview {
-    grid-column: span 7;
+    grid-column: 1 / -1;
   }
 
   .settings-stack {
@@ -1547,12 +1552,9 @@ label {
     grid-column: 1 / -1;
   }
 
-  .dashboard-budget {
-    grid-column: span 4;
-  }
-
+  .dashboard-budget,
   .dashboard-overview {
-    grid-column: span 8;
+    grid-column: 1 / -1;
   }
 }
 
