@@ -16,19 +16,22 @@ export function MonthFilter({ value, months, onChange }: Props) {
   const options = ['All', ...months];
 
   return (
-    <div className="month-filter-rail" role="listbox" aria-label="Filter transactions by month">
-      {options.map((option) => (
-        <button
-          className={`month-filter-chip ${value === option ? 'active' : ''}`}
-          key={option}
-          type="button"
-          role="option"
-          aria-selected={value === option}
-          onClick={() => onChange(option)}
-        >
-          {label(option)}
-        </button>
-      ))}
+    <div className="month-filter">
+      <span className="month-filter-label">Filter</span>
+      <div className="month-filter-rail" role="listbox" aria-label="Filter transactions by month">
+        {options.map((option) => (
+          <button
+            className={`month-filter-chip ${value === option ? 'active' : ''}`}
+            key={option}
+            type="button"
+            role="option"
+            aria-selected={value === option}
+            onClick={() => onChange(option)}
+          >
+            {label(option)}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

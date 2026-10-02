@@ -77,6 +77,10 @@ function currency(amount: number) {
   return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
 }
 
+function formatLedgerDate(date: string) {
+  return new Date(`${date}T00:00:00`).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
 export default function App() {
   const [vaultMeta, setVaultMetaState] = useState<VaultMeta | null>(null);
   const [phrase, setPhrase] = useState('');
@@ -747,15 +751,15 @@ export default function App() {
 
                       <div className="ledger-date-cell">
                         <span className="ledger-cell-label">Date</span>
-                        <span>{record.data.date}</span>
+                        <span>{formatLedgerDate(record.data.date)}</span>
                         {record.data.notes ? <small>{record.data.notes}</small> : null}
                       </div>
 
                       <strong className="ledger-desktop-amount">{currency(record.data.amount)}</strong>
 
-                      <div className="ledger-actions-compact">
-                        <button className="compact-action" onClick={() => startEdit(record)}>Edit</button>
-                        <button className="compact-action danger-text" onClick={() => void deleteTransaction(record.id)}>Delete</button>
+                      <div className="ledger-actions-compact" aria-label={`Actions for ${record.data.reason}`}>
+                        <button className="compact-action" type="button" onClick={() => startEdit(record)}>Edit</button>
+                        <button className="compact-action danger-text" type="button" onClick={() => void deleteTransaction(record.id)}>Delete</button>
                       </div>
                     </article>
                   ))}
