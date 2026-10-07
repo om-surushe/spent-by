@@ -6,6 +6,8 @@ const previewUrl = process.env.PREVIEW_URL;
 if (!previewUrl) throw new Error('PREVIEW_URL is required');
 
 const chromeCandidates = [
+  process.env.CHROME_PATH,
+  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
   '/usr/bin/google-chrome',
   '/usr/bin/google-chrome-stable',
   '/usr/bin/chromium',
@@ -33,6 +35,8 @@ fs.mkdirSync(outDir, { recursive: true });
 const browser = await chromium.launch({ headless: true, executablePath });
 const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
 const page = await context.newPage();
+const runtimeErrors = [];
+page.on('pageerror', (error) => runtimeErrors.push(error.message));
 
 await page.goto(previewUrl, { waitUntil: 'domcontentloaded', timeout: 60_000 });
 await page.waitForSelector('body', { timeout: 20_000 });
@@ -64,6 +68,21 @@ if (await page.locator('.ledger-row').count() === 0) {
   const savedRows = await page.locator('.ledger-row').count();
   console.log('QA rows after save:', savedRows);
   if (savedRows < 1) throw new Error('Transaction appeared after save but disappeared from the ledger');
+}
+
+const historicalDates = await page.evaluate(() => [1, 2, 3, 4].map((offset) => {
+  const date = new Date();
+  date.setDate(15);
+  date.setMonth(date.getMonth() - offset);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}));
+await page.locator('.transaction-details').evaluate((el) => { el.open = true; });
+for (const [index, date] of historicalDates.entries()) {
+  await page.locator('input[type="date"]').first().fill(date);
+  await page.getByPlaceholder('What did you spend on?').fill(`Responsive QA month ${index + 1}`);
+  for (const digit of ['4', '2']) await page.getByRole('button', { name: digit, exact: true }).click();
+  await page.getByRole('button', { name: 'Save transaction' }).click();
+  await page.getByText(`Responsive QA month ${index + 1}`, { exact: true }).waitFor({ timeout: 10_000 });
 }
 
 console.log('QA rows before opening details:', await page.locator('.ledger-row').count());
@@ -107,12 +126,10 @@ for (const [width, height] of widths) {
     const zeroWidth = [...document.querySelectorAll('button, input, select, textarea')]
       .filter((el) => {
         const style = getComputedStyle(el);
-        const rect = el.getBoundingClientRect();
-        return style.display !== 'none' &&
+        return el.checkVisibility() &&
+          style.display !== 'none' &&
           style.visibility !== 'hidden' &&
-          style.opacity !== '0' &&
-          rect.width > 0 &&
-          rect.height > 0;
+          style.opacity !== '0';
       })
       .map((el) => {
         const r = el.getBoundingClientRect();
@@ -141,7 +158,21 @@ for (const [width, height] of widths) {
       .sort((a, b) => (b.scrollWidth - b.clientWidth) - (a.scrollWidth - a.clientWidth))
       .slice(0, 12);
 
-    return { vw, scrollWidth: root.scrollWidth, scrollOverflow, transactionCount, outside, zeroWidth, elementOverflows };
+    const rails = '.source-strip, .preset-strip, .month-filter-rail, .vault-id-value';
+    const escaped = [...document.querySelectorAll('body *')]
+      .filter((el) => {
+        const r = el.getBoundingClientRect();
+        return (r.left < -1 || r.right > vw + 1) && !el.closest(rails);
+      })
+      .map((el) => `${el.tagName}.${typeof el.className === 'string' ? el.className : ''}`)
+      .slice(0, 12);
+    const settingsOverflow = [...document.querySelectorAll('.setting-select')]
+      .filter((el) => el.scrollWidth > el.clientWidth + 2)
+      .map((el) => el.textContent?.trim());
+    const appBottom = document.querySelector('.app-shell')?.getBoundingClientRect().bottom ?? 0;
+    const blankBelow = Math.max(0, root.scrollHeight - appBottom - window.scrollY);
+
+    return { vw, scrollWidth: root.scrollWidth, scrollOverflow, transactionCount, outside, zeroWidth, elementOverflows, escaped, settingsOverflow, blankBelow };
   });
 
   if (diagnostics.transactionCount < 1) {
@@ -157,15 +188,30 @@ for (const [width, height] of widths) {
   if (diagnostics.zeroWidth.length) {
     failures.push(`${width}px: visible controls collapsed: ${JSON.stringify(diagnostics.zeroWidth)}`);
   }
+  if (diagnostics.escaped.length) {
+    failures.push(`${width}px: content escapes the viewport outside intentional horizontal rails: ${JSON.stringify(diagnostics.escaped)}`);
+  }
+  if (diagnostics.settingsOverflow.length) {
+    failures.push(`${width}px: settings controls exceed their containers: ${JSON.stringify(diagnostics.settingsOverflow)}`);
+  }
+  if (diagnostics.blankBelow > 96) {
+    failures.push(`${width}px: ${Math.round(diagnostics.blankBelow)}px of blank space below the app`);
+  }
 
   const screenshot = path.join(outDir, `${width}x${height}.png`);
   await page.screenshot({ path: screenshot, fullPage: true });
-  report.push({ width, height, ...diagnostics, screenshot });
+  if (width === 390) {
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.screenshot({ path: path.join(outDir, '390x844-viewport.png') });
+  }
+  report.push({ width, height, ...diagnostics, screenshot: path.relative(process.cwd(), screenshot) });
 }
 
 fs.writeFileSync(path.join(outDir, 'report.json'), JSON.stringify(report, null, 2));
 
 await browser.close();
+
+if (runtimeErrors.length) failures.push(`Runtime errors: ${runtimeErrors.join('; ')}`);
 
 if (failures.length) {
   console.error('Responsive browser QA failed:\n- ' + failures.join('\n- '));

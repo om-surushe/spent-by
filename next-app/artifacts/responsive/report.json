@@ -1,0 +1,282 @@
+[
+  {
+    "width": 320,
+    "height": 760,
+    "vw": 320,
+    "scrollWidth": 320,
+    "scrollOverflow": 0,
+    "transactionCount": 5,
+    "outside": [],
+    "zeroWidth": [],
+    "elementOverflows": [
+      {
+        "tag": "LABEL",
+        "className": "switch",
+        "text": "",
+        "clientWidth": 52,
+        "scrollWidth": 56,
+        "rectWidth": 52,
+        "display": "flex",
+        "overflowX": "hidden",
+        "minWidth": "0px",
+        "width": "52px"
+      }
+    ],
+    "escaped": [],
+    "settingsOverflow": [],
+    "blankBelow": 0.265625,
+    "screenshot": "artifacts/responsive/320x760.png"
+  },
+  {
+    "width": 360,
+    "height": 800,
+    "vw": 360,
+    "scrollWidth": 360,
+    "scrollOverflow": 0,
+    "transactionCount": 5,
+    "outside": [],
+    "zeroWidth": [],
+    "elementOverflows": [
+      {
+        "tag": "LABEL",
+        "className": "switch",
+        "text": "",
+        "clientWidth": 52,
+        "scrollWidth": 56,
+        "rectWidth": 52,
+        "display": "flex",
+        "overflowX": "hidden",
+        "minWidth": "0px",
+        "width": "52px"
+      }
+    ],
+    "escaped": [],
+    "settingsOverflow": [],
+    "blankBelow": 0.078125,
+    "screenshot": "artifacts/responsive/360x800.png"
+  },
+  {
+    "width": 390,
+    "height": 844,
+    "vw": 390,
+    "scrollWidth": 390,
+    "scrollOverflow": 0,
+    "transactionCount": 5,
+    "outside": [],
+    "zeroWidth": [],
+    "elementOverflows": [
+      {
+        "tag": "LABEL",
+        "className": "switch",
+        "text": "",
+        "clientWidth": 52,
+        "scrollWidth": 56,
+        "rectWidth": 52,
+        "display": "flex",
+        "overflowX": "hidden",
+        "minWidth": "0px",
+        "width": "52px"
+      }
+    ],
+    "escaped": [],
+    "settingsOverflow": [],
+    "blankBelow": 0.109375,
+    "screenshot": "artifacts/responsive/390x844.png"
+  },
+  {
+    "width": 430,
+    "height": 900,
+    "vw": 430,
+    "scrollWidth": 430,
+    "scrollOverflow": 0,
+    "transactionCount": 5,
+    "outside": [],
+    "zeroWidth": [],
+    "elementOverflows": [
+      {
+        "tag": "LABEL",
+        "className": "switch",
+        "text": "",
+        "clientWidth": 52,
+        "scrollWidth": 56,
+        "rectWidth": 52,
+        "display": "flex",
+        "overflowX": "hidden",
+        "minWidth": "0px",
+        "width": "52px"
+      }
+    ],
+    "escaped": [],
+    "settingsOverflow": [],
+    "blankBelow": 0,
+    "screenshot": "artifacts/responsive/430x900.png"
+  },
+  {
+    "width": 480,
+    "height": 900,
+    "vw": 480,
+    "scrollWidth": 480,
+    "scrollOverflow": 0,
+    "transactionCount": 5,
+    "outside": [],
+    "zeroWidth": [],
+    "elementOverflows": [
+      {
+        "tag": "LABEL",
+        "className": "switch",
+        "text": "",
+        "clientWidth": 52,
+        "scrollWidth": 56,
+        "rectWidth": 52,
+        "display": "flex",
+        "overflowX": "hidden",
+        "minWidth": "0px",
+        "width": "52px"
+      }
+    ],
+    "escaped": [],
+    "settingsOverflow": [],
+    "blankBelow": 0.421875,
+    "screenshot": "artifacts/responsive/480x900.png"
+  },
+  {
+    "width": 768,
+    "height": 1024,
+    "vw": 768,
+    "scrollWidth": 768,
+    "scrollOverflow": 0,
+    "transactionCount": 5,
+    "outside": [],
+    "zeroWidth": [],
+    "elementOverflows": [
+      {
+        "tag": "LABEL",
+        "className": "switch",
+        "text": "",
+        "clientWidth": 52,
+        "scrollWidth": 56,
+        "rectWidth": 52,
+        "display": "flex",
+        "overflowX": "hidden",
+        "minWidth": "0px",
+        "width": "52px"
+      }
+    ],
+    "escaped": [],
+    "settingsOverflow": [],
+    "blankBelow": 0,
+    "screenshot": "artifacts/responsive/768x1024.png"
+  },
+  {
+    "width": 1024,
+    "height": 900,
+    "vw": 1024,
+    "scrollWidth": 1024,
+    "scrollOverflow": 0,
+    "transactionCount": 5,
+    "outside": [],
+    "zeroWidth": [],
+    "elementOverflows": [
+      {
+        "tag": "LABEL",
+        "className": "switch",
+        "text": "",
+        "clientWidth": 52,
+        "scrollWidth": 56,
+        "rectWidth": 52,
+        "display": "flex",
+        "overflowX": "hidden",
+        "minWidth": "0px",
+        "width": "52px"
+      }
+    ],
+    "escaped": [],
+    "settingsOverflow": [],
+    "blankBelow": 0.25,
+    "screenshot": "artifacts/responsive/1024x900.png"
+  },
+  {
+    "width": 1280,
+    "height": 900,
+    "vw": 1280,
+    "scrollWidth": 1280,
+    "scrollOverflow": 0,
+    "transactionCount": 5,
+    "outside": [],
+    "zeroWidth": [],
+    "elementOverflows": [
+      {
+        "tag": "LABEL",
+        "className": "switch",
+        "text": "",
+        "clientWidth": 52,
+        "scrollWidth": 56,
+        "rectWidth": 52,
+        "display": "flex",
+        "overflowX": "hidden",
+        "minWidth": "0px",
+        "width": "52px"
+      }
+    ],
+    "escaped": [],
+    "settingsOverflow": [],
+    "blankBelow": 0.140625,
+    "screenshot": "artifacts/responsive/1280x900.png"
+  },
+  {
+    "width": 1440,
+    "height": 1000,
+    "vw": 1440,
+    "scrollWidth": 1440,
+    "scrollOverflow": 0,
+    "transactionCount": 5,
+    "outside": [],
+    "zeroWidth": [],
+    "elementOverflows": [
+      {
+        "tag": "LABEL",
+        "className": "switch",
+        "text": "",
+        "clientWidth": 52,
+        "scrollWidth": 56,
+        "rectWidth": 52,
+        "display": "flex",
+        "overflowX": "hidden",
+        "minWidth": "0px",
+        "width": "52px"
+      }
+    ],
+    "escaped": [],
+    "settingsOverflow": [],
+    "blankBelow": 0.3125,
+    "screenshot": "artifacts/responsive/1440x1000.png"
+  },
+  {
+    "width": 1920,
+    "height": 1080,
+    "vw": 1920,
+    "scrollWidth": 1920,
+    "scrollOverflow": 0,
+    "transactionCount": 5,
+    "outside": [],
+    "zeroWidth": [],
+    "elementOverflows": [
+      {
+        "tag": "LABEL",
+        "className": "switch",
+        "text": "",
+        "clientWidth": 52,
+        "scrollWidth": 56,
+        "rectWidth": 52,
+        "display": "flex",
+        "overflowX": "hidden",
+        "minWidth": "0px",
+        "width": "52px"
+      }
+    ],
+    "escaped": [],
+    "settingsOverflow": [],
+    "blankBelow": 0,
+    "screenshot": "artifacts/responsive/1920x1080.png"
+  }
+]
